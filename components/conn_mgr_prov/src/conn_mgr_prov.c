@@ -22,10 +22,10 @@
 
 #include <wifi_provisioning/wifi_config.h>
 
-#include "wifi_prov.h"
-#include "wifi_prov_priv.h"
+#include "conn_mgr_prov.h"
+#include "conn_mgr_prov_priv.h"
 
-static const char *TAG = "wifi_prov";
+static const char *TAG = "conn_mgr_prov";
 
 /* Handlers for wifi_config provisioning endpoint */
 extern wifi_prov_config_handlers_t wifi_prov_handlers;
@@ -34,7 +34,7 @@ extern wifi_prov_config_handlers_t wifi_prov_handlers;
  * @brief   Data relevant to provisioning application
  */
 struct wifi_prov_data {
-    wifi_prov_t  prov;             /*!< Provisioning handle */
+    conn_mgr_prov_t  prov;         /*!< Provisioning handle */
     void        *prov_mode_config; /*!< Wifi Provisioning Mode Config */
     int          security;         /*!< Type of security to use with protocomm */
     protocomm_t *pc;               /*!< Protocomm handle */
@@ -51,7 +51,7 @@ struct wifi_prov_data {
 /* Pointer to provisioning application data */
 static struct wifi_prov_data *g_prov;
 
-static esp_err_t wifi_prov_start_service(const char *service_name, const char *service_key)
+static esp_err_t conn_mgr_prov_start_service(const char *service_name, const char *service_key)
 {
     /* Create new protocomm instance */
     g_prov->pc = protocomm_new();
@@ -100,7 +100,7 @@ static esp_err_t wifi_prov_start_service(const char *service_name, const char *s
     return ESP_OK;
 }
 
-static void wifi_prov_stop_service(void)
+static void conn_mgr_prov_stop_service(void)
 {
     /* Remove provisioning endpoint */
     protocomm_remove_endpoint(g_prov->pc, "prov-config");
@@ -120,7 +120,7 @@ static void wifi_prov_stop_service(void)
 static void _stop_prov_cb(void * arg)
 {
     ESP_LOGI(TAG, "Stopping provisioning");
-    wifi_prov_stop_service();
+    conn_mgr_prov_stop_service();
     esp_wifi_set_mode(WIFI_MODE_STA);
 
     /* Timer not needed anymore */
@@ -139,7 +139,7 @@ static void _stop_prov_cb(void * arg)
  * To be called from within the context of the main
  * event handler.
  */
-esp_err_t wifi_prov_event_handler(void *ctx, system_event_t *event)
+esp_err_t conn_mgr_prov_event_handler(void *ctx, system_event_t *event)
 {
     /* For accessing reason codes in case of disconnection */
     system_event_info_t *info = &event->event_info;
@@ -230,7 +230,7 @@ esp_err_t wifi_prov_get_wifi_disconnect_reason(wifi_prov_sta_fail_reason_t* reas
     return ESP_OK;
 }
 
-esp_err_t wifi_prov_is_provisioned(bool *provisioned)
+esp_err_t conn_mgr_prov_is_provisioned(bool *provisioned)
 {
     if (nvs_flash_init() != ESP_OK) {
         ESP_LOGE(TAG, "Failed to init NVS");
@@ -300,7 +300,7 @@ esp_err_t wifi_prov_configure_sta(wifi_config_t *wifi_cfg)
     return ESP_OK;
 }
 
-esp_err_t wifi_prov_start_provisioning(wifi_prov_t prov, int security, const char *pop,
+esp_err_t conn_mgr_prov_start_provisioning(conn_mgr_prov_t prov, int security, const char *pop,
                                        const char *service_name, const char *service_key)
 {
     /* If provisioning app data present,
@@ -345,7 +345,7 @@ esp_err_t wifi_prov_start_provisioning(wifi_prov_t prov, int security, const cha
     }
 
     /* Start provisioning service */
-    err = wifi_prov_start_service(service_name, service_key);
+    err = conn_mgr_prov_start_service(service_name, service_key);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Provisioning failed to start");
         esp_timer_delete(g_prov->timer);

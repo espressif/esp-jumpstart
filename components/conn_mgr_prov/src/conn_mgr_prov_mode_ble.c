@@ -15,12 +15,12 @@
 #include <protocomm.h>
 #include <protocomm_ble.h>
 
-#include "wifi_prov.h"
-#include "wifi_prov_mode_ble.h"
+#include "conn_mgr_prov.h"
+#include "conn_mgr_prov_mode_ble.h"
 
-static const char *TAG = "wifi_prov_mode_ble";
+static const char *TAG = "conn_mgr_prov_mode_ble";
 
-extern wifi_prov_t wifi_prov_mode_ble;
+extern conn_mgr_prov_t conn_mgr_prov_mode_ble;
 
 static esp_err_t prov_start(protocomm_t *pc, void *config)
 {
@@ -28,7 +28,7 @@ static esp_err_t prov_start(protocomm_t *pc, void *config)
         return ESP_ERR_INVALID_ARG;
     }
 
-    wifi_prov_mode_ble_config_t *ble_config = (wifi_prov_mode_ble_config_t *) config;
+    conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
 
     /* Start protocomm as BLE service */
     if (protocomm_ble_start(pc, ble_config) != ESP_OK) {
@@ -40,7 +40,7 @@ static esp_err_t prov_start(protocomm_t *pc, void *config)
 
 static void *new_config(void)
 {
-    wifi_prov_mode_ble_config_t *ble_config = calloc(1, sizeof(wifi_prov_mode_ble_config_t));
+    conn_mgr_prov_mode_ble_config_t *ble_config = calloc(1, sizeof(conn_mgr_prov_mode_ble_config_t));
     if (ble_config == NULL) {
         return NULL;
     }
@@ -58,7 +58,7 @@ static void *new_config(void)
 
 static void delete_config(void *config)
 {
-    wifi_prov_mode_ble_config_t *ble_config = (wifi_prov_mode_ble_config_t *) config;
+    conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
     for (unsigned int i = 0; i < ble_config->nu_lookup_count; i++) {
         free(ble_config->nu_lookup[i].name);
     }
@@ -68,14 +68,14 @@ static void delete_config(void *config)
 
 static esp_err_t set_config_service(void *config, const char *service_name, const char *service_key)
 {
-    wifi_prov_mode_ble_config_t *ble_config = (wifi_prov_mode_ble_config_t *) config;
+    conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
     strlcpy(ble_config->device_name,  service_name, sizeof(ble_config->device_name));
     return ESP_OK;
 }
 
 static esp_err_t set_config_endpoint(void *config, const char *endpoint_name, uint16_t uuid)
 {
-    wifi_prov_mode_ble_config_t *ble_config = (wifi_prov_mode_ble_config_t *) config;
+    conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
 
     char *copy_ep_name = strdup(endpoint_name);
     if (!copy_ep_name) {
@@ -95,7 +95,7 @@ static esp_err_t set_config_endpoint(void *config, const char *endpoint_name, ui
     return ESP_OK;
 }
 
-wifi_prov_t wifi_prov_mode_ble = {
+conn_mgr_prov_t conn_mgr_prov_mode_ble = {
     .prov_start          = prov_start,
     .prov_stop           = protocomm_ble_stop,
     .new_config          = new_config,

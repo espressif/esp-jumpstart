@@ -12,8 +12,8 @@
 #include <protocomm.h>
 #include <protocomm_ble.h>
 
-#include "wifi_prov.h"
+#include "conn_mgr_prov.h"
 
-extern wifi_prov_t wifi_prov_mode_ble;
+extern conn_mgr_prov_t conn_mgr_prov_mode_ble;
 
-typedef protocomm_ble_config_t wifi_prov_mode_ble_config_t;
+typedef protocomm_ble_config_t conn_mgr_prov_mode_ble_config_t;

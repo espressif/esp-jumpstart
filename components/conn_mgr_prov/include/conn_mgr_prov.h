@@ -20,7 +20,7 @@ typedef struct {
     esp_err_t (*set_config_service) (void *config, const char *service_name, const char *service_key);
     esp_err_t (*set_config_endpoint) (void *config, const char *endpoint_name, uint16_t uuid);
     int         wifi_mode;
-} wifi_prov_t;
+} conn_mgr_prov_t;
 
 /**
  * @brief   Event handler for provisioning app
@@ -35,7 +35,7 @@ typedef struct {
  *  - ESP_OK      : Event handled successfully
  *  - ESP_FAIL    : Failed to start server on event AP start
  */
-esp_err_t wifi_prov_event_handler(void *ctx, system_event_t *event);
+esp_err_t conn_mgr_prov_event_handler(void *ctx, system_event_t *event);
 
 /**
  * @brief   Checks if device is provisioned
@@ -46,7 +46,7 @@ esp_err_t wifi_prov_event_handler(void *ctx, system_event_t *event);
  *  - ESP_OK      : Retrieved provision state successfully
  *  - ESP_FAIL    : Failed to retrieve provision state
  */
-esp_err_t wifi_prov_is_provisioned(bool *provisioned);
+esp_err_t conn_mgr_prov_is_provisioned(bool *provisioned);
 
 /**
  * @brief   Start provisioning
@@ -59,5 +59,5 @@ esp_err_t wifi_prov_is_provisioned(bool *provisioned);
  *  - ESP_OK      : Provisioning started successfully
  *  - ESP_FAIL    : Failed to start
  */
-esp_err_t wifi_prov_start_provisioning(wifi_prov_t mode, int security, const char *pop,
+esp_err_t conn_mgr_prov_start_provisioning(conn_mgr_prov_t mode, int security, const char *pop,
                                        const char *service_name, const char *service_key);

@@ -19,9 +19,9 @@
 
 #include <wifi_provisioning/wifi_config.h>
 
-#include "wifi_prov_priv.h"
+#include "conn_mgr_prov_priv.h"
 
-static const char* TAG = "wifi_prov_handler";
+static const char* TAG = "conn_mgr_prov_handler";
 
 static esp_err_t get_status_handler(wifi_prov_config_get_data_t *resp_data)
 {

@@ -12,12 +12,12 @@
 #include <protocomm.h>
 #include <protocomm_httpd.h>
 
-#include "wifi_prov.h"
+#include "conn_mgr_prov.h"
 
-extern wifi_prov_t wifi_prov_mode_softap;
+extern conn_mgr_prov_t conn_mgr_prov_mode_softap;
 
 typedef struct {
     protocomm_httpd_config_t httpd_config;
     char ssid[33];
     char password[65];
-} wifi_prov_mode_softap_config_t;
+} conn_mgr_prov_mode_softap_config_t;

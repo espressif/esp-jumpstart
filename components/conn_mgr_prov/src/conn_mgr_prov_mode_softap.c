@@ -15,12 +15,12 @@
 #include <protocomm.h>
 #include <protocomm_httpd.h>
 
-#include "wifi_prov.h"
-#include "wifi_prov_mode_softap.h"
+#include "conn_mgr_prov.h"
+#include "conn_mgr_prov_mode_softap.h"
 
-static const char *TAG = "wifi_prov_mode_softap";
+static const char *TAG = "conn_mgr_prov_mode_softap";
 
-extern wifi_prov_t wifi_prov_mode_softap;
+extern conn_mgr_prov_t conn_mgr_prov_mode_softap;
 
 static esp_err_t start_wifi_ap(const char *ssid, const char *pass)
 {
@@ -76,7 +76,7 @@ static esp_err_t prov_start(protocomm_t *pc, void *config)
         return ESP_ERR_INVALID_ARG;
     }
 
-    wifi_prov_mode_softap_config_t *softap_config = (wifi_prov_mode_softap_config_t *) config;
+    conn_mgr_prov_mode_softap_config_t *softap_config = (conn_mgr_prov_mode_softap_config_t *) config;
 
     protocomm_httpd_config_t *httpd_config = &softap_config->httpd_config;
 
@@ -100,7 +100,7 @@ static esp_err_t prov_start(protocomm_t *pc, void *config)
 
 static void *new_config(void)
 {
-    wifi_prov_mode_softap_config_t *softap_config = calloc(1, sizeof(wifi_prov_mode_softap_config_t));
+    conn_mgr_prov_mode_softap_config_t *softap_config = calloc(1, sizeof(conn_mgr_prov_mode_softap_config_t));
     if (softap_config == NULL) {
         return NULL;
     }
@@ -110,13 +110,13 @@ static void *new_config(void)
 
 static void delete_config(void *config)
 {
-    wifi_prov_mode_softap_config_t *softap_config = (wifi_prov_mode_softap_config_t *) config;
+    conn_mgr_prov_mode_softap_config_t *softap_config = (conn_mgr_prov_mode_softap_config_t *) config;
     free(softap_config);
 }
 
 static esp_err_t set_config_service(void *config, const char *service_name, const char *service_key)
 {
-    wifi_prov_mode_softap_config_t *softap_config = (wifi_prov_mode_softap_config_t *) config;
+    conn_mgr_prov_mode_softap_config_t *softap_config = (conn_mgr_prov_mode_softap_config_t *) config;
     strlcpy(softap_config->ssid,     service_name, sizeof(softap_config->ssid));
     strlcpy(softap_config->password, service_key,  sizeof(softap_config->password));
     return ESP_OK;
@@ -127,7 +127,7 @@ static esp_err_t set_config_endpoint(void *config, const char *endpoint_name, ui
     return ESP_OK;
 }
 
-wifi_prov_t wifi_prov_mode_softap = {
+conn_mgr_prov_t conn_mgr_prov_mode_softap = {
     .prov_start          = prov_start,
     .prov_stop           = protocomm_httpd_stop,
     .new_config          = new_config,

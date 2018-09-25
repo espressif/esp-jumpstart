@@ -14,9 +14,9 @@
 #include <esp_event_loop.h>
 
 #include <nvs_flash.h>
-#include <wifi_prov.h>
-#include <wifi_prov_mode_ble.h>
-#include <wifi_prov_mode_softap.h>
+#include <conn_mgr_prov.h>
+#include <conn_mgr_prov_mode_ble.h>
+#include <conn_mgr_prov_mode_softap.h>
 
 static const char *TAG = "app_main";
 
@@ -72,7 +72,7 @@ void app_main()
     ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL) );
 
     bool provisioned = false;
-    if (wifi_prov_is_provisioned(&provisioned) != ESP_OK) {
+    if (conn_mgr_prov_is_provisioned(&provisioned) != ESP_OK) {
         ESP_LOGE(TAG, "Error getting device provisioning state");
         return;
     }
@@ -81,15 +81,15 @@ void app_main()
         /* What is the Device Service Name that we want */
         char service_name[12];
         get_device_service_name(service_name, sizeof(service_name));
-        /* What is the Provisioning Type that we want: wifi_prov_mode_softap or wifi_prov_mode_ble */
-        wifi_prov_t prov_type = wifi_prov_mode_softap;
+        /* What is the Provisioning Type that we want: conn_mgr_prov_mode_softap or conn_mgr_prov_mode_ble */
+        conn_mgr_prov_t prov_type = conn_mgr_prov_mode_softap;
         /* What is the security level that we want: 0 or 1 */
         int security = 1;
         /* Do we want a proof-of-possession: for now this has to be a string with length  > 0 */
         const char *pop = "abcd1234";
         /* What is the service key */
         const char *service_key = "DEADCAFE";
-        wifi_prov_start_provisioning(prov_type, security, pop, service_name, service_key);
+        conn_mgr_prov_start_provisioning(prov_type, security, pop, service_name, service_key);
     } else {
         ESP_LOGI(TAG, "Already provisioned, starting station");
         /* Start the station */
