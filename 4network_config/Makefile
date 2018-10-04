@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := 3network_config
+PROJECT_NAME := 4network_config
 
 EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/../components
 

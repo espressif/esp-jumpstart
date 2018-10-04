@@ -14,6 +14,7 @@
 #include <esp_event_loop.h>
 
 #include <nvs_flash.h>
+#include "app_priv.h"
 
 static const char *TAG = "app_main";
 
@@ -61,6 +62,7 @@ static void wifi_init_sta()
 
 void app_main()
 {
+    app_driver_init();
     /* Initialise NVS partition */
     esp_err_t ret = nvs_flash_init();
     if (ret != ESP_OK) {

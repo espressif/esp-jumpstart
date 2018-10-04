@@ -18,6 +18,8 @@
 #include <conn_mgr_prov_mode_ble.h>
 #include <conn_mgr_prov_mode_softap.h>
 
+#include "app_priv.h"
+
 static const char *TAG = "app_main";
 
 static esp_err_t event_handler(void *ctx, system_event_t *event)
@@ -60,6 +62,7 @@ static void get_device_service_name(char *service_name, size_t max)
 
 void app_main()
 {
+    app_driver_init();
     /* Initialise NVS partition */
     esp_err_t ret = nvs_flash_init();
     if (ret != ESP_OK) {
@@ -82,7 +85,7 @@ void app_main()
         char service_name[12];
         get_device_service_name(service_name, sizeof(service_name));
         /* What is the Provisioning Type that we want: conn_mgr_prov_mode_softap or conn_mgr_prov_mode_ble */
-        conn_mgr_prov_t prov_type = conn_mgr_prov_mode_softap;
+        conn_mgr_prov_t prov_type = conn_mgr_prov_mode_ble;
         /* What is the security level that we want: 0 or 1 */
         int security = 1;
         /* Do we want a proof-of-possession: for now this has to be a string with length  > 0 */
