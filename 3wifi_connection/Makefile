@@ -5,5 +5,7 @@
 
 PROJECT_NAME := 3wifi_connection
 
+EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/../components
+
 include $(IDF_PATH)/make/project.mk
 
