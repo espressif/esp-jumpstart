@@ -18,7 +18,7 @@
 #define BUTTON_GPIO          0
 #define BUTTON_ACTIVE_LEVEL  0
 /* This is the GPIO on which the output will be set */
-#define OUTPUT_GPIO    14
+#define OUTPUT_GPIO    27
 #define DEBOUNCE_TIME  30
 
 static bool g_output_state;
