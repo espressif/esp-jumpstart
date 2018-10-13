@@ -28,7 +28,7 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
         ESP_LOGI(TAG, "Connected with IP Address:%s", ip4addr_ntoa(&event->event_info.got_ip.ip_info.ip));
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
-        ESP_LOGI(TAG, "Disconnected, connectin to the AP again...\n");
+        ESP_LOGI(TAG, "Disconnected, connecting to the AP again...\n");
         esp_wifi_connect();
         break;
     default:
@@ -44,6 +44,7 @@ static void wifi_init_sta()
 {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
 
     wifi_config_t wifi_config = {
