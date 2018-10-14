@@ -1,0 +1,5 @@
+key,type,encoding,value
+mfg_ns,namespace,,
+serial_no,data,string,btest1
+cert,file,string,/Users/kedars/work/training/esp-bootstrap/7mfg/main/certs/certificate.pem.crt
+priv_key,file,string,/Users/kedars/work/training/esp-bootstrap/7mfg/main/certs/private.pem.key
