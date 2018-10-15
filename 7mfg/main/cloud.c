@@ -43,7 +43,6 @@ static const char *TAG = "cloud";
  * - Certificate
  * - Private Key
  * - Thing Name
- * - ClientID
  */
 static char *serial_no, *cert, *priv_key;
 #define MFG_PARTITION_NAME "fctry"

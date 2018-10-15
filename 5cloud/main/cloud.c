@@ -40,10 +40,8 @@ static const char *TAG = "cloud";
  * - Certificate
  * - Private Key
  * - Thing Name
- * - ClientID
  */
-#define EXAMPLE_CLIENT_ID "ClientId1"
-#define EXAMPLE_THING_NAME "training1"
+#define EXAMPLE_THING_NAME "change-me"
 extern const uint8_t certificate_pem_crt_start[] asm("_binary_certificate_pem_crt_start");
 extern const uint8_t certificate_pem_crt_end[] asm("_binary_certificate_pem_crt_end");
 extern const uint8_t private_pem_key_start[] asm("_binary_private_pem_key_start");
@@ -147,8 +145,8 @@ void aws_iot_task(void *param)
 
     ShadowConnectParameters_t scp = ShadowConnectParametersDefault;
     scp.pMyThingName = EXAMPLE_THING_NAME;
-    scp.pMqttClientId = EXAMPLE_CLIENT_ID;
-    scp.mqttClientIdLen = (uint16_t) strlen(EXAMPLE_CLIENT_ID);
+    scp.pMqttClientId = EXAMPLE_THING_NAME;
+    scp.mqttClientIdLen = (uint16_t) strlen(EXAMPLE_THING_NAME);
 
     ESP_LOGI(TAG, "Shadow Connect");
     rc = aws_iot_shadow_connect(&mqttClient, &scp);
