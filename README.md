@@ -18,7 +18,7 @@ world `load` for `power outlet`
 Lets connect device to WiFi network with static or build time credentials
 
 ## 4network_config
-Real work on-boarding of device to WiFi network with secure and dynamic configuration
+Real world on-boarding of device to WiFi network with secure and dynamic configuration
 over multiple transports like BLE or SoftAP interface. Ability to reconfigure device
 with reset-to-factory mode based on long press of switch
 
@@ -26,7 +26,7 @@ with reset-to-factory mode based on long press of switch
 Lets on-board device to cloud in secure manner, reference cloud is AWS IoT
 
 ## 6ota
-Device firmware over-the-air upgrades for pusing latest and greatest software
+Device firmware over-the-air upgrades for pushing latest and greatest software
 
 ## 7mfg
 Separation of configuration and firmware partitions for seamless manufacturing or factory
