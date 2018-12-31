@@ -1,5 +1,12 @@
 # ESP-Jumpstart
 
+## Getting Started
+
+Please ensure to use ESP-IDF v3.2 from either tagged release or command,
+```
+git checkout -b release/v3.2 origin/release/v3.2
+```
+
 ## Overview
 
 Repository contains incremental applications which provides step-by-step guidance
