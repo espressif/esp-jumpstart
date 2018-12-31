@@ -1,5 +1,0 @@
-future
-protobuf
-netifaces
-dbus-python
-cryptography
