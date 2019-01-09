@@ -4,7 +4,10 @@
 
 Please ensure to use ESP-IDF v3.2 from either tagged release or command,
 ```
+git clone --recursive https://github.com/espressif/esp-idf.git
+cd esp-idf
 git checkout -b release/v3.2 origin/release/v3.2
+export IDF_PATH=</path/to/esp-idf/>
 ```
 
 ## Overview
