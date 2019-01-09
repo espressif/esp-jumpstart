@@ -1,0 +1,56 @@
+stages:
+  - build
+
+variables:
+  BATCH_BUILD: "1"
+  V: "0"
+  MAKEFLAGS: "-j5 --no-keep-going"
+  IDF_PATH: "$CI_PROJECT_DIR/esp-idf"
+  IDF_CI_BUILD: "1"
+
+build_demo:
+  stage: build
+  image: $CI_DOCKER_REGISTRY/esp32-ci-env
+  tags:
+    - build
+  script:
+    # add gitlab ssh key
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -n $GITLAB_KEY > ~/.ssh/id_rsa_base64
+    - base64 --decode --ignore-garbage ~/.ssh/id_rsa_base64 > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - echo -e "Host gitlab.espressif.cn\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+    - git --version
+    - git submodule update --init --recursive
+    - git clone --branch release/v3.2 --depth 1 $GITLAB_SSH_SERVER/idf/esp-idf.git
+    - cd esp-idf
+    - ./tools/ci/mirror-submodule-update.sh
+    - cd ..
+    - cd 1hello_world
+    - make defconfig
+    - make
+    - cd ../
+    - cd 2outlet
+    - make defconfig
+    - make
+    - cd ../
+    - cd 3wifi_connection
+    - make defconfig
+    - make
+    - cd ../
+    - cd 4network_config
+    - make defconfig
+    - make
+    - cd ../
+    - cd 5cloud
+    - make defconfig
+    - make
+    - cd ../
+    - cd 6ota
+    - make defconfig
+    - make
+    - cd ../
+    - cd 7mfg
+    - make defconfig
+    - make
