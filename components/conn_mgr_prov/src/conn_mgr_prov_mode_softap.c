@@ -104,7 +104,9 @@ static void *new_config(void)
     if (softap_config == NULL) {
         return NULL;
     }
-    softap_config->httpd_config.port = 80;
+    protocomm_httpd_config_t default_config = PROTOCOMM_HTTPD_DEFAULT_CONFIG();
+    softap_config->httpd_config = default_config;
+
     return softap_config;
 }
 
