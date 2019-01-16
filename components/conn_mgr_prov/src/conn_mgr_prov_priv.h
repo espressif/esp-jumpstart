@@ -57,3 +57,16 @@ esp_err_t wifi_prov_get_wifi_disconnect_reason(wifi_prov_sta_fail_reason_t* reas
  *  - ESP_FAIL    : Failed to set configuration
  */
 esp_err_t wifi_prov_configure_sta(wifi_config_t *wifi_cfg);
+
+/**
+ * @brief   Notify conn_manager that provisioning is done
+ *
+ * Stops the provisioning. This is called by the get_status_handler()
+ * when the status is connected. The handler is returned and then the
+ * provisioning is stopped.
+ *
+ * @return
+ *  - ESP_OK      : Provisioning will be stopped
+ *  - ESP_FAIL    : Failed to stop provisioning
+ */
+esp_err_t wifi_prov_done();
