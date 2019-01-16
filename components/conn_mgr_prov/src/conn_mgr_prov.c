@@ -13,6 +13,7 @@
 #include <esp_wifi.h>
 #include <nvs_flash.h>
 #include <nvs.h>
+#include <esp_bt.h>
 
 #include <protocomm.h>
 #include <protocomm_security0.h>
@@ -26,6 +27,8 @@
 #include "conn_mgr_prov_priv.h"
 
 static const char *TAG = "conn_mgr_prov";
+
+static void conn_mgr_prov_extra_mem_release();
 
 /* Handlers for wifi_config provisioning endpoint */
 extern wifi_prov_config_handlers_t wifi_prov_handlers;
@@ -50,7 +53,7 @@ struct wifi_prov_data {
 
 /* Pointer to provisioning application data */
 static struct wifi_prov_data *g_prov;
-
+static int endpoint_uuid_used = 0;
 static esp_err_t conn_mgr_prov_start_service(const char *service_name, const char *service_key)
 {
     /* Create new protocomm instance */
@@ -71,6 +74,15 @@ static esp_err_t conn_mgr_prov_start_service(const char *service_name, const cha
     g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, "prov-session", 0xFF51);
     g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, "prov-config",  0xFF52);
     g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, "proto-ver",    0xFF53);
+    endpoint_uuid_used = 0xFF53;
+
+    if (g_prov->prov.event_cb) {
+        g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_ENDPOINT_CONFIG);
+        g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_PROV_START);
+    }
+
+    /* For releasing BT memory, as we need only BLE */
+    conn_mgr_prov_extra_mem_release();
 
     if (g_prov->prov.prov_start(g_prov->pc, g_prov->prov_mode_config) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start provisioning");
@@ -96,14 +108,70 @@ static esp_err_t conn_mgr_prov_start_service(const char *service_name, const cha
         return ESP_FAIL;
     }
 
+    if (g_prov->prov.event_cb) {
+        g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_ENDPOINT_ADD);
+    }
+
     ESP_LOGI(TAG, "Provisioning started with : \n\tservice name = %s \n\tservice key = %s", service_name, service_key);
     return ESP_OK;
+}
+
+void conn_mgr_prov_endpoint_configure(const char *ep_name)
+{
+    endpoint_uuid_used++;
+    g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, ep_name, endpoint_uuid_used);
+}
+
+void conn_mgr_prov_endpoint_add(const char *ep_name, int (*handler)(uint32_t session_id, const uint8_t *inbuf, ssize_t inlen, uint8_t **outbuf, ssize_t *outlen, void *priv_data), void *user_ctx)
+{
+    if (protocomm_add_endpoint(g_prov->pc, ep_name,
+                               handler,
+                               user_ctx) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set provisioning endpoint");
+        g_prov->prov.prov_stop(g_prov->pc);
+    }
+}
+
+void conn_mgr_prov_endpoint_remove(const char *ep_name)
+{
+    protocomm_remove_endpoint(g_prov->pc, ep_name);
+}
+
+void conn_mgr_prov_mem_release()
+{
+#if CONFIG_BT_ENABLED
+    /* Release memory used by BT stack */
+    esp_err_t err = esp_bt_mem_release(ESP_BT_MODE_BTDM);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "bt_mem_release failed %d", err);
+        return;
+    }
+    ESP_LOGI(TAG, "BT stack memory released");
+#endif
+
+}
+
+/* Release BT memory, as we need only BLE */
+static void conn_mgr_prov_extra_mem_release()
+{
+#if CONFIG_BT_ENABLED
+    /* Release BT memory, as we need only BLE */
+    esp_err_t err = esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "bt_controller_mem_release failed %d", err);
+        return;
+    }
+    ESP_LOGI(TAG, "BT controller memory released");
+#endif
 }
 
 static void conn_mgr_prov_stop_service(void)
 {
     /* Remove provisioning endpoint */
     protocomm_remove_endpoint(g_prov->pc, "prov-config");
+
+    /* All the extra application added endpoints are also removed automatically when prov_stop is called. Hence, no need to give a callback with CM_ENDPOINT_REMOVE. */
+
     /* Unset provisioning security */
     protocomm_unset_security(g_prov->pc, "prov-session");
     /* Unset provisioning version endpoint */
@@ -114,11 +182,17 @@ static void conn_mgr_prov_stop_service(void)
     g_prov->prov.delete_config(g_prov->prov_mode_config);
     /* Delete protocomm instance */
     protocomm_delete(g_prov->pc);
+
+    if (g_prov->prov.event_cb) {
+        g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_PROV_END);
+    }
 }
 
-/* Callback to be invoked by timer */
-static void _stop_prov_cb(void * arg)
+/* Task spawned by timer callback or by wifi_prov_done() */
+static void stop_prov_task(void * arg)
 {
+    /* This delay is so that the phone app is noified first and then the provisioning is stopped. Generally 100ms is enough. */
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
     ESP_LOGI(TAG, "Stopping provisioning");
     conn_mgr_prov_stop_service();
     esp_wifi_set_mode(WIFI_MODE_STA);
@@ -133,7 +207,24 @@ static void _stop_prov_cb(void * arg)
     free(g_prov);
     g_prov = NULL;
     ESP_LOGI(TAG, "Provisioning stopped");
+
+    vTaskDelete(NULL);
 }
+
+/* Callback to be invoked by timer */
+static void _stop_prov_cb(void * arg)
+{
+    xTaskCreate(&stop_prov_task, "stop_prov", 2048, NULL, tskIDLE_PRIORITY, NULL);
+}
+
+/* If the provisioning was done before the timeout occured */
+esp_err_t wifi_prov_done()
+{
+    esp_timer_stop(g_prov->timer);
+    xTaskCreate(&stop_prov_task, "stop_prov", 2048, NULL, tskIDLE_PRIORITY, NULL);
+    return ESP_OK;
+}
+
 
 /* Event handler for starting/stopping provisioning.
  * To be called from within the context of the main

@@ -102,5 +102,7 @@ conn_mgr_prov_t conn_mgr_prov_mode_ble = {
     .delete_config       = delete_config,
     .set_config_service  = set_config_service,
     .set_config_endpoint = set_config_endpoint,
-    .wifi_mode           = WIFI_MODE_STA
+    .wifi_mode           = WIFI_MODE_STA,
+    .event_cb            = NULL,
+    .cb_user_data        = NULL,
 };

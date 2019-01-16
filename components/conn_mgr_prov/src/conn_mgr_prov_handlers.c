@@ -49,6 +49,7 @@ static esp_err_t get_status_handler(wifi_prov_config_get_data_t *resp_data)
         memcpy(resp_data->conn_info.ssid,  (char *)ap_info.ssid,  sizeof(ap_info.ssid));
         resp_data->conn_info.channel   = ap_info.primary;
         resp_data->conn_info.auth_mode = ap_info.authmode;
+        wifi_prov_done();
     } else if (resp_data->wifi_state == WIFI_PROV_STA_DISCONNECTED) {
         ESP_LOGI(TAG, "Disconnected state");
 

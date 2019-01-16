@@ -106,7 +106,6 @@ static void *new_config(void)
     }
     protocomm_httpd_config_t default_config = PROTOCOMM_HTTPD_DEFAULT_CONFIG();
     softap_config->httpd_config = default_config;
-
     return softap_config;
 }
 
@@ -136,5 +135,7 @@ conn_mgr_prov_t conn_mgr_prov_mode_softap = {
     .delete_config       = delete_config,
     .set_config_service  = set_config_service,
     .set_config_endpoint = set_config_endpoint,
-    .wifi_mode           = WIFI_MODE_APSTA
+    .wifi_mode           = WIFI_MODE_APSTA,
+    .event_cb            = NULL,
+    .cb_user_data        = NULL,
 };
