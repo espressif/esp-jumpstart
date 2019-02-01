@@ -1,5 +1,9 @@
 # ESP-Jumpstart
 
+This Project is aimed at guiding developers to build simple products using ESP32.
+It is designed is a tutorial wherein features will be introduced incrementally, leading to a
+production ready implementation.
+
 ## Getting Started
 
 Please ensure to use ESP-IDF v3.2 from either tagged release or command,
@@ -12,32 +16,34 @@ export IDF_PATH=</path/to/esp-idf/>
 
 ## Overview
 
-Repository contains incremental applications which provides step-by-step guidance
-to build `fully functional` IoT product using ESP-IDF software framework on ESP32.
-Reference product considered here is `power outlet` or `smart switch`.
+As already mentioned, this Project contains tutorials wherein features are introduced incrementally.
+The step-by-step guidance will help building "Fully Functional" IoT Products using ESP-IDF software
+framework on ESP32.
+Reference product considered here is `power outlet` or `smart switch`. The steps are as below
 
-## 1hello_world
+## 1_hello_world
 Getting started point for setting up development environment using ESP-IDF and simple
-multi-threaded application showing periodically `hello world` string on UART/console
+multi-threaded application periodically showing `hello world` string on UART/console
 
-## 2outlet
-Interface LED module to ESP32 DevKitC and control/toggle using GPIO. This will be real
-world `load` for `power outlet`
+## 2_drivers
+Interface LED module to ESP32 DevKitC and control/toggle using a Button/GPIO. This will be the
+primary hardware linked product logic.
 
-## 3wifi_connection
-Lets connect device to WiFi network with static or build time credentials
+## 3_wifi_connection
+Connect device to Wi-Fi network with static or build time credentials.
 
-## 4network_config
-Real world on-boarding of device to WiFi network with secure and dynamic configuration
+## 4_network_config
+Real world on-boarding of device to Wi-Fi network with secure and dynamic configuration
 over multiple transports like BLE or SoftAP interface. Ability to reconfigure device
-with reset-to-factory mode based on long press of switch
+with reset-to-factory mode based on long press of a button.
 
-## 5cloud
-Lets on-board device to cloud in secure manner, reference cloud is AWS IoT
+## 5_cloud
+Securely connect device to the "Internet" by introducing cloud connectivity.
+AWS IoT has been used as a reference.
 
-## 6ota
-Device firmware over-the-air upgrades for pushing latest and greatest software
+## 6_ota
+Device firmware over-the-air upgrades for pushing latest and greatest software.
 
-## 7mfg
+## 7_mfg
 Separation of configuration and firmware partitions for seamless manufacturing or factory
-programming
+programming.

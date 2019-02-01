@@ -3,9 +3,10 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := 4network_config
+PROJECT_NAME := 7_mfg
 
 EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/../components
 
 include $(IDF_PATH)/make/project.mk
-
+VERSION ?= v1.1
+CPPFLAGS += -DVERSION=\"$(VERSION)\"

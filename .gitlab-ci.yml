@@ -27,30 +27,30 @@ build_demo:
     - cd esp-idf
     - ./tools/ci/mirror-submodule-update.sh
     - cd ..
-    - cd 1hello_world
+    - cd 1_hello_world
     - make defconfig
     - make
     - cd ../
-    - cd 2outlet
+    - cd 2_drivers
     - make defconfig
     - make
     - cd ../
-    - cd 3wifi_connection
+    - cd 3_wifi_connection
     - make defconfig
     - make
     - cd ../
-    - cd 4network_config
+    - cd 4_network_config
     - make defconfig
     - make
     - cd ../
-    - cd 5cloud
+    - cd 5_cloud
     - make defconfig
     - make
     - cd ../
-    - cd 6ota
+    - cd 6_ota
     - make defconfig
     - make
     - cd ../
-    - cd 7mfg
+    - cd 7_mfg
     - make defconfig
     - make
