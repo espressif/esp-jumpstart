@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := 5cloud
+PROJECT_NAME := 3_wifi_connection
 
 EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/../components
 

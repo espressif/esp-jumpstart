@@ -3,9 +3,10 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := 2outlet
+PROJECT_NAME := 6_ota
 
 EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/../components
 
 include $(IDF_PATH)/make/project.mk
-
+VERSION ?= v1.1
+CPPFLAGS += -DVERSION=\"$(VERSION)\"

@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := 3wifi_connection
+PROJECT_NAME := 2_drivers
 
 EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/../components
 

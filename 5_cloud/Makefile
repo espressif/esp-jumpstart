@@ -3,7 +3,9 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := 1hello-world
+PROJECT_NAME := 5_cloud
+
+EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/../components
 
 include $(IDF_PATH)/make/project.mk
 
