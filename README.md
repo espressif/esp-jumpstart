@@ -1,7 +1,7 @@
 # ESP-Jumpstart
 
 This Project is aimed at guiding developers to build simple products using ESP32.
-It is designed is a tutorial wherein features will be introduced incrementally, leading to a
+It is designed as a tutorial wherein features will be introduced incrementally, leading to a
 production ready implementation.
 
 ## Getting Started
