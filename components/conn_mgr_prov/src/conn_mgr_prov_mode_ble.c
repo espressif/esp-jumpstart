@@ -60,7 +60,7 @@ static void delete_config(void *config)
 {
     conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
     for (unsigned int i = 0; i < ble_config->nu_lookup_count; i++) {
-        free(ble_config->nu_lookup[i].name);
+        free((void *)ble_config->nu_lookup[i].name);
     }
     free(ble_config->nu_lookup);
     free(ble_config);
