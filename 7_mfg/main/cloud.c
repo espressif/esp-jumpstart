@@ -68,8 +68,10 @@ void upgrade_handler(AWS_IoT_Client *pClient, char *pTopicName, uint16_t topicNa
 {
     /* Starting Firmware Upgrades */
     printf("Upgrade Handler got:%.*s on %.*s topic\n", (int) params->payloadLen, (char *)params->payload, topicNameLen, pTopicName);
-    do_firmware_upgrade(strndup((char *)params->payload, (int) params->payloadLen));
+    char *ota_url = strndup((char *)params->payload, (int) params->payloadLen);
+    do_firmware_upgrade(ota_url);
     /* If upgrade was successful, the above function call will not return */
+    free(ota_url);
 }
 
 static bool shadowUpdateInProgress;
