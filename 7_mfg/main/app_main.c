@@ -40,7 +40,7 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
         xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_EVENT);
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
-        ESP_LOGI(TAG, "Disconnected, connectin to the AP again...\n");
+        ESP_LOGI(TAG, "Disconnected. Connecting to the AP again...\n");
         esp_wifi_connect();
         break;
     default:
