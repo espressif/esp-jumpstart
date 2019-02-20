@@ -24,7 +24,7 @@ extern conn_mgr_prov_t conn_mgr_prov_mode_softap;
 
 static esp_err_t start_wifi_ap(const char *ssid, const char *pass)
 {
-    /* Initialise WiFi with default configuration */
+    /* Initialize WiFi with default configuration */
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     esp_err_t err = esp_wifi_init(&cfg);
     if (err != ESP_OK) {
@@ -104,7 +104,11 @@ static void *new_config(void)
     if (softap_config == NULL) {
         return NULL;
     }
-    protocomm_httpd_config_t default_config = PROTOCOMM_HTTPD_DEFAULT_CONFIG();
+    protocomm_httpd_config_t default_config = {
+        .data = {
+            .config = PROTOCOMM_HTTPD_DEFAULT_CONFIG()
+        }
+    };
     softap_config->httpd_config = default_config;
     return softap_config;
 }

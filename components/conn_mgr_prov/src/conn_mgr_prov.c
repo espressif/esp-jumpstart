@@ -11,8 +11,6 @@
 #include <esp_log.h>
 #include <esp_err.h>
 #include <esp_wifi.h>
-#include <nvs_flash.h>
-#include <nvs.h>
 #include <esp_bt.h>
 
 #include <protocomm.h>
@@ -323,11 +321,6 @@ esp_err_t wifi_prov_get_wifi_disconnect_reason(wifi_prov_sta_fail_reason_t* reas
 
 esp_err_t conn_mgr_prov_is_provisioned(bool *provisioned)
 {
-    if (nvs_flash_init() != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to init NVS");
-        return ESP_FAIL;
-    }
-
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     if (esp_wifi_init(&cfg) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to init wifi");
