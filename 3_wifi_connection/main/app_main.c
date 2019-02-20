@@ -20,7 +20,7 @@ static const char *TAG = "app_main";
 
 static esp_err_t event_handler(void *ctx, system_event_t *event)
 {
-    switch(event->event_id) {
+    switch (event->event_id) {
     case SYSTEM_EVENT_STA_START:
         esp_wifi_connect();
         break;
@@ -68,7 +68,7 @@ void app_main()
     /* Initialize NVS partition */
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        /* NVS partition was truncated 
+        /* NVS partition was truncated
          * and needs to be erased */
         ret = nvs_flash_erase();
 

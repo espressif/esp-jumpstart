@@ -29,7 +29,7 @@
  *  - ESP_OK    : Successfully retrieved wifi state
  *  - ESP_FAIL  : Provisioning app not running
  */
-esp_err_t wifi_prov_get_wifi_state(wifi_prov_sta_state_t* state);
+esp_err_t wifi_prov_get_wifi_state(wifi_prov_sta_state_t *state);
 
 /**
  * @brief   Get reason code in case of WiFi station
@@ -41,7 +41,7 @@ esp_err_t wifi_prov_get_wifi_state(wifi_prov_sta_state_t* state);
  *  - ESP_OK    : Successfully retrieved wifi disconnect reason
  *  - ESP_FAIL  : Provisioning app not running
  */
-esp_err_t wifi_prov_get_wifi_disconnect_reason(wifi_prov_sta_fail_reason_t* reason);
+esp_err_t wifi_prov_get_wifi_disconnect_reason(wifi_prov_sta_fail_reason_t *reason);
 
 /**
  * @brief   Runs WiFi as Station

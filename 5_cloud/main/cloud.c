@@ -24,7 +24,7 @@
 #define MAX_LENGTH_OF_UPDATE_JSON_BUFFER 200
 static const char *TAG = "cloud";
 
-/* 
+/*
  * The Json Document in the cloud will be:
  * {
  *   "reported": {
@@ -56,8 +56,8 @@ static int reported_state = false;
 static bool update_desired = false;
 static void state_change_callback(const char *pJsonString, uint32_t JsonStringDataLen, jsonStruct_t *pContext)
 {
-    if(pContext != NULL) {
-	ESP_LOGI(TAG, "Delta - Output state changed to %d", *(bool *) (pContext->pData));
+    if (pContext != NULL) {
+        ESP_LOGI(TAG, "Delta - Output state changed to %d", *(bool *) (pContext->pData));
         app_driver_toggle_state();
         update_desired = false;
     }
@@ -65,7 +65,7 @@ static void state_change_callback(const char *pJsonString, uint32_t JsonStringDa
 
 static bool shadowUpdateInProgress;
 static void update_status_callback(const char *pThingName, ShadowActions_t action, Shadow_Ack_Status_t status,
-                      const char *pReceivedJsonDocument, void *pContextData)
+                                   const char *pReceivedJsonDocument, void *pContextData)
 {
     IOT_UNUSED(pThingName);
     IOT_UNUSED(action);
@@ -74,11 +74,11 @@ static void update_status_callback(const char *pThingName, ShadowActions_t actio
 
     shadowUpdateInProgress = false;
 
-    if(SHADOW_ACK_TIMEOUT == status) {
+    if (SHADOW_ACK_TIMEOUT == status) {
         ESP_LOGE(TAG, "Update timed out");
-    } else if(SHADOW_ACK_REJECTED == status) {
+    } else if (SHADOW_ACK_REJECTED == status) {
         ESP_LOGE(TAG, "Update rejected");
-    } else if(SHADOW_ACK_ACCEPTED == status) {
+    } else if (SHADOW_ACK_ACCEPTED == status) {
         ESP_LOGI(TAG, "Update accepted");
     }
 }
@@ -90,9 +90,9 @@ static void update_our_status(AWS_IoT_Client *mqttClient_p, jsonStruct_t *handle
     size_t sizeOfJsonDocumentBuffer = sizeof(JsonDocumentBuffer) / sizeof(JsonDocumentBuffer[0]);
 
     rc = aws_iot_shadow_init_json_document(JsonDocumentBuffer, sizeOfJsonDocumentBuffer);
-    if(SUCCESS == rc) {
+    if (SUCCESS == rc) {
         rc = aws_iot_shadow_add_reported(JsonDocumentBuffer, sizeOfJsonDocumentBuffer, 1, handler);
-        if(SUCCESS != rc) {
+        if (SUCCESS != rc) {
             goto out;
         }
         if (update_desired) {
@@ -101,19 +101,19 @@ static void update_our_status(AWS_IoT_Client *mqttClient_p, jsonStruct_t *handle
              * again.
              */
             rc = aws_iot_shadow_add_desired(JsonDocumentBuffer, sizeOfJsonDocumentBuffer, 1, handler);
-            if(SUCCESS != rc) {
+            if (SUCCESS != rc) {
                 goto out;
             }
         }
         rc = aws_iot_finalize_json_document(JsonDocumentBuffer, sizeOfJsonDocumentBuffer);
-        if(SUCCESS == rc) {
+        if (SUCCESS == rc) {
             ESP_LOGI(TAG, "Update Shadow: %s", JsonDocumentBuffer);
             rc = aws_iot_shadow_update(mqttClient_p, EXAMPLE_THING_NAME, JsonDocumentBuffer,
                                        update_status_callback, NULL, 4, true);
             shadowUpdateInProgress = true;
         }
     }
- out:
+out:
     /* Reset the update_desired state to true. This ensures that for
      * local modifications desired is updated. If we get a remote call
      * to update the state, update_desired will be reset.
@@ -138,7 +138,7 @@ void aws_iot_task(void *param)
 
     ESP_LOGI(TAG, "Shadow Init");
     rc = aws_iot_shadow_init(&mqttClient, &sp);
-    if(SUCCESS != rc) {
+    if (SUCCESS != rc) {
         ESP_LOGE(TAG, "aws_iot_shadow_init returned error %d, aborting...", rc);
         abort();
     }
@@ -150,13 +150,13 @@ void aws_iot_task(void *param)
 
     ESP_LOGI(TAG, "Shadow Connect");
     rc = aws_iot_shadow_connect(&mqttClient, &scp);
-    if(SUCCESS != rc) {
+    if (SUCCESS != rc) {
         ESP_LOGE(TAG, "aws_iot_shadow_connect returned error %d, aborting...", rc);
         abort();
     }
 
     rc = aws_iot_shadow_set_autoreconnect_status(&mqttClient, true);
-    if(SUCCESS != rc) {
+    if (SUCCESS != rc) {
         ESP_LOGE(TAG, "Unable to set Auto Reconnect to true - %d, aborting...", rc);
         abort();
     }
@@ -167,20 +167,20 @@ void aws_iot_task(void *param)
     state_handler.pKey = "output";
     state_handler.type = SHADOW_JSON_BOOL;
     rc = aws_iot_shadow_register_delta(&mqttClient, &state_handler);
-    if(SUCCESS != rc) {
+    if (SUCCESS != rc) {
         ESP_LOGE(TAG, "Shadow Register Delta Error");
     }
 
     output_state = app_driver_get_state();
     update_our_status(&mqttClient, &state_handler);
-    while(NETWORK_ATTEMPTING_RECONNECT == rc || NETWORK_RECONNECTED == rc || SUCCESS == rc) {
-            rc = aws_iot_shadow_yield(&mqttClient, 200);
-        if(NETWORK_ATTEMPTING_RECONNECT == rc || shadowUpdateInProgress) {
+    while (NETWORK_ATTEMPTING_RECONNECT == rc || NETWORK_RECONNECTED == rc || SUCCESS == rc) {
+        rc = aws_iot_shadow_yield(&mqttClient, 200);
+        if (NETWORK_ATTEMPTING_RECONNECT == rc || shadowUpdateInProgress) {
             rc = aws_iot_shadow_yield(&mqttClient, 1000);
             // If the client is attempting to reconnect, or already waiting on a shadow update,
             // we will skip the rest of the loop.
             continue;
-	}
+        }
 
         output_state = app_driver_get_state();
         if (reported_state == output_state) {
@@ -189,7 +189,7 @@ void aws_iot_task(void *param)
         }
 
         reported_state = output_state;
-    	ESP_LOGI(TAG, "Updating our state to cloud");
+        ESP_LOGI(TAG, "Updating our state to cloud");
         update_our_status(&mqttClient, &state_handler);
         vTaskDelay(1000 / portTICK_RATE_MS);
     }

@@ -187,7 +187,7 @@ static void conn_mgr_prov_stop_service(void)
 }
 
 /* Task spawned by timer callback or by wifi_prov_done() */
-static void stop_prov_task(void * arg)
+static void stop_prov_task(void *arg)
 {
     /* This delay is so that the phone app is noified first and then the provisioning is stopped. Generally 100ms is enough. */
     vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -210,7 +210,7 @@ static void stop_prov_task(void * arg)
 }
 
 /* Callback to be invoked by timer */
-static void _stop_prov_cb(void * arg)
+static void _stop_prov_cb(void *arg)
 {
     xTaskCreate(&stop_prov_task, "stop_prov", 2048, NULL, tskIDLE_PRIORITY, NULL);
 }
@@ -240,7 +240,7 @@ esp_err_t conn_mgr_prov_event_handler(void *ctx, system_event_t *event)
         return ESP_OK;
     }
 
-    switch(event->event_id) {
+    switch (event->event_id) {
     case SYSTEM_EVENT_STA_START:
         ESP_LOGI(TAG, "STA Start");
         /* Once configuration is received through protocomm,
@@ -256,7 +256,7 @@ esp_err_t conn_mgr_prov_event_handler(void *ctx, system_event_t *event)
          * Schedule timer to stop provisioning app after 30 seconds. */
         g_prov->wifi_state = WIFI_PROV_STA_CONNECTED;
         if (g_prov && g_prov->timer) {
-            esp_timer_start_once(g_prov->timer, 30000*1000U);
+            esp_timer_start_once(g_prov->timer, 30000 * 1000U);
         }
         break;
 
@@ -295,7 +295,7 @@ esp_err_t conn_mgr_prov_event_handler(void *ctx, system_event_t *event)
     return ESP_OK;
 }
 
-esp_err_t wifi_prov_get_wifi_state(wifi_prov_sta_state_t* state)
+esp_err_t wifi_prov_get_wifi_state(wifi_prov_sta_state_t *state)
 {
     if (g_prov == NULL || state == NULL) {
         return ESP_FAIL;
@@ -305,7 +305,7 @@ esp_err_t wifi_prov_get_wifi_state(wifi_prov_sta_state_t* state)
     return ESP_OK;
 }
 
-esp_err_t wifi_prov_get_wifi_disconnect_reason(wifi_prov_sta_fail_reason_t* reason)
+esp_err_t wifi_prov_get_wifi_disconnect_reason(wifi_prov_sta_fail_reason_t *reason)
 {
     if (g_prov == NULL || reason == NULL) {
         return ESP_FAIL;
@@ -334,10 +334,10 @@ esp_err_t conn_mgr_prov_is_provisioned(bool *provisioned)
         return ESP_FAIL;
     }
 
-    if (strlen((const char*) wifi_cfg.sta.ssid)) {
+    if (strlen((const char *) wifi_cfg.sta.ssid)) {
         *provisioned = true;
-        ESP_LOGI(TAG, "Found ssid %s",     (const char*) wifi_cfg.sta.ssid);
-        ESP_LOGI(TAG, "Found password %s", (const char*) wifi_cfg.sta.password);
+        ESP_LOGI(TAG, "Found ssid %s",     (const char *) wifi_cfg.sta.ssid);
+        ESP_LOGI(TAG, "Found password %s", (const char *) wifi_cfg.sta.password);
     }
     return ESP_OK;
 }
@@ -385,7 +385,7 @@ esp_err_t wifi_prov_configure_sta(wifi_config_t *wifi_cfg)
 }
 
 esp_err_t conn_mgr_prov_start_provisioning(conn_mgr_prov_t prov, int security, const char *pop,
-                                       const char *service_name, const char *service_key)
+        const char *service_name, const char *service_key)
 {
     /* If provisioning app data present,
      * means provisioning app is already running */
