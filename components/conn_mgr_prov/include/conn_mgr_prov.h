@@ -24,7 +24,7 @@ typedef enum {
 typedef struct {
     esp_err_t (*prov_start) (protocomm_t *pc, void *config);
     esp_err_t (*prov_stop)  (protocomm_t *pc);
-    void *    (*new_config) (void);
+    void     *(*new_config) (void);
     void      (*delete_config) (void *config);
     esp_err_t (*set_config_service) (void *config, const char *service_name, const char *service_key);
     esp_err_t (*set_config_endpoint) (void *config, const char *endpoint_name, uint16_t uuid);
@@ -71,7 +71,7 @@ esp_err_t conn_mgr_prov_is_provisioned(bool *provisioned);
  *  - ESP_FAIL    : Failed to start
  */
 esp_err_t conn_mgr_prov_start_provisioning(conn_mgr_prov_t mode, int security, const char *pop,
-                                       const char *service_name, const char *service_key);
+        const char *service_name, const char *service_key);
 
 /**
  * @brief   Configure an extra endpoint

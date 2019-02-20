@@ -48,8 +48,8 @@ static void *new_config(void)
     uint8_t service_uuid[16] = {
         /* LSB <---------------------------------------
          * ---------------------------------------> MSB */
-         0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80,
-         0x00, 0x10, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00,
+        0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80,
+        0x00, 0x10, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00,
     };
 
     memcpy(ble_config->service_uuid, service_uuid, sizeof(service_uuid));
@@ -83,7 +83,7 @@ static esp_err_t set_config_endpoint(void *config, const char *endpoint_name, ui
     }
 
     protocomm_ble_name_uuid_t *lookup_table = (
-        realloc(ble_config->nu_lookup, (ble_config->nu_lookup_count + 1) * sizeof(protocomm_ble_name_uuid_t)));
+                realloc(ble_config->nu_lookup, (ble_config->nu_lookup_count + 1) * sizeof(protocomm_ble_name_uuid_t)));
     if (!lookup_table) {
         return ESP_ERR_NO_MEM;
     }

@@ -21,7 +21,7 @@
 
 #include "conn_mgr_prov_priv.h"
 
-static const char* TAG = "conn_mgr_prov_handler";
+static const char *TAG = "conn_mgr_prov_handler";
 
 /* Provide definition of wifi_prov_ctx_t */
 struct wifi_prov_ctx {
@@ -30,7 +30,7 @@ struct wifi_prov_ctx {
 
 static wifi_config_t *get_config(wifi_prov_ctx_t **ctx)
 {
-    return (*ctx ? &(*ctx)->wifi_cfg : NULL);
+    return (*ctx ? & (*ctx)->wifi_cfg : NULL);
 }
 
 static wifi_config_t *new_config(wifi_prov_ctx_t **ctx)

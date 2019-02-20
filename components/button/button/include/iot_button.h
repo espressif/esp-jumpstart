@@ -32,8 +32,8 @@ extern "C" {
 
 #include <driver/gpio.h>
 #include <freertos/portmacro.h>
-typedef void (* button_cb)(void*);
-typedef void* button_handle_t;
+typedef void (* button_cb)(void *);
+typedef void *button_handle_t;
 
 typedef enum {
     BUTTON_ACTIVE_HIGH = 1,    /*!<button active level: high level*/
@@ -75,7 +75,7 @@ button_handle_t iot_button_create(gpio_num_t gpio_num, button_active_t active_le
  *     - ESP_OK Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t iot_button_set_serial_cb(button_handle_t btn_handle, uint32_t start_after_sec, TickType_t interval_tick, button_cb cb, void* arg);
+esp_err_t iot_button_set_serial_cb(button_handle_t btn_handle, uint32_t start_after_sec, TickType_t interval_tick, button_cb cb, void *arg);
 
 /**
  * @brief Register a callback function for a button_cb_type_t action.
@@ -93,7 +93,7 @@ esp_err_t iot_button_set_serial_cb(button_handle_t btn_handle, uint32_t start_af
  *     - ESP_OK Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t iot_button_set_evt_cb(button_handle_t btn_handle, button_cb_type_t type, button_cb cb, void* arg);
+esp_err_t iot_button_set_evt_cb(button_handle_t btn_handle, button_cb_type_t type, button_cb cb, void *arg);
 
 /**
  * @brief Callbacks invoked as timer events occur while button is pressed.
@@ -113,17 +113,17 @@ esp_err_t iot_button_set_evt_cb(button_handle_t btn_handle, button_cb_type_t typ
  *     - ESP_OK Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t iot_button_add_on_press_cb(button_handle_t btn_handle, uint32_t press_sec, button_cb cb, void* arg);
+esp_err_t iot_button_add_on_press_cb(button_handle_t btn_handle, uint32_t press_sec, button_cb cb, void *arg);
 
 /**
- * @brief Single callback invoked according to the latest timer event on button release. 
+ * @brief Single callback invoked according to the latest timer event on button release.
  *        Example: If a button is configured for 2 sec, 5 sec and 7 sec callbacks and if the button is released at 6 sec then only 5 sec callback would be invoked
  *
  * @param btn_handle handle of the button object
  * @param press_sec the callback function would be called if you press the button for a specified period of time
  * @param cb callback function for "PRESS and RELEASE" action.
  * @param arg Parameter for callback function
- * 
+ *
  * @note
  *        Button callback functions execute in the context of the timer service task.
  *        It is therefore essential that button callback functions never attempt to block.
@@ -133,7 +133,7 @@ esp_err_t iot_button_add_on_press_cb(button_handle_t btn_handle, uint32_t press_
  *     - ESP_OK Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t iot_button_add_on_release_cb(button_handle_t btn_handle, uint32_t press_sec, button_cb cb, void* arg);
+esp_err_t iot_button_add_on_release_cb(button_handle_t btn_handle, uint32_t press_sec, button_cb cb, void *arg);
 
 /**
  * @brief Delete button object and free memory
@@ -179,19 +179,19 @@ private:
     /**
      * prevent copy constructing
      */
-    CButton(const CButton&);
-    CButton& operator = (const CButton&);
+    CButton(const CButton &);
+    CButton &operator = (const CButton &);
 public:
 
     /**
      * @brief constructor of CButton
-     * 
+     *
      * @param gpio_num GPIO index of the pin that the button uses
      * @param active_level button hardware active level.
      *        For "BUTTON_ACTIVE_LOW" it means when the button pressed, the GPIO will read low level.
      */
     CButton(gpio_num_t gpio_num, button_active_t active_level = BUTTON_ACTIVE_LOW);
-    
+
     ~CButton();
 
     /**
@@ -209,7 +209,7 @@ public:
      *     - ESP_OK Success
      *     - ESP_FAIL Parameter error
      */
-    esp_err_t set_evt_cb(button_cb_type_t type, button_cb cb, void* arg);
+    esp_err_t set_evt_cb(button_cb_type_t type, button_cb cb, void *arg);
 
     /**
      * @brief Register a callback function for a serial trigger event.
@@ -228,7 +228,7 @@ public:
      *     - ESP_OK Success
      *     - ESP_FAIL Parameter error
      */
-    esp_err_t set_serial_cb(button_cb cb, void* arg, TickType_t interval_tick, uint32_t start_after_sec);
+    esp_err_t set_serial_cb(button_cb cb, void *arg, TickType_t interval_tick, uint32_t start_after_sec);
 
     /**
      * @brief Callbacks invoked as timer events occur while button is pressed
@@ -246,8 +246,8 @@ public:
      *     - ESP_OK Success
      *     - ESP_FAIL Parameter error
      */
-    esp_err_t add_on_press_cb(uint32_t press_sec, button_cb cb, void* arg);
-    
+    esp_err_t add_on_press_cb(uint32_t press_sec, button_cb cb, void *arg);
+
     /**
      * @brief Single callback invoked according to the latest timer event on button release.
      *
@@ -264,8 +264,8 @@ public:
      *     - ESP_OK Success
      *     - ESP_FAIL Parameter error
      */
-    esp_err_t add_on_release_cb(uint32_t press_sec, button_cb cb, void* arg);
-    
+    esp_err_t add_on_release_cb(uint32_t press_sec, button_cb cb, void *arg);
+
     /**
      * @brief Remove callback
      *
