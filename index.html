@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <!-- Basic Page Needs
+	 –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta charset="UTF-8">
+    <title>Espressif | Jumpstart</title>
+    <meta name="description" content="Easily create credentials for secure cloud communication.">
+    <meta name="author" content="Espressif Systems">
+
+    <!-- Mobile Specific Metas
+	 –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- FONT
+	 –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+    <!-- CSS
+	 –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/normalize.css">
+
+    <!-- Favicon
+	 –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="icon" type="image/ico" href="img/favicon.ico">
+    <script src="js/jquery.min.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+
+
+  </head>
+  <body >
+    <div class="container">
+
+      <div class="row">
+	<div class="one-half column" style="margin-top: 25%">
+	  <h3>ESP Jumpstart</h3>
+	  <div id="intro">
+	  <p>This form allows you to quickly create credentials to securely communicate with a cloud platform as part of <b>ESP Jumpstart</b>.</p>
+	  <p>After you fill out the form, an email will be sent to you with the required credentials.</p> 
+	  <p>These credentials will be valid for a period of <b>14 days</b> from the time you generate it.</p>
+
+	  <hr>
+	  </div>
+	  <div id="success" style="display:none">
+	    <p id="successMessage"></p>
+	  </div>
+	  <form id="myform">
+	    <p>Email:</p>
+	    <input type="email" name="email" required>
+
+	    <br/>
+	    <br/>
+
+	    <p>Cloud platform:</p>
+	    <input type="radio" name="cloud" value="AWS" checked> AWS IoT<br>
+	    <input type="radio" name="cloud" value="Microsoft" disabled> Microsoft Azure (coming soon)<br>
+	    <input type="radio" name="cloud" value="Google" disabled> Google Cloud (coming soon)
+
+	    <br/>
+	    <br/>
+	    <div class="g-recaptcha" data-sitekey="6LfskJAUAAAAACq2xPSOk2be6S3w7ImsXvPzjJQf"></div>
+	    <br/>
+	    <br/>
+	    <input type="submit" style="background-color: #d12e26; color: #fff" value="Generate">
+
+	  </form>
+	  <hr/>
+	</div>
+      </div>
+    </div>
+    <script>
+      window.onload = function() {
+	  var recaptcha = document.forms["myform"]["g-recaptcha-response"];
+	  recaptcha.required = true;
+	  recaptcha.oninvalid = function(e) {
+	      // do something
+	      alert("Please complete the captcha");
+	  }
+};
+    </script>
+    <script>
+      var form = document.getElementById("myform");
+      form.onsubmit = function (e) {
+	  e.preventDefault();
+	  // collect the form data while iterating over the inputs
+	  var data = {};
+	  data['email'] = form[0].value;
+
+	  // Add code for email regex verification
+	  var radios = form.elements['cloud'];
+	  for (var i=0, len=radios.length; i<len; i++) {
+	      if(radios[i].checked){ // radio checked?
+		  data['cloud'] = radios[i].value; // if so, hold its value in val
+		  break; // and break out of for loop
+	      }
+	  }
+	  console.log(data);
+	  addData(data);
+      }
+
+
+      function addData(data){// pass your data in method
+	  $.ajax({
+	      async: true,
+	      type: "POST",
+	      url: "https://uvc34p1lg8.execute-api.us-east-1.amazonaws.com/dev/create-thing",
+	      data: JSON.stringify(data),
+	      contentType: "application/json; charset=utf-8",
+	      crossDomain: true,
+	      dataType: "json",
+	      //traditional: true,
+	      success: function (data, status, jqXHR) {
+		  console.log(data);
+		  // console.log(status.code);
+		  form.style.display = "none";
+		  var div = document.getElementById("intro");
+		  div.style.display = "none";
+		  var div = document.getElementById("success");
+		  div.style.display = '';
+		  document.getElementById("successMessage").innerHTML = jqXHR.responseText;
+	//	  alert("success");// write success in " "
+	      },
+	      error: function (jqXHR, status) {
+		  console.log(jqXHR.responseText);
+		  form.style.display = "none";
+		  var div = document.getElementById("intro");
+		  div.style.display = "none";
+		  var div = document.getElementById("success");
+		  div.style.display = '';
+		  document.getElementById("successMessage").innerHTML = jqXHR.responseText;
+		  //window.location=jqXHR.responseText;
+	      }
+	  });
+      }
+    </script>
+  </body>
+</html>
