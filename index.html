@@ -56,8 +56,8 @@
 
 	    <p>Cloud platform:</p>
 	    <input type="radio" name="cloud" value="AWS" checked> AWS IoT<br>
-	    <input type="radio" name="cloud" value="Microsoft" disabled> Microsoft Azure (coming soon)<br>
-	    <input type="radio" name="cloud" value="Google" disabled> Google Cloud (coming soon)
+	    <!-- <input type="radio" name="cloud" value="Microsoft" disabled> Microsoft Azure (coming soon)<br> -->
+	    <!-- <input type="radio" name="cloud" value="Google" disabled> Google Cloud (coming soon) -->
 
 	    <br/>
 	    <br/>
@@ -90,13 +90,14 @@
 	  data['email'] = form[0].value;
 
 	  // Add code for email regex verification
-	  var radios = form.elements['cloud'];
-	  for (var i=0, len=radios.length; i<len; i++) {
-	      if(radios[i].checked){ // radio checked?
-		  data['cloud'] = radios[i].value; // if so, hold its value in val
-		  break; // and break out of for loop
-	      }
-	  }
+	  // var radios = form.elements['cloud'];
+	  // for (var i=0, len=radios.length; i<len; i++) {
+	  //     if(radios[i].checked){ // radio checked?
+	  // 	  data['cloud'] = radios[i].value; // if so, hold its value in val
+	  // 	  break; // and break out of for loop
+	  //     }
+	  // }
+	  data['cloud']="AWS";
 	  console.log(data);
 	  addData(data);
       }
