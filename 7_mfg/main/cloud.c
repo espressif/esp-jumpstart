@@ -101,7 +101,7 @@ static IoT_Error_t get_reported_data(char *JsonDocumentBuffer, size_t sizeOfJson
         first_time = false;
         jsonStruct_t version_data;
         version_data.cb = NULL;
-        version_data.pData = VERSION;
+        version_data.pData = APP_VERSION;
         version_data.pKey = "version";
         version_data.type = SHADOW_JSON_STRING;
 
