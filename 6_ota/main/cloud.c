@@ -29,7 +29,7 @@ static const char *TAG = "cloud";
  * {
  *   "reported": {
  *      "output": true,
- *      "version": "<version-string>"
+ *      "fw_version": "<version-string>"
  *    },
  *   "desired": {
  *      "output": false
@@ -102,8 +102,8 @@ static IoT_Error_t get_reported_data(char *JsonDocumentBuffer, size_t sizeOfJson
         first_time = false;
         jsonStruct_t version_data;
         version_data.cb = NULL;
-        version_data.pData = APP_VERSION;
-        version_data.pKey = "version";
+        version_data.pData = FW_VERSION;
+        version_data.pKey = "fw_version";
         version_data.type = SHADOW_JSON_STRING;
 
         return aws_iot_shadow_add_reported(JsonDocumentBuffer, sizeOfJsonDocumentBuffer, 2, handler, &version_data);

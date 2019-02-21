@@ -8,5 +8,5 @@ PROJECT_NAME := 6_ota
 EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/../components
 
 include $(IDF_PATH)/make/project.mk
-APP_VERSION ?= v1.1
-CPPFLAGS += -DAPP_VERSION=\"$(APP_VERSION)\"
+FW_VERSION ?= v1.1
+CPPFLAGS += -DFW_VERSION=\"$(FW_VERSION)\"
