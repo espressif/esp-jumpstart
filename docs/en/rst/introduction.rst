@@ -67,17 +67,17 @@ steps, you can do the following:
 #. Directly use the final application in ESP-Jumpstart
 
 #. Create the manufacturing configuration file, based on the
-   instructions provided in Section [sec:gen\_factory\_data] and flash
+   instructions provided in Section :ref:`sec_gen\_factory\_data` and flash
    it at appropriate location
 
 #. Build, flash and boot up the firmware image as you usually do
 
 #. Use the reference phone-app (iOS/Android) libraries for building your
    phone applications. Or use the reference application to try things
-   out as discussed in Section [sec:unified\_prov]
+   out as discussed in Section :ref:`sec_unified\_prov`
 
 #. Configure your AWS IoT Cloud configuration as mentioned in Section
-   [sec:aws\_cloud] and use the commands to control and monitor the
+   :ref:`sec_aws\_cloud` and use the commands to control and monitor the
    device remotely
 
 #. Integrate with your OTA upgrade service

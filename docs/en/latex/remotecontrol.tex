@@ -6,7 +6,7 @@
 
 The true potential for smart connected devices can be realised when the connectivity is used to control or monitor the device remotely, or through integration with other services. This is where the cloud communication comes into picture. In this Chapter, we will get the connected to a cloud platform, and enable remote control and monitoring of the device.
 
-Typically, this is achieved through either of the scenarios as shown in \ref{fig:cloud_connectivity}.
+Typically, this is achieved through either of the scenarios as shown in the figure \ref{fig:cloud_connectivity}.
 
 \begin{figure}
     \centering
@@ -84,7 +84,7 @@ To setup your AWS IoT example,
 The firmware is so written that it will now connect to the AWS IoT cloud platform and will notify the cloud of any state changes. The firmware will also fetch any updates to the state from the cloud and apply them locally. 
 
 \subsection{Remote Control}\index{Remote control}
-With reference to the Section \ref{fig:cloud_connectivity}, the AWS IoT exposes a RESTful web API for all devices that connect to it. Phone applications can interact with this Web API to control and monitor the device. We will use cURL, a command-line utility that can be used to simulate this phone app. 
+For remote control, AWS IoT exposes a RESTful web API for all devices that connect to it. Phone applications can interact with this Web API to control and monitor the device. We will use cURL, a command-line utility that can be used to simulate this phone app. 
 
 Using curl, we can then read the current state of the device by executing the following command on your Linux/Windows/Mac console:
 \begin{minted}{console}

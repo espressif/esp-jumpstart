@@ -25,10 +25,12 @@ Let’s first create a push-button. The Devkit-C development board has a
 button called ’boot’ which is connected to GPIO 0. We will configure
 this button to be used to toggle the outlet’s state.
 
+.. _sec_push\_button:
+
 The Code
 ~~~~~~~~
 
-[sec:push\_button] The code for enabling this is shown as below:
+ The code for enabling this is shown as below:
 
 .. code:: c
 
@@ -80,10 +82,12 @@ Now we will configure a GPIO to act as the output of the power outlet.
 We will assert this GPIO on or off which would ideally trigger a relay
 to switch the output on or off.
 
+.. _sec_relay:
+
 The Code
 ~~~~~~~~
 
-[sec:relay] First off we initialize the GPIO with the correct
+ First off we initialize the GPIO with the correct
 configuration as shown below:
 
 .. code:: c

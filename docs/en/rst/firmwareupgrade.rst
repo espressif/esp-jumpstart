@@ -4,12 +4,14 @@ Firmware Upgrades
 Before we discuss firmware upgrades, one pertinent topic that needs to
 be discussed is the flash partitions.
 
+.. _sec_flash\_partitions:
+
 Flash Partitions
 ----------------
 
-[sec:flash\_partitions] The ESP-IDF framework divides the flash into
+ The ESP-IDF framework divides the flash into
 multiple logical partitions for storing various components. The typical
-way this is done is shown in the figure [fig:flash\_parts].
+way this is done is shown in the figure.
 
 .. figure:: ../../_static/flash_partitions_intro.png
    :alt: Flash Partitions Structure
@@ -28,7 +30,7 @@ OTA Mechanism
 
 For firmware upgrades, an active-passive partition scheme is used. Two
 flash partitions are reserved for the ’firmware’ component, as shown in
-the figure [fig:ota\_flash\_parts]. The OTA Data partition remembers
+the figure. The OTA Data partition remembers
 which of these is the active partition.
 
 .. figure:: ../../_static/flash_partitions_upgrade.png
@@ -37,7 +39,7 @@ which of these is the active partition.
    OTA Flash Partitions
 
 The typical state changes across the OTA firmware upgrade happens as
-shown in the figure [fig:ota\_workflow]. Behind the scene the following
+shown in the figure. Behind the scene the following
 steps occur during the OTA upgrade workflow:
 
 -  Step 0: OTA 0 is the active firmware. The OTA data partition stores
@@ -58,10 +60,12 @@ steps occur during the OTA upgrade workflow:
 
    Firmware Upgrade Flow
 
+.. _sec_updating\_flash\_partitions:
+
 Updating the Flash Partitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[sec:updating\_flash\_partitions] So how exactly do we instruct the IDF
+ So how exactly do we instruct the IDF
 to create a partition table that has this OTA-Data partition and the 2
 partitions for storing the firmware?
 
@@ -116,7 +120,7 @@ Now let’s check the code for enabling this functionality.
    from, and also the CA certificate for validating the server from
    which the upgrade should be fetched. Please note that it is quite
    critical to ensure the validation of the CA certificate as mentioned
-   in the Section [sec:security\_first].
+   in the Section :ref:`sec_security\_first`.
 
 -  The API *esp\_https\_ota()* is then executed which initiates the
    firmware upgrade. When the firmware upgrade process is successful (or

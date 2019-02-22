@@ -12,11 +12,11 @@ have to create hundreds of thousands of such devices? In this section
 this is what we will look at.
 
 You might remember the NVS partitions that we discussed in Section
-[sec:nvs\_info]. This was used to store key-value pairs persistently
+:ref:`sec_nvs\_info`. This was used to store key-value pairs persistently
 into the flash. Because this is stored in the flash, this information
 was accessible even across device reboot events. Also remember that we
 implemented the *Reset to Factory* action in Section
-[sec:reset\_to\_factory] by erasing the contents of this NVS.
+:ref:`sec_reset\_to\_factory` by erasing the contents of this NVS.
 
 We can use the similar NVS partition for storing per-device unique keys.
 But we want that this unique information should not be erased across the
@@ -32,9 +32,9 @@ Thus we can reuse the same concept to store factory unique information.
 Multiple NVS Partitions
 -----------------------
 
-We had looked at *Flash Partitions* in Section [sec:flash\_partitions]
+We had looked at *Flash Partitions* in Section :ref:`sec_flash\_partitions`
 while discussing firmware upgrades. In Section
-[sec:updating\_flash\_partitions] we also looked at how the flash
+:ref:`sec_updating\_flash\_partitions` we also looked at how the flash
 partitions can be modified. For this example, we will add this extra NVS
 partition that will store the unique factory settings, and call it
 *fctry*.
@@ -70,10 +70,12 @@ So, we can now disable the code that embeds any certificates in the
 firmware itself, and instead, read them from the unique factory
 partition that is flashed for this device.
 
+.. _sec_gen\_factory\_data:
+
 Generating the Factory Data
 ---------------------------
 
-[sec:gen\_factory\_data] Now we are good to go from the firmware
+ Now we are good to go from the firmware
 perspective. But we still need to identify some mechanism for generating
 the factory data that will be written to the *fctry* partition.
 

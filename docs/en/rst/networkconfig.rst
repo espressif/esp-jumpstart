@@ -120,10 +120,12 @@ XXX add network configuration images
    network-configuration mode. Instead it will go and connect to the
    Wi-Fi network that is configured.
 
+.. _sec_unified\_prov:
+
 Unified Provisioning
 --------------------
 
-[sec:unified\_prov]
+
 
 Espressif provides a **Unified Provisioning** module for assisting you
 with your network configuration. When this module is invoked from your
@@ -179,8 +181,8 @@ The following components are offered:
 The Code
 ~~~~~~~~
 
-[sec:unified\_prov] The code for invoking the unified provisioning
-through your firmware is shown below:
+The code for invoking the unified provisioning through your firmware is
+shown below:
 
 .. code:: c
 
@@ -328,10 +330,12 @@ Additional Details
 More details about Unified provisioning are available at:
 https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html
 
+.. _sec_nvs\_info:
+
 NVS: Persistent key-value store
 -------------------------------
 
-[sec:nvs\_info] In the Unified Provisioning section above, we mentioned
+ In the Unified Provisioning section above, we mentioned
 in passing that the Wi-Fi credentials are stored in the NVS. The NVS is
 a software component that maintains a persistent storage of key-value
 pairs. Since the storage is persistent this information is available
@@ -376,10 +380,12 @@ Generally, this action is triggered by long-pressing a button available
 on the product. This can easily be configured using the
 *iot\_button\_()* functions
 
+.. _sec_reset\_to\_factory:
+
 The Code
 ~~~~~~~~
 
-[sec:reset\_to\_factory] In the *4\_network\_config/* application, we
+ In the *4\_network\_config/* application, we
 use a long-press action of the same toggle push-button to configure the
 reset to factory behaviour.
 
