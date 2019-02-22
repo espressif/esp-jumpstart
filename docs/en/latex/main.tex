@@ -1,0 +1,132 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Important note:
+% Chapter heading images should have a 2:1 width:height ratio,
+% e.g. 920px width and 460px height.
+%
+%
+% The original template (the Legrand Orange Book Template) can be found here --> http://www.latextemplates.com/template/the-legrand-orange-book
+%
+% Original author of the Legrand Orange Book Template:
+% Mathias Legrand (legrand.mathias@gmail.com) with modifications by:
+% Vel (vel@latextemplates.com)
+%
+% Original License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[11pt,fleqn]{book} % Default font size and left-justified equations
+
+\usepackage[top=3cm,bottom=3cm,left=3.2cm,right=3.2cm,headsep=10pt,letterpaper]{geometry} % Page margins
+
+\usepackage[table]{xcolor} % Required for specifying colors by name
+\definecolor{ocre}{RGB}{190, 30, 30} % Define the orange color used for highlighting throughout the book 52, 177, 201
+\usepackage{tabularx}
+\usepackage{subfiles}
+
+% Font Settings
+\usepackage{avant} % Use the Avantgarde font for headings
+%\usepackage{times} % Use the Times font for headings
+\usepackage{mathptmx} % Use the Adobe Times Roman as the default text font together with math symbols from the Sym­bol, Chancery and Com­puter Modern fonts
+
+\usepackage{microtype} % Slightly tweak font spacing for aesthetics
+\usepackage[utf8]{inputenc} % Required for including letters with accents
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage{minted} % For code highlighting
+
+\usepackage{marginnote}
+% Bibliography
+\usepackage[style=alphabetic,sorting=nyt,sortcites=true,autopunct=true,babel=hyphen,hyperref=true,abbreviate=false,backref=true,backend=biber]{biblatex}
+\addbibresource{bibliography.bib} % BibTeX bibliography file
+\defbibheading{bibempty}{}
+
+\input{structure} % Insert the commands.tex file which contains the majority of the structure behind the template
+\setlength{\parindent}{0pt} % Don't indent paragraphs
+\setlength{\parskip}{1em}
+
+\newcommand{\ksnotebox}[1]{\begin{tabularx}{\textwidth}{ |c|X| }
+\hline
+\cellcolor{lightgray} \textbf{Note} & #1 \\
+\hline
+\end{tabularx}} % Define a template for the note box
+
+\begin{document}
+\title{Building Products with ESP32 fast}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\begingroup
+\thispagestyle{empty}
+\AddToShipoutPicture*{\put(0,0){\includegraphics{cover_book}}} % Image background
+\centering
+\vspace*{6cm}
+\par\normalfont\fontsize{35}{35}\sffamily\selectfont
+\textbf{Building Products with ESP32 \textit{fast}}\\
+{\LARGE Jumpstart: From concept to production}\par % Book title
+\vspace*{1cm}
+{\Huge  }\par % Kedar Sovani
+
+\endgroup
+
+%----------------------------------------------------------------------------------------
+%	COPYRIGHT PAGE
+%----------------------------------------------------------------------------------------
+
+\newpage
+~\vfill
+\thispagestyle{empty}
+
+%\noindent Copyright \copyright\ 2018 Kedar Sovani\\ % Copyright notice
+
+\noindent \textsc{For Espressif Systems}
+
+\noindent \textsc{https://github.com/espressif/esp-jumpstart} % URL
+
+\noindent This work is the culmination of years of learning in  IoT product development across a wide team of engineers at Espressif. The content started off as official training material. Given the success of the trainings in getting products off the ground, the material has subsequently been converted to this format. Feel free to make copies and share. % License information
+
+\noindent \textit{First release, 2019} % Printing/edition date
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS
+%----------------------------------------------------------------------------------------
+
+\chapterimage{band1.jpg} % Table of contents heading image
+
+\pagestyle{empty} % No headers
+
+\tableofcontents % Print the table of contents itself
+
+%\cleardoublepage % Forces the first chapter to start on an odd page so it's on the right
+
+\pagestyle{fancy} % Print headers again
+
+\subfile{introduction}
+
+\subfile{gettingstarted}
+
+\subfile{theoutlet}
+
+\subfile{wifi}
+
+\subfile{networkconfig}
+
+\subfile{remotecontrol}
+
+\subfile{firmwareupgrade}
+
+\subfile{manufacturing}
+
+\subfile{security}
+
+\clearpage
+\vspace*{\fill} 
+\centering \Huge {\textit{Happy Productising!}}
+\vspace*{\fill} 
+
+\end{document}
