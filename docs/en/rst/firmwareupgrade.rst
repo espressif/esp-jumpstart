@@ -9,7 +9,7 @@ be discussed is the flash partitions.
 Flash Partitions
 ----------------
 
- The ESP-IDF framework divides the flash into
+The ESP-IDF framework divides the flash into
 multiple logical partitions for storing various components. The typical
 way this is done is shown in the figure.
 
@@ -65,7 +65,7 @@ steps occur during the OTA upgrade workflow:
 Updating the Flash Partitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- So how exactly do we instruct the IDF
+So how exactly do we instruct the IDF
 to create a partition table that has this OTA-Data partition and the 2
 partitions for storing the firmware?
 

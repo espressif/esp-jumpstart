@@ -30,7 +30,7 @@ this button to be used to toggle the outlet’s state.
 The Code
 ~~~~~~~~
 
- The code for enabling this is shown as below:
+The code for enabling this is shown as below:
 
 .. code:: c
 
@@ -87,7 +87,7 @@ to switch the output on or off.
 The Code
 ~~~~~~~~
 
- First off we initialize the GPIO with the correct
+First off we initialize the GPIO with the correct
 configuration as shown below:
 
 .. code:: c

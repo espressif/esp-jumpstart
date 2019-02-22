@@ -32,7 +32,7 @@ to expose control through voice.
 Security First
 --------------
 
- Before we get into the details about cloud
+Before we get into the details about cloud
 connectivity, a few important words about security.
 
 Connecting with any remote cloud infrastructure must always happen using
@@ -65,7 +65,7 @@ https://medium.com/the-esp-journal/esp32-tls-transport-layer-security-and-iot-de
 Embedding Files in the Firmware
 -------------------------------
 
- At times, the firmware has to use certain files
+At times, the firmware has to use certain files
 directly. Most commonly, in the case of CA certificates, that need to be
 embedded within the firmware for server validation.
 
@@ -99,7 +99,7 @@ The file can then be accessed using these start and end pointers.
 AWS IoT
 -------
 
- In this section we will connect the device to Amazon’s
+In this section we will connect the device to Amazon’s
 AWS IoT cloud.
 
 Quick Setup

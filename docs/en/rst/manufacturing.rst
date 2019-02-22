@@ -75,7 +75,7 @@ partition that is flashed for this device.
 Generating the Factory Data
 ---------------------------
 
- Now we are good to go from the firmware
+Now we are good to go from the firmware
 perspective. But we still need to identify some mechanism for generating
 the factory data that will be written to the *fctry* partition.
 
