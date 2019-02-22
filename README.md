@@ -1,53 +1,49 @@
-# ESP-Jumpstart
+ESP-Jumpstart
+=============
 
-This Project is aimed at guiding developers to build products using ESP32 *fast*.
-It is designed as a tutorial with features introduced incrementally, leading to a fully-functional
-production-ready implementation.
+| ![Cover Page] |
+|:--------------------------:|
+| **ESP-Jumpstart: Build ESP32 Products Fast** |
 
-## Getting Started
 
-Please ensure to use ESP-IDF v3.2 from either tagged release or command,
+Building production-ready firmware can be hard. It involves multiple questions and decisions about the best ways of doing things. It involves building phone applications, and integrating cloud agents to get all the features done. What if there was a ready reference, a known set of best steps, gathered from previous experience of others, that you could jumpstart with?
+
+ESP-Jumpstart is focused on building ’products’ on ESP32. It is a quick-way to get started into your product development process. ESP-Jumpstart builds a fully functional, ready to deploy “Smart Power Outlet” in a sequence of incremental tutorial steps. Each step addresses either a user-workflow or a developer workflow. Each step is an application built with ESP-IDF, ESP32’s software development framework.
+
+![Smart Power Outlet]
+
+The ESP-Jumpstart’s Smart Power Outlet firmware assumes the device has one input push-button, and one GPIO output. It implements the following commonly required functionality.
+
+-   Allows user’s home Wi-Fi network configuration through phone applications (iOS/Android)
+-   Ability to switch on or off a single GPIO output
+-   Use a push-button to physically toggle this output
+-   Allow remote control of this output through a cloud
+-   Implements over-the-air (OTA) firmware upgrade
+-   Performs *Reset to Factory* settings on long-press of the push-button
+
+Building your production firmware, is a matter of replacing the power-outlet’s device driver, with your device driver (bulb, washing machine).
+
+![Jumpstart Applicability]
+
+You will require the following to get started:
+
+-   An ESP32 development kit: ESP32-DevKit-C (Available on DigiKey, Mouser, Amazon)
+-   A Development setup (<https://docs.espressif.com/projects/esp-idf/en/latest/get-started/>)
+
+Please ensure to use ESP-IDF v3.2 from either the tagged release or the following command,
 ```
+git clone https://github.com/espressif/esp-jumpstart.git
 git clone --recursive https://github.com/espressif/esp-idf.git
 cd esp-idf
 git checkout -b release/v3.2 origin/release/v3.2
+cd ../esp-jumpstart
 export IDF_PATH=</path/to/esp-idf/>
+make
 ```
 
-## Overview
 
-This project is a tutorial with features incrementally. The step-by-step guidance will help building "Fully Functional" IoT Products using ESP-IDF software
-framework on ESP32.
-By the end of this, a firmware for a `power outlet` is built with the following functionality:
-* Ability to configure user’s home Wi-Fi network configuration through phone applications (iOS/Android)
-* Ability to switch on or off a single GPIO output
-* Ability to use a push-button to physically toggle this output
-* Ability to remotely control this output through a cloud
-* Ability to perform over-the-air (OTA) firmware upgrade
-* Ability to perform Reset to Factory settings on long-press of the push-button
+  [Smart Power Outlet]: docs/_static/jumpstart-outlet.png
+  [Jumpstart Applicability]: docs/_static/jumpstart-outlet-blocks.png
+  [Cover Page]: docs/_static/cover_page.svg
 
-## 1_hello_world
-Getting started point by setting up the development environment using ESP-IDF and a simple
-application periodically showing `hello world` string on UART/console
 
-## 2_drivers
-Configure a GPIO to act as our output, and then configure one GPIO to act as the input
-
-## 3_wifi_connection
-Connect the device to a Wi-Fi network with static or compile-time Wi-Fi credentials.
-
-## 4_network_config
-Real world on-boarding of the device to Wi-Fi network with secure and dynamic configuration
-over multiple transports like BLE or SoftAP interface. Ability to reconfigure device
-with reset-to-factory mode based on long press of a button.
-
-## 5_cloud
-Securely connect the device to the "Internet" by introducing cloud connectivity.
-AWS IoT has been used as a reference.
-
-## 6_ota
-Device firmware over-the-air upgrades for pushing latest and greatest software.
-
-## 7_mfg
-Separation of configuration and firmware partitions for seamless manufacturing or factory
-programming.
