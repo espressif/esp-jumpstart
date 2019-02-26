@@ -1,6 +1,9 @@
 Network Configuration
 =====================
 
+In the previous example, we had hard-coded the Wi-Fi credentials into
+the firmware. This obviously doesn’t work for an end-user product.
+
 In this step we will build a firmware such that the end-user can
 configure her Wi-Fi network’s credentials into the device at run-time.
 Since a user’s network credentials will be stored persistently on the
@@ -8,9 +11,6 @@ device, we will also provide a *Reset to Factory* action where a user’s
 configurations can be erased from the device. You may refer to the
 *4\_network\_config/* directory of esp-jumpstart for looking at this
 code.
-
-In the previous example, we had hard-coded the Wi-Fi credentials into
-the firmware. This obviously doesn’t work for a end-user product.
 
 Overview
 --------
@@ -26,16 +26,14 @@ credentials, it can then connect to her home Wi-Fi network.
    Network Configuration Process
 
 There can be multiple channels through which your device can receive the
-Wi-Fi credentials. ESP32 supports the following mechanisms:
+Wi-Fi credentials. ESP-Jumpstart supports the following mechanisms:
 
 -  SoftAP
 
 -  Bluetooth Low Energy (BLE)
 
--  Smart-Config
-
-Each of these have their own pros and cons. There is no single correct
-way of doing this, some developers may pick one way, and some the other,
+Each of these have their own pros and cons. There is no single way of
+doing this, some developers may pick one way, and some the other,
 depending upon what you value more.
 
 SoftAP
@@ -58,12 +56,12 @@ workflow, the user has to
 
 From a user experience perspective, the first step of this requires the
 user to change their phone’s Wi-Fi network. This may be confusing to
-some users. Additionally, changing the Wi-Fi network programatically
-through the phone application may not always be possible (iOS and some
-variants of Android don’t allow application to this). The advantage of
-this method though is that it is very reliable (SoftAP being just Wi-Fi
-is an established mechanism), and doesn’t require a lot of additional
-code (since it’s all over Wi-Fi).
+some users. Changing the Wi-Fi network programatically through the phone
+application may not always be possible (iOS and some variants of Android
+don’t allow phone apps to do this). But the advantage of this method
+though is that it is very reliable (SoftAP being just Wi-Fi, is an
+established mechanism), and doesn’t require a lot of additional code
+(footprint) in the device firmware.
 
 BLE
 ~~~
@@ -84,11 +82,6 @@ requirement may be affected since your firmware size will increase.
 During the network configuration mode, BLE will also consume memory
 until the network configuration is complete.
 
-Smart-Config
-~~~~~~~~~~~~
-
-XXX
-
 Demo
 ----
 
@@ -101,7 +94,7 @@ directory of esp-jumpstart for trying this out.
 
 -  Build, flash and load the application.
 
--  By default, the firmware is launched in BLE mode.
+-  By default, the firmware is launched in BLE provisioning mode.
 
 -  Install the companion phone application for network configuration
    from this location:
@@ -116,9 +109,10 @@ XXX add network configuration images
 -  If all goes well, your device would be connected to your Home Wi-Fi
    network.
 
--  If you now reset the device, it will not enter the
+-  If you now reboot the device, it will NOT enter the
    network-configuration mode. Instead it will go and connect to the
-   Wi-Fi network that is configured.
+   Wi-Fi network that is configured. This is the end product experience
+   that we want.
 
 .. _sec_unified\_prov:
 
@@ -151,18 +145,20 @@ the credentials securely, storing them for subsequent use etc).
    want application level security. The unified provisioning framework
    allows application to choose the security as deemed suitable.
 
--  Compact Data Representation: The protocol uses Google Protobufs as a
-   data representation for session setup and Wi-Fi provisioning. They
-   provide a compact data representation and ability to parse the data
-   in multiple programming languages in native format. Please note that
-   this data representation is not forced on application specific data
-   and the developers may choose the representation of their choice.
+-  Compact Data Representation: The protocol uses Google Protocol
+   Buffers as a data representation for session setup and Wi-Fi
+   provisioning. They provide a compact data representation and ability
+   to parse the data in multiple programming languages in native format.
+   Please note that this data representation is not forced on
+   application specific data and the developers may choose the
+   representation of their choice.
 
-The following components are offered:
+The following components are offered as part of the provisioning
+infrastructure:
 
 -  **Unified Provisioning Specification:** A specification to *securely*
    transfer Wi-Fi credentials to the device, independent of the
-   transport (SoftAP, BLE)
+   transport (SoftAP, BLE). More details `here`_.
 
 -  **IDF Components:** Software modules that implement this
    specification in the device firmware, available through ESP-IDF
@@ -225,8 +221,8 @@ provisioning interface. Some notes about the code above:
 
    #. Finally, it will deinitialise any components (SoftAP, BLE, HTTP
       Server etc) that were required by the unified provisioning
-      mechanism. This ensures that this point onward there is almost no
-      memory overhead from the unified provisioning module.
+      mechanism. This ensures once provisioning is complete there is
+      almost no memory overhead from the unified provisioning module.
 
 -  If a Wi-Fi network configuration was found in NVS, we directly start
    the Wi-Fi station interface using *wifi\_init\_sta()*.
@@ -235,9 +231,9 @@ These steps ensure that the firmware launches the unified provisioning
 module when no configuration is found, and if a configuration is
 available, then starts the Wi-Fi station interface.
 
-Additionally, the unified provisioning module also needs to know the
-state transitions of the Wi-Fi interface. Hence an additional call needs
-to be made from the event handler for taking care of this:
+The unified provisioning module also needs to know the state transitions
+of the Wi-Fi interface. Hence an additional call needs to be made from
+the event handler for taking care of this:
 
 .. code:: c
 
@@ -356,10 +352,10 @@ write values to the NVS.
 
 .. code:: c
 
-      /* Store the 'chosen_value' variable to NVS */
+      /* Store the value of key 'my_key' to NVS */
       nvs_set_u32(nvs_handle, "my_key", chosen_value);
 
-      /* Read the 'chosen_value' variable from NVS */
+      /* Read the value of key 'my_key' from NVS */
       nvs_get_u32(nvs_handle, "my_key", &chosen_value);
 
 Additional Details
@@ -395,12 +391,12 @@ reset to factory behaviour.
     iot_button_add_on_press_cb(btn_handle, 3, button_press_3sec_cb, NULL);
 
 This function makes the configuration such that the
-*button\_press\_3sec\_cb()* function gets calls whenever the button
+*button\_press\_3sec\_cb()* function gets called whenever the button
 associated with the *btn\_handle* is pressed and released for longer
-than 3 seconds. Remember we had initialised the *btn\_handle* in our
-Chapter [the-outlet]
+than 3 seconds. Remember we had initialised the *btn\_handle* in Section
+:ref:`sec_push\_button`
 
-Then callback function can then be written as follows:
+The callback function can then be written as follows:
 
 .. code:: c
 
@@ -430,3 +426,5 @@ these settings on a long-press of a push-button.
 As of now, the outlet functionality and the connectivity functionality
 are separate. As our next step, let’s control and monitor the state of
 the outlet (on/off) remotely.
+
+.. _here: https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html

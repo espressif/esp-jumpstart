@@ -4,9 +4,9 @@ Remote Control (Cloud)
 The true potential for smart connected devices can be realised when the
 connectivity is used to control or monitor the device remotely, or
 through integration with other services. This is where the cloud
-communication comes into picture. In this Chapter, we will get the
-connected to a cloud platform, and enable remote control and monitoring
-of the device.
+communication comes into picture. In this Chapter, we will get the smart
+outlet connected to a cloud platform, and enable remote control and
+monitoring of the device.
 
 Typically, this is achieved through either of the scenarios as shown in
 the figure.
@@ -37,7 +37,7 @@ connectivity, a few important words about security.
 
 Connecting with any remote cloud infrastructure must always happen using
 TLS (Transport Layer Security). It is a standard and it takes care of
-ensuring that communication stays secure. This is a transport layer
+ensuring that the communication stays secure. This is a transport layer
 protocol. Any higher-level protocols like HTTP, or MQTT can use TLS as
 the underlying transport. All reputable cloud vendors provide device
 services over TLS.
@@ -49,16 +49,10 @@ One aspect of TLS is server validation using CA certificates. The TLS
 layer uses the CA certificate to validate that you are really talking to
 the server that you are supposed to talk to. For this validation to
 happen, your device must be pre-programmed with one or more valid and
-trusted CA certificate. The TLS layer will use these as trusted
+trusted CA certificates. The TLS layer will use these as trusted
 certificates and then validate the server based on these trusted
 certificates. Please refer to Section :ref:`sec_embedding\_files` for more
-details about how the CA certificate be made part of your firmware.
-
-Additional Details
-~~~~~~~~~~~~~~~~~~
-
-More details about TLS and certificates is available at:
-https://medium.com/the-esp-journal/esp32-tls-transport-layer-security-and-iot-devices-3ac93511f6d8
+details about how the CA certificate can be made part of your firmware.
 
 .. _sec_embedding\_files:
 
@@ -99,19 +93,40 @@ The file can then be accessed using these start and end pointers.
 AWS IoT
 -------
 
-In this section we will connect the device to Amazon’s
-AWS IoT cloud.
+In this section we will take AWS IoT as an example and
+connect the device to this cloud.
 
 Quick Setup
 ~~~~~~~~~~~
 
-XXX Specify quick setup instructions
+Feel free to skip this sub-section, if you already have a registered
+account with a cloud platform.
+
+As a way for you to try this functionality out, we have created a
+web-page that allows you to quickly connect a device to the AWS IoT
+cloud platform. This page will create a set of credentials for your
+device, that your device can use to authenticate with the cloud. The
+credentials will stay valid for a duration of 14 days, which gives you
+enough time to experiment with the remote control and OTA upgrades
+feature that are demonstrated in this and subsequent chapters. Beyond
+this duration, you can register with AWS IoT for a cloud account
+yourself and then use that cloud in your production.
+
+You can create credentials for your device by:
+
+#. Visit the following URL: https://espressif.github.io/esp-jumpstart/
+
+#. Enter your email address to which the device credentials should be
+   mailed
+
+#. You will receive an email that contains the device credentials that
+   should be programmed on your device
 
 Demo
 ~~~~
 
-By the end of the previous sub-section, you should have the following
-items ready to get your device to start talking with AWS IoT:
+By now, you should have the following items ready to get your device to
+start talking with AWS IoT:
 
 #. A Device Private Key (a file)
 
@@ -122,7 +137,7 @@ items ready to get your device to start talking with AWS IoT:
 #. A CA Certificate for the AWS-IoT service’s domain name (a file)
 
 Before getting into the details of the code, let us actually try to use
-the remote control for our device. You may refer to the *4cloud/*
+the remote control for our device. You may refer to the *5\_cloud/*
 directory of esp-jumpstart for trying this out.
 
 To setup your AWS IoT example,
@@ -142,18 +157,17 @@ To setup your AWS IoT example,
 
 #. Build, flash and load the firmware on your device
 
-The firmware is so written that it will now connect to the AWS IoT cloud
-platform and will notify the cloud of any state changes. The firmware
-will also fetch any updates to the state from the cloud and apply them
-locally.
+The will now connect to the AWS IoT cloud platform and will notify the
+cloud of any state changes. The firmware will also fetch any updates to
+the state from the cloud and apply them locally.
 
 Remote Control
 ~~~~~~~~~~~~~~
 
 For remote control, AWS IoT exposes a RESTful web API for all devices
 that connect to it. Phone applications can interact with this Web API to
-control and monitor the device. We will use cURL, a command-line utility
-that can be used to simulate this phone app.
+control and monitor the device. We will use cURL, a command-line
+utility, that can be used to simulate this phone app.
 
 Using curl, we can then read the current state of the device by
 executing the following command on your Linux/Windows/Mac console:
@@ -172,9 +186,8 @@ that are authorised to do so. Hence in the command above, we use the
 that we have configured to be in the firmware. This ensures that we can
 access the device’s state.
 
-In the command above, this reads the state from the device
-**my\_device\_name**. Don’t forget to replace this with the name of your
-thing.
+The command above reads the state from the device **my\_device\_name**.
+Don’t forget to replace this with the name of your thing.
 
 The device state can be modified as:
 
@@ -187,9 +200,9 @@ The device state can be modified as:
          https://aln7lww42a72l-ats.iot.us-east-2.amazonaws.com:8443/things/my_device_name/shadow \ 
          | python -mjson.tool
 
-This cURL command will generate an HTTP POST operation, and sends the
-JSON data, as shown above, as the post’s body. This JSON data instructs
-AWS IoT to update the state of the device to false.
+This cURL command will generate an HTTP POST request, and sends the JSON
+data, as shown above, in the POST’s body. This JSON data instructs AWS
+IoT to update the state of the device to false.
 
 You can observe the corresponding change of state on the device whenever
 you change the state from cURL to true or false.

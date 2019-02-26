@@ -9,7 +9,7 @@ Development Overview
 --------------------
 
 The following diagram depicts the typical developer setup for
-development with ESP.
+development with ESP32.
 
 .. figure:: ../../_static/dev_setup.png
    :alt: Typical Developer Setup
@@ -26,39 +26,6 @@ the development board. As the firmware executes on the development
 board, the logs from the firmware can be monitored from the Development
 Host.
 
-Getting ESP-Jumpstart
----------------------
-
-Let’s get started by cloning the ESP-Jumpstart git repositories
-https://github.com/espressif/esp-jumpstart. This repository contains the
-sequence of applications that we will use for this exercise. This
-repository also contains a stable release version of IDF as a git
-submodule. This ensures that we are working off of a stable release of
-IDF.
-
-::
-
-    $ git clone --recursive https://github.com/espressif/esp-jumpstart
-
-This repository already contains a copy of the IDF, Espressif’s IoT
-Development Framework. Let’s define the IDF\_PATH variable to point to
-the correction location of IDF. This can be done by executing the
-following command in your console:
-
-::
-
-    $ export IDF_PATH=/path/to/esp-jumpstart/esp-idf
-
-Now let’s make sure your development host (Windows, Linux or Mac) has
-the required packages to build and monitor ESP32 based projects. What
-you specifically need to do is:
-
--  Setting the toolchain
-   https://docs.espressif.com/projects/esp-idf/en/latest/get-started/#setup-toolchain
-
--  Establish serial connection with ESP32
-   https://docs.espressif.com/projects/esp-idf/en/latest/get-started/establish-serial-connection.html
-
 ESP-IDF
 -------
 
@@ -72,7 +39,22 @@ ESP-IDF is Espressif’s IoT Development Framework.
    typical developer and production usecases, like build, flash, debug
    and measure.
 
-The IDF has a component-based design.
+Setting up IDF
+~~~~~~~~~~~~~~
+
+Please follow the steps in this documentation for setting up IDF:
+https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html.
+Please complete all the steps on this page.
+
+Before proceeding, please ensure that you have setup your development
+host, and have built the first application as indicated in this page.
+Now that you have done that, let’s look at some additional details about
+IDF.
+
+IDF Details
+~~~~~~~~~~~
+
+The IDF has a component based design.
 
 .. figure:: ../../_static/idf_comp.png
    :alt: Component Based Design
@@ -87,8 +69,8 @@ This design allows you to use your own or third-party components that
 are built for ESP-IDF.
 
 A developer typically builds *applications* against the IDF. The
-applications typically contains the business logic, any drivers for
-externally interfaced peripherals and the SDK configuration.
+applications contain the business logic, any drivers for externally
+interfaced peripherals and the SDK configuration.
 
 .. figure:: ../../_static/app_structure.png
    :alt: Application’s Structure
@@ -101,68 +83,48 @@ additionally include other components as may be desired. The
 application’s *Makefile* defines the build instructions for the
 application. Additionally, an optional *sdkconfig.defaults* may be
 placed that picks up the default SDK configuration that should be
-selected for this application. More details about the SDK configuration
-follow.
+selected for this application.
 
-SDK Configuration
-~~~~~~~~~~~~~~~~~
+Getting ESP-Jumpstart
+---------------------
 
-Given that this is an embedded application with footprint constraints,
-the IDF allows every application to choose its own SDK configuration.
-The SDK configuration allows you to select specific configuration
-options of the SDK that suit your application.
+The ESP-Jumpstart repository contains a sequence of *applications* that
+we will use for this exercise. These applications build with the ESP-IDF
+that you have setup before. Let’s get started by cloning the
+ESP-Jumpstart git repository https://github.com/espressif/esp-jumpstart.
 
-Typically, there is a feature v/s footprint tradeoff, where pulling in a
-new feature will consume greater memory footprint.
+::
 
-Let us now first use the *Hello World* application and launch the SDK
-configuration for this application.
+    $ git clone --recursive https://github.com/espressif/esp-jumpstart
+
+Since we are building a production-ready firmware here, we would want to
+base our development on a stable release of IDF. Currently,
+ESP-Jumpstart uses the stable version 3.2 of ESP-IDF. Let us first
+switch to that version of ESP-IDF.
+
+::
+
+    $ cd esp-idf
+    $ git checkout -b release/v3.2 remotes/origin/release/v3.2
+    $ git submodule update --recursive
+
+Now we build our first, *Hello World*, application from ESP-Jumpstart
+and flash it on to our development board. You should be already familiar
+with most of the steps below.
 
 ::
 
     $ cd esp-jumpstart/1_hello_world
     $ make -j8 menuconfig
-
-This will first open a pop-up screen for the SDK configuration.
-
-For our current scenario, we will choose the default configuration.
-Later in this series, we will look at greater details into the SDK
-configuration options. For now, you can simply exit from this screen. On
-exiting, when asked for a prompt whether you want to save the SDK
-configuration, say “Yes”.
-
-Build and Flash
-~~~~~~~~~~~~~~~
-
-At this point you should have connected the device to your development
-host. If you have installed the correct drivers, you should see a new
-device in your machine. For Windows, a new COM port would have been
-created. For Linux/OSX, a new file would appear in /dev/tty.\*. The
-flashing utility should know which serial port is connected to your
-device. This can be configured by setting the ’ESPPORT’ environment
-variable. The following command should help:
-
-::
-
     $ export ESPPORT=/dev/tty.SLAB_USBTOUART
-
-The rate at which the flashing utility writes firmware to the device can
-also be configured. This is called the baud rate. The typical rate is
-115200. But this can be extended upto 921600. Let’s configure the
-maximum baud rate for our flashing.
-
-::
-
     $ export ESPBAUD=921600
-
-Now let’s go ahead and ask make to build and flash the firmware.
-
-::
-
     $ make -j8 flash monitor
 
-The SDK will then build the entire SDK and the application. Once the
-build is successful, it will write the generated firmware to the device.
+This will then build the entire SDK and the application. Once the build
+is successful, it will write the generated firmware to the device.
+
+Once the flashing is successful, the device will reset and you will see
+the console output from this firmware.
 
 The Code
 --------
