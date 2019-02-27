@@ -8,35 +8,15 @@ In this chapter, our aim would be to get our development setup functional, and a
 
 \section{Development Overview}\index{Development Overview}
 
-The following diagram depicts the typical developer setup for development with ESP.
+The following diagram depicts the typical developer setup for development with ESP32.
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.3]{../../_static/dev_setup.png}
+    \includegraphics[scale=0.6]{../../_static/dev_setup.png}
     \caption{Typical Developer Setup}
     \label{fig:dev_setup}
 \end{figure}
 
 The PC, or the Development Host can be any of Linux, Windows or Mac. The ESP32 based development board is connected to the Development Host over a USB cable. The Development Host has the ESP-IDF (Espressif's SDK), the compiler toolchain and the code for your project. The development host builds this code and generates the executable firmware image. The tools on the Development Host then download the generated firmware image on to the development board. As the firmware executes on the development board, the logs from the firmware can be monitored from the Development Host.
-
-\section{Getting ESP-Jumpstart}\index{Getting ESP-Jumpstart}
-
-Let's get started by cloning the ESP-Jumpstart git repositories \url{https://github.com/espressif/esp-jumpstart}. This repository contains the sequence of applications that we will use for this exercise. This repository also contains a stable release version of IDF as a git submodule. This ensures that we are working off of a stable release of IDF.
-
-\begin{verbatim}
-$ git clone --recursive https://github.com/espressif/esp-jumpstart
-\end{verbatim}
-
-This repository already contains a copy of the IDF, Espressif's IoT Development Framework. Let's define the IDF\_PATH variable to point to the correction location of IDF. This can be done by executing the following command in your console:
-
-\begin{verbatim}
-$ export IDF_PATH=/path/to/esp-jumpstart/esp-idf
-\end{verbatim}
-
-Now let's make sure your development host (Windows, Linux or Mac) has the required packages to build and monitor ESP32 based projects. What you specifically need to do is:
-\begin{itemize}
-    \item Setting the toolchain \url{https://docs.espressif.com/projects/esp-idf/en/latest/get-started/#setup-toolchain}
-    \item Establish serial connection with ESP32 \url{https://docs.espressif.com/projects/esp-idf/en/latest/get-started/establish-serial-connection.html}
-\end{itemize}
 
 \section{ESP-IDF}\index{ESP-IDF}
 
@@ -46,7 +26,15 @@ ESP-IDF is Espressif's IoT Development Framework.
     \item ESP-IDF also provides tools and utilities that are required for typical developer and production usecases, like build, flash, debug and measure.
 \end{itemize}
 
-The IDF has a component-based design. 
+\subsection{Setting up IDF}\index{Setting up IDF}
+
+Please follow the steps in this documentation for setting up IDF: \url{https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html}. Please complete all the steps on this page.
+
+Before proceeding, please ensure that you have setup your development host, and have built the first application as indicated in this page. Now that you have done that, let's look at some additional details about IDF.
+
+\subsection{IDF Details}\index{IDF Details}
+
+The IDF has a component based design.
 
 \begin{figure}[h!]
     \centering
@@ -59,57 +47,50 @@ All the software in the IDF is available as components. The Operating System, th
 
 This design allows you to use your own or third-party components that are built for ESP-IDF.
 
-A developer typically builds \textit{applications} against the IDF. The applications typically contains the business logic, any drivers for externally interfaced peripherals and the SDK configuration.
+A developer typically builds \textit{applications} against the IDF. The applications contain the business logic, any drivers for externally interfaced peripherals and the SDK configuration.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[scale=0.4]{../../_static/app_structure.png}
+    \includegraphics[scale=0.6]{../../_static/app_structure.png}
     \caption{Application's Structure}
     \label{fig:app_structure}
 \end{figure}
 
 An application must contain one \textit{main} component. This is the primary component that holds the application logic. The application may additionally include other components as may be desired.
 The application's \textit{Makefile} defines the build instructions for the application. 
-Additionally, an optional \textit{sdkconfig.defaults} may be placed that picks up the default SDK configuration that should be selected for this application. More details about the SDK configuration follow.
+Additionally, an optional \textit{sdkconfig.defaults} may be placed that picks up the default SDK configuration that should be selected for this application.
 
-\subsection{SDK Configuration}\index{SDK Configuration}
 
-Given that this is an embedded application with footprint constraints, the IDF allows every application to choose its own SDK configuration. The SDK configuration allows you to select specific configuration options of the SDK that suit your application.
+\section{Getting ESP-Jumpstart}\index{Getting ESP-Jumpstart}
 
-Typically, there is a feature v/s footprint tradeoff, where pulling in a new feature will consume greater memory footprint.
+The ESP-Jumpstart repository contains a sequence of \textit{applications} that we will use for this exercise. These applications build with the ESP-IDF that you have setup before. Let's get started by cloning the ESP-Jumpstart git repository \url{https://github.com/espressif/esp-jumpstart}. 
 
-Let us now first use the \textit{Hello World} application and launch the SDK configuration for this application.
+\begin{verbatim}
+$ git clone --recursive https://github.com/espressif/esp-jumpstart
+\end{verbatim}
+
+Since we are building a production-ready firmware here, we would want to base our development on a stable release of IDF. Currently, ESP-Jumpstart uses the stable version 3.2 of ESP-IDF. Let us first switch to that version of ESP-IDF.
+\begin{verbatim}
+$ cd esp-idf
+$ git checkout -b release/v3.2 remotes/origin/release/v3.2
+$ git submodule update --recursive
+\end{verbatim}
+
+Now we build our first, \textit{Hello World}, application from ESP-Jumpstart and flash it on to our development board. You should be already familiar with most of the steps below.
 
 \begin{verbatim}
 $ cd esp-jumpstart/1_hello_world
 $ make -j8 menuconfig
-\end{verbatim}
-
-This will first open a pop-up screen for the SDK configuration.
-
-For our current scenario, we will choose the default configuration. Later in this series, we will look at greater details into the SDK configuration options. For now, you can simply exit from this screen. On exiting, when asked for a prompt whether you want to save the SDK configuration, say "Yes".
-
-\ksnotebox{If you are building the application for the first time, the SDK configuration screen will pop-up automatically even if you build for some other build target. For subsequent builds this SDK configuration screen wouldn't show up again unless you specify the \textit{menuconfig} target.}
-
-\subsection{Build and Flash}\index{Build and Flash}
-At this point you should have connected the device to your development host. If you have installed the correct drivers, you should see a new device in your machine. For Windows, a new COM port would have been created. For Linux/OSX, a new file would appear in /dev/tty.*. The flashing utility should know which serial port is connected to your device. This can be configured by setting the 'ESPPORT' environment variable. The following command should help:
-\begin{verbatim}
 $ export ESPPORT=/dev/tty.SLAB_USBTOUART
-\end{verbatim}
-
-The rate at which the flashing utility writes firmware to the device can also be configured. This is called the baud rate. The typical rate is 115200. But this can be extended upto 921600. Let's configure the maximum baud rate for our flashing.
-\begin{verbatim}
 $ export ESPBAUD=921600
-\end{verbatim}
-
-Now let's go ahead and ask make to build and flash the firmware.
-\begin{verbatim}
 $ make -j8 flash monitor
 \end{verbatim}
 
-The SDK will then build the entire SDK and the application. Once the build is successful, it will write the generated firmware to the device.
+This will then build the entire SDK and the application. Once the build is successful, it will write the generated firmware to the device.
 
 \ksnotebox{On some development boards you may have to press a specific button configuration in order to put the development board into the 'flashing mode'. Please refer to your development board's documentation for these details. For ESP32-DevKit-C, no such button press is required, the board is automatically put into the flashing mode by the flasher utility.}
+
+Once the flashing is successful, the device will reset and you will see the console output from this firmware.
 
 \section{The Code}\index{The Code}
 Now let's look at the code of the Hello World Application. It is only a few lines of code as shown below:

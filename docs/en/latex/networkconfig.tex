@@ -5,10 +5,10 @@
 \chapterimage{band1.jpg}
 \chapter{Network Configuration}
 
+In the previous example, we had hard-coded the Wi-Fi credentials into the firmware. This obviously doesn't work for an end-user product.
+
 In this step we will build a firmware such that the end-user can configure her Wi-Fi network's credentials into the device at run-time. Since a user's network credentials will be stored persistently on the device, we will also provide a \textit{Reset to Factory} action where a user's configurations can be erased from the device.
 You may refer to the \textit{4\_network\_config/} directory of esp-jumpstart for looking at this code.
-
-In the previous example, we had hard-coded the Wi-Fi credentials into the firmware. This obviously doesn't work for a end-user product.
 
 \section{Overview}\index{Overview}
 As can be seen in this figure, in the network configuration stage, the end-user typically uses her smart-phone to \textit{securely} configure her Wi-Fi credentials into your device. Once the devices acquires these credentials, it can then connect to her home Wi-Fi network. 
@@ -20,15 +20,14 @@ As can be seen in this figure, in the network configuration stage, the end-user 
     \label{fig:network_config}
 \end{figure}
 
-There can be multiple channels through which your device can receive the Wi-Fi credentials. ESP32 supports the following mechanisms:
+There can be multiple channels through which your device can receive the Wi-Fi credentials. ESP-Jumpstart supports the following mechanisms:
 
 \begin{itemize}
     \item SoftAP 
     \item Bluetooth Low Energy (BLE)
-    \item Smart-Config
 \end{itemize}
 
-Each of these have their own pros and cons. There is no single correct way of doing this, some developers may pick one way, and some the other, depending upon what you value more.
+Each of these have their own pros and cons. There is no single way of doing this, some developers may pick one way, and some the other, depending upon what you value more.
 
 \subsection{SoftAP}\index{SoftAP}
 In the SoftAP mechanism your outlet will launch its own temporary Wi-Fi Access Point. The user can then connect their smart-phones to this temporary Wi-Fi network. And then use this connection to transfer the Home Wi-Fi's credentials to the outlet. Many connected devices in the market today use this kind of mechanism. In this network configuration workflow, the user has to 
@@ -37,7 +36,8 @@ In the SoftAP mechanism your outlet will launch its own temporary Wi-Fi Access P
     \item launch your phone application
     \item enter her home Wi-Fi credentials that will be then transferred to the outlet over the SoftAP connection
 \end{itemize}
-From a user experience perspective, the first step of this requires the user to change their phone's Wi-Fi network. This may be confusing to some users. Additionally, changing the Wi-Fi network programatically through the phone application may not always be possible (iOS and some variants of Android don't allow application to this). The advantage of this method though is that it is very reliable (SoftAP being just Wi-Fi is an established mechanism), and doesn't require a lot of additional code (since it's all over Wi-Fi).
+From a user experience perspective, the first step of this requires the user to change their phone's Wi-Fi network. This may be confusing to some users. Changing the Wi-Fi network programatically through the phone application may not always be possible (iOS and some variants of Android don't allow phone apps to do this).
+But the advantage of this method though is that it is very reliable (SoftAP being just Wi-Fi, is an established mechanism), and doesn't require a lot of additional code (footprint) in the device firmware.
 
 \subsection{BLE}\index{BLE}
 
@@ -46,8 +46,6 @@ In this network configuration workflow, the user doesn't have to do the hard tas
 
 One side-effect, though, of using the BLE based network configuration is that it also pulls in the code for Bluetooth. This means your flash requirement may be affected since your firmware size will increase. During the network configuration mode, BLE will also consume memory until the network configuration is complete.
 
-\subsection{Smart-Config}\index{Smart-Config}
-XXX
 
 \section{Demo}\index{Demo}
 Before getting into the details of the network configuration workflow, let us get a feel for how an end-user will configure the network using the provided application.
@@ -56,7 +54,7 @@ You may refer to the \textit{4\_network\_config/} directory of esp-jumpstart for
 \begin{itemize}
     \item Go to the \textit{4\_network\_config} application.
     \item Build, flash and load the application.
-    \item By default, the firmware is launched in BLE mode.
+    \item By default, the firmware is launched in BLE provisioning mode.
     \item Install the companion phone application for network configuration from this location: \url{https://github.com/espressif/esp-idf-provisioning-android/releases}. Please install the latest app with \textbf{sec1-ble} as part of its name.
     \item Launch the application and follow the wizard as shown in the images below.
 \end{itemize}
@@ -67,7 +65,7 @@ XXX add network configuration images
 
 \begin{itemize}
     \item If all goes well, your device would be connected to your Home Wi-Fi network.
-    \item If you now reset the device, it will not enter the network-configuration mode. Instead it will go and connect to the Wi-Fi network that is configured.
+    \item If you now reboot the device, it will NOT enter the network-configuration mode. Instead it will go and connect to the Wi-Fi network that is configured. This is the end product experience that we want.
 \end{itemize}
 
  
@@ -80,15 +78,15 @@ Espressif provides a \textbf{Unified Provisioning} module for assisting you with
 \item Extensible Protocol: The protocol is completely flexible and it offers the ability for the developers to send custom configuration in the provisioning process. The data representation too is left to the application to decide.
 \item Transport Flexibility: The protocol can work on Wi-Fi (SoftAP + HTTP server) or on BLE as a transport protocol. The framework provides an ability to add support for any other transport easily as long as command-response behaviour can be supported on the transport.
 \item Security Scheme Flexibility: It’s understood that each use-case may require different security scheme to secure the data that is exchanged in the provisioning process. Some applications may work with SoftAP that’s WPA2 protected or BLE with “just-works” security. Or the applications may consider the transport to be insecure and may want application level security. The unified provisioning framework allows application to choose the security as deemed suitable.
-\item Compact Data Representation: The protocol uses Google Protobufs as a data representation for session setup and Wi-Fi provisioning. They provide a compact data representation and ability to parse the data in multiple programming languages in native format. Please note that this data representation is not forced on application specific data and the developers may choose the representation of their choice.
+\item Compact Data Representation: The protocol uses Google Protocol Buffers as a data representation for session setup and Wi-Fi provisioning. They provide a compact data representation and ability to parse the data in multiple programming languages in native format. Please note that this data representation is not forced on application specific data and the developers may choose the representation of their choice.
 
 \end{itemize}
 
 \ksnotebox{More details about Unified provisioning are available at: \url{https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html}}
 
-The following components are offered:
+The following components are offered as part of the provisioning infrastructure:
 \begin{itemize}
-    \item \textbf{Unified Provisioning Specification:} A specification to \textit{securely} transfer Wi-Fi credentials to the device, independent of the transport (SoftAP, BLE)
+    \item \textbf{Unified Provisioning Specification:} A specification to \textit{securely} transfer Wi-Fi credentials to the device, independent of the transport (SoftAP, BLE). More details \href{https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html}{here}.
     \item \textbf{IDF Components:} Software modules that implement this specification in the device firmware, available through ESP-IDF
     \item \textbf{Phone Libraries:} Reference implementations on iOS and Android are available that can be directly incorporated into your existing phone applications
     \item \textbf{Reference Phone Applications:} Fully functional Phone applications on Android (\url{https://github.com/espressif/esp-idf-provisioning-android}) and iOS (\url{https://github.com/espressif/esp-idf-provisioning-ios}) are available for testing during your development, or for skinning with your brand's elements.
@@ -121,14 +119,14 @@ The \textit{conn\_mgr\_prov} component provides a wrapper over the unified provi
         \item It will enable the necessary advertisements using the Wi-Fi or BLE standards
         \item It will \textit{securely} accept any network credentials from a phone application
         \item It will store these credentials, for future use, in the NVS
-        \item Finally, it will deinitialise any components (SoftAP, BLE, HTTP Server etc) that were required by the unified provisioning mechanism. This ensures that this point onward there is almost no memory overhead from the unified provisioning module.
+        \item Finally, it will deinitialise any components (SoftAP, BLE, HTTP Server etc) that were required by the unified provisioning mechanism. This ensures once provisioning is complete there is almost no memory overhead from the unified provisioning module.
     \end{enumerate}
     \item If a Wi-Fi network configuration was found in NVS, we directly start the Wi-Fi station interface using \textit{wifi\_init\_sta()}.
 \end{itemize}
 
 These steps ensure that the firmware launches the unified provisioning module when no configuration is found, and if a configuration is available, then starts the Wi-Fi station interface.
 
-Additionally, the unified provisioning module also needs to know the state transitions of the Wi-Fi interface. Hence an additional call needs to be made from the event handler for taking care of this:
+The unified provisioning module also needs to know the state transitions of the Wi-Fi interface. Hence an additional call needs to be made from the event handler for taking care of this:
 \begin{minted}{c}
 esp_err_t event_handler(void *ctx, system_event_t *event)
 {
@@ -181,10 +179,10 @@ The NVS is designed in such a manner so as to be resilient to metadata corruptio
 Application developers can also use the NVS to store any additional data that you wish to maintain as part of your application firmware. Data types like integers, NULL-terminated strings and binary blobs can be stored in the NVS. This can be used to maintain any user configurations for your product. Simple APIs like the following can be used to read and write values to the NVS.
 
 \begin{minted}{c}
-  /* Store the 'chosen_value' variable to NVS */
+  /* Store the value of key 'my_key' to NVS */
   nvs_set_u32(nvs_handle, "my_key", chosen_value);
 
-  /* Read the 'chosen_value' variable from NVS */
+  /* Read the value of key 'my_key' from NVS */
   nvs_get_u32(nvs_handle, "my_key", &chosen_value);
 \end{minted}
 
@@ -206,9 +204,9 @@ In the \textit{4\_network\_config/} application, we use a long-press action of t
 iot_button_add_on_press_cb(btn_handle, 3, button_press_3sec_cb, NULL);
 \end{minted}
 
-This function makes the configuration such that the \textit{button\_press\_3sec\_cb()} function gets calls whenever the button associated with the \textit{btn\_handle} is pressed and released for longer than 3 seconds. Remember we had initialised the \textit{btn\_handle} in our Chapter \ref{the-outlet}
+This function makes the configuration such that the \textit{button\_press\_3sec\_cb()} function gets called whenever the button associated with the \textit{btn\_handle} is pressed and released for longer than 3 seconds. Remember we had initialised the \textit{btn\_handle} in Section \ref{sec:push_button}
 
-Then callback function can then be written as follows:
+The callback function can then be written as follows:
 \begin{minted}{c}
 static void button_press_3sec_cb(void *arg)
 {

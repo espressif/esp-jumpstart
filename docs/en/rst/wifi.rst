@@ -7,12 +7,6 @@ device’s firmware executable image. You may refer to the
 *3\_wifi\_connection/* directory of esp-jumpstart for looking at this
 code.
 
-Wi-Fi is a protocol that can generate asynchronous events like
-connectivity lost, connection established, DHCP Address received etc.
-For this, we register a handler with the Wi-Fi and network subsystem.
-This handler will get called whenever either of these asynchronous
-events occurs.
-
 The Code
 --------
 
@@ -49,10 +43,12 @@ In the above code:
    target Wi-Fi network are configured and we start the station using a
    call to *esp\_wifi\_start()*
 
-The call to *esp\_event\_loop\_init()* is important. The event loop
-collects events from the TCP/IP Stack and the Wi-Fi subsystem. It
-delivers these events to the callback that is registered through the
-first parameter.
+Wi-Fi is a protocol that can generate asynchronous events like
+connectivity lost, connection established, DHCP Address received etc.
+The event loop collects events from the TCP/IP Stack and the Wi-Fi
+subsystem. The call to *esp\_event\_loop\_init()* initialises the event
+loop. The event loop delivers these events to the callback that is
+registered through the first parameter.
 
 The asynchronous event handler that is registered with the event loop
 can be implemented as:

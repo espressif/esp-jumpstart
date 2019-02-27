@@ -38,15 +38,15 @@ which of these is the active partition.
 
    OTA Flash Partitions
 
-The typical state changes across the OTA firmware upgrade happens as
-shown in the figure. Behind the scene the following
-steps occur during the OTA upgrade workflow:
+The typical state changes that happen across the OTA firmware upgrade
+workflow are as shown in the figure.
 
 -  Step 0: OTA 0 is the active firmware. The OTA data partition stores
-   this information as indicated.
+   this information as can be seen.
 
 -  Step 1: The firmware upgrade process begins. The passive partition is
-   identified, erased and new firmware is being written the OTA 1.
+   identified, erased and new firmware is being written to the OTA 1
+   partition.
 
 -  Step 2: The firmware upgrade is completely written and verification
    is in-progress.
@@ -87,15 +87,15 @@ The partitions file that is used for this example is shown below:
     ota_1,    app,    ota_1,   ,      1600K,
 
 The above partitions file instructs the IDF to create partitions: NVS,
-OTA-Data, OTA 0 and OTA 1, and it also specifies that sizes for each of
+OTA-Data, OTA 0 and OTA 1, and it also specifies the sizes for each of
 these.
 
 Once we create this partition file, we should instruct IDF to use this
 custom partitioning mechanism, over its default mechanism. This can be
-enabled by mentioned this detail in the SDK configuration. In the case
-of our application right now, this setting has already been activated in
-the *6\_ota/sdkconfig.defaults* file. Hence you don’t have to do any
-extra step for activating this.
+enabled by updating the SDK configuration. In the case of our
+application right now, this setting has already been activated in the
+*6\_ota/sdkconfig.defaults* file. Hence you don’t have to do any extra
+step for activating this.
 
 But should you wish to use a different partitions file, or update the
 offset of the primary firmware, you should modify this setting. This can
@@ -105,7 +105,7 @@ correct options in *menuconfig* -> *Partition Table*.
 The Code
 --------
 
-Now let’s check the code for enabling this functionality.
+Now let’s check the code for actually performing the firmware upgrade.
 
 .. code:: c
 
@@ -142,6 +142,6 @@ Progress So Far
 With this firmware we enable a key feature of any smart connected
 device, the over-the-air firmware upgrade.
 
-Our product firmware is almost ready to be go, but for one any
-considerations for unique device data. Let’s wrap that up in the
-upcoming Chapter.
+Our product firmware is almost ready to be go, but for the final
+considerations for maintaining unique device data. Let’s wrap that up in
+the upcoming Chapter.

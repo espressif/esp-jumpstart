@@ -10,7 +10,7 @@ APIs of the ESP32. The power outlet will do the following:
 
 For the scope of this chapter, we won’t worry about ’connectivity’ of
 this power outlet. That will follow in subsequent chapters. Here we will
-only focus in implementing the outlet functionality. You may refer to
+only focus on implementing the outlet functionality. You may refer to
 the *2\_drivers/* directory of esp-jumpstart for looking at this code.
 
 The code for the driver has been neatly isolated in the file

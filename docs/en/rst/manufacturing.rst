@@ -1,7 +1,7 @@
 Manufacturing
 =============
 
-While building IoT products it is often the case that some unique
+While building IoT products, it is often the case that some unique
 information needs to be stored in each device.
 
 For example, in our journey so far, you might have realised that some

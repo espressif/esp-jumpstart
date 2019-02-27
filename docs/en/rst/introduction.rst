@@ -11,7 +11,7 @@ features done. What if there was a ready reference, a known set of best
 steps, gathered from previous experience of others, that you could
 jumpstart with?
 
-ESP-Jumpstart is focused on building ’products’ on ESP32. It is a
+ESP-Jumpstart is focused on building *products* on ESP32. It is a
 quick-way to get started into your product development process.
 ESP-Jumpstart builds a fully functional, ready to deploy “Smart Power
 Outlet” in a sequence of incremental tutorial steps. Each step addresses
@@ -27,22 +27,22 @@ The ESP-Jumpstart’s Smart Power Outlet firmware assumes the device has
 one input push-button, and one GPIO output. It implements the following
 commonly required functionality.
 
--  Allows user’s home Wi-Fi network configuration through phone
-   applications (iOS/Android)
+-  Allows and end-user to configure their home Wi-Fi network through
+   phone applications (iOS/Android)
 
--  Ability to switch on or off a single GPIO output
+-  Switch on or off the GPIO output
 
 -  Use a push-button to physically toggle this output
 
 -  Allow remote control of this output through a cloud
 
--  Implements over-the-air (OTA) firmware upgrade
+-  Implement over-the-air (OTA) firmware upgrade
 
--  Performs *Reset to Factory* settings on long-press of the push-button
+-  Perform *Reset to Factory* settings on long-press of the push-button
 
-Building your production firmware, is a matter of replacing the
-power-outlet’s device driver, with your device driver (bulb, washing
-machine).
+Once you are familiar with ESP-Jumpstart, building your production
+firmware, is a matter of replacing the power-outlet’s device driver,
+with your device driver (bulb, washing machine).
 
 .. figure:: ../../_static/jumpstart-outlet-blocks.png
    :alt: Jumpstart Applicability
@@ -51,11 +51,12 @@ machine).
 
 You will require the following to get started:
 
--  An ESP32 development kit: ESP32-DevKit-C (Available on DigiKey,
-   Mouser, Amazon)
+-  An ESP32 development kit: `ESP32-DevKit-C`_, available through your
+   closest store. You could also use any other ESP32 development board
+   if you already have one.
 
--  A Development setup
-   (https://docs.espressif.com/projects/esp-idf/en/latest/get-started/)
+-  A Development host setup (Windows, Linux or Mac) that will be used
+   for development.
 
 For the Restless
 ----------------
@@ -66,9 +67,12 @@ steps, you can do the following:
 
 #. Directly use the final application in ESP-Jumpstart
 
-#. Create the manufacturing configuration file, based on the
-   instructions provided in Section :ref:`sec_gen\_factory\_data` and flash
-   it at appropriate location
+#. If you don’t have a cloud accout, configure your AWS IoT Cloud
+   configuration as mentioned in Section :ref:`sec_aws\_cloud`
+
+#. Create the manufacturing configuration file for your device’s unique
+   cloud credentials, based on the instructions provided in Section
+   :ref:`sec_gen\_factory\_data` and flash it at the appropriate location
 
 #. Build, flash and boot up the firmware image as you usually do
 
@@ -76,10 +80,9 @@ steps, you can do the following:
    phone applications. Or use the reference application to try things
    out as discussed in Section :ref:`sec_unified\_prov`
 
-#. Configure your AWS IoT Cloud configuration as mentioned in Section
-   :ref:`sec_aws\_cloud` and use the commands to control and monitor the
-   device remotely
+#. Use the commands discussed in Section :ref:`sec_aws\_cloud` for remote
+   control
 
-#. Integrate with your OTA upgrade service
+#. Now that you have this functional, modify to work with your driver
 
-#. And you are good to go!
+.. _ESP32-DevKit-C: https://www.espressif.com/en/products/hardware/esp32-devkitc/overview
