@@ -44,15 +44,19 @@ static const char *TAG = "cloud";
 /* Per-Device Unique components:
  * - Certificate
  * - Private Key
- * - Thing Name
+ * - Device ID
  */
 static char *serial_no, *cert, *priv_key;
 #define MFG_PARTITION_NAME "fctry"
 
 /* Root CA Certificate */
-extern const uint8_t aws_root_ca_pem_start[] asm("_binary_aws_root_ca_pem_start");
-extern const uint8_t aws_root_ca_pem_end[] asm("_binary_aws_root_ca_pem_end");
-#define AWS_IOT_MY_MQTT_HOSTNAME   "aln7lww42a72l-ats.iot.us-east-1.amazonaws.com"
+
+extern const uint8_t aws_root_ca_pem_start[] asm("_binary_server_cert_start");
+extern const uint8_t aws_root_ca_pem_end[] asm("_binary_server_cert_end");
+
+/* AWS IoT Endpoint specific to account and region */
+extern const uint8_t endpoint_txt_start[] asm("_binary_endpoint_txt_start");
+extern const uint8_t endpoint_txt_end[] asm("_binary_endpoint_txt_end");
 
 static int reported_state = false;
 static bool update_desired = false;
@@ -166,7 +170,7 @@ void aws_iot_task(void *param)
     AWS_IoT_Client mqttClient;
 
     ShadowInitParameters_t sp = ShadowInitParametersDefault;
-    sp.pHost = AWS_IOT_MY_MQTT_HOSTNAME;
+    sp.pHost = (char *)endpoint_txt_start;
     sp.port = AWS_IOT_MQTT_PORT;
     sp.pClientCRT = (const char *)cert;
     sp.pClientKey = (const char *)priv_key;

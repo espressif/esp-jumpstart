@@ -40,20 +40,27 @@ static const char *TAG = "cloud";
  */
 
 /* Per-Device Unique components:
+ * - Device ID
  * - Certificate
  * - Private Key
- * - Thing Name
  */
-#define EXAMPLE_THING_NAME "change-me"
-extern const uint8_t certificate_pem_crt_start[] asm("_binary_certificate_pem_crt_start");
-extern const uint8_t certificate_pem_crt_end[] asm("_binary_certificate_pem_crt_end");
-extern const uint8_t private_pem_key_start[] asm("_binary_private_pem_key_start");
-extern const uint8_t private_pem_key_end[] asm("_binary_private_pem_key_end");
+
+extern const uint8_t deviceid_txt_start[] asm("_binary_deviceid_txt_start");
+extern const uint8_t deviceid_txt_end[] asm("_binary_deviceid_txt_end");
+
+
+extern const uint8_t certificate_pem_crt_start[] asm("_binary_device_cert_start");
+extern const uint8_t certificate_pem_crt_end[] asm("_binary_device_cert_end");
+extern const uint8_t private_pem_key_start[] asm("_binary_device_key_start");
+extern const uint8_t private_pem_key_end[] asm("_binary_device_key_end");
 
 /* Root CA Certificate */
-extern const uint8_t aws_root_ca_pem_start[] asm("_binary_aws_root_ca_pem_start");
-extern const uint8_t aws_root_ca_pem_end[] asm("_binary_aws_root_ca_pem_end");
-#define AWS_IOT_MY_MQTT_HOSTNAME   "aln7lww42a72l-ats.iot.us-east-2.amazonaws.com"
+extern const uint8_t aws_root_ca_pem_start[] asm("_binary_server_cert_start");
+extern const uint8_t aws_root_ca_pem_end[] asm("_binary_server_cert_end");
+
+/* AWS IoT Endpoint specific to account and region */
+extern const uint8_t endpoint_txt_start[] asm("_binary_endpoint_txt_start");
+extern const uint8_t endpoint_txt_end[] asm("_binary_endpoint_txt_end");
 
 static int reported_state = false;
 static bool update_desired = false;
@@ -147,8 +154,8 @@ static void update_our_status(AWS_IoT_Client *mqttClient_p, jsonStruct_t *handle
         rc = aws_iot_finalize_json_document(JsonDocumentBuffer, sizeOfJsonDocumentBuffer);
         if (SUCCESS == rc) {
             ESP_LOGI(TAG, "Update Shadow: %s", JsonDocumentBuffer);
-            rc = aws_iot_shadow_update(mqttClient_p, EXAMPLE_THING_NAME, JsonDocumentBuffer,
-                                        update_status_callback, NULL, 4, true);
+            rc = aws_iot_shadow_update(mqttClient_p, (const char *)deviceid_txt_start, JsonDocumentBuffer,
+                                       update_status_callback, NULL, 4, true);
             shadowUpdateInProgress = true;
         }
     }
@@ -167,7 +174,7 @@ void aws_iot_task(void *param)
     AWS_IoT_Client mqttClient;
 
     ShadowInitParameters_t sp = ShadowInitParametersDefault;
-    sp.pHost = AWS_IOT_MY_MQTT_HOSTNAME;
+    sp.pHost = (char *)endpoint_txt_start;
     sp.port = AWS_IOT_MQTT_PORT;
     sp.pClientCRT = (const char *)certificate_pem_crt_start;
     sp.pClientKey = (const char *)private_pem_key_start;
@@ -183,9 +190,9 @@ void aws_iot_task(void *param)
     }
 
     ShadowConnectParameters_t scp = ShadowConnectParametersDefault;
-    scp.pMyThingName = EXAMPLE_THING_NAME;
-    scp.pMqttClientId = EXAMPLE_THING_NAME;
-    scp.mqttClientIdLen = (uint16_t) strlen(EXAMPLE_THING_NAME);
+    scp.pMyThingName = (const char *)deviceid_txt_start;
+    scp.pMqttClientId = (const char *)deviceid_txt_start;
+    scp.mqttClientIdLen = (uint16_t) strlen((const char *)deviceid_txt_start);
 
     ESP_LOGI(TAG, "Shadow Connect");
     rc = aws_iot_shadow_connect(&mqttClient, &scp);
