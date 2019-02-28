@@ -14,10 +14,8 @@
 
 #include "conn_mgr_prov.h"
 
-extern conn_mgr_prov_t conn_mgr_prov_mode_softap;
-
-typedef struct {
-    protocomm_httpd_config_t httpd_config;
-    char ssid[33];
-    char password[65];
-} conn_mgr_prov_mode_softap_config_t;
+/**
+ * @brief   Scheme that can be used by manager for provisioning
+ *          over SoftAP transport with HTTP server
+ */
+extern const conn_mgr_prov_scheme_t conn_mgr_prov_scheme_softap;

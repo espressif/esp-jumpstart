@@ -43,13 +43,29 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
         xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_EVENT);
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
-        ESP_LOGI(TAG, "Disconnected. Connecting to the AP again...\n");
+        ESP_LOGI(TAG, "Disconnected. Connecting to the AP again...");
         esp_wifi_connect();
         break;
     default:
         break;
     }
     return ESP_OK;
+}
+
+/* Custom event handler for catching provisioning manager events */
+static esp_err_t prov_event_handler(void *user_data, conn_mgr_prov_cb_event_t event)
+{
+    esp_err_t ret = ESP_OK;
+    switch (event) {
+        case CMP_PROV_END:
+            /* De-initialize manager once
+             * provisioning is finished */
+            conn_mgr_prov_deinit();
+            break;
+        default:
+            break;
+    }
+    return ret;
 }
 
 static void wifi_init_sta()
@@ -93,6 +109,37 @@ void app_main()
     ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL) );
     wifi_event_group = xEventGroupCreate();
 
+    /* Configuration for the provisioning manager */
+    conn_mgr_prov_config_t config = {
+        /* What is the Provisioning Scheme that we want ?
+         * conn_mgr_prov_scheme_softap or conn_mgr_prov_scheme_ble */
+        .scheme = conn_mgr_prov_scheme_ble,
+
+        /* Any default scheme specific event handler that you would
+         * like to choose. Since our example application requires
+         * neither BT nor BLE, we can choose to release the associated
+         * memory once provisioning is complete, or not needed
+         * (in case when device is already provisioned). Choosing
+         * appropriate scheme specific event handler allows the manager
+         * to take care of this automatically. This can be set to
+         * CMP_EVENT_HANDLER_NONE when using conn_mgr_prov_scheme_softap*/
+        .scheme_event_handler = CMP_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM,
+
+        /* Do we want an application specific handler be executed on
+         * various provisioning related events */
+        .app_event_handler = {
+            .event_cb = prov_event_handler,
+            .user_data = NULL
+        }
+    };
+
+    /* Initialize provisioning manager with the
+     * configuration parameters set above */
+    if (conn_mgr_prov_init(config) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize provisioning manager");
+        return;
+    }
+
     bool provisioned = false;
     /* Let's find out if the device is provisioned */
     if (conn_mgr_prov_is_provisioned(&provisioned) != ESP_OK) {
@@ -106,17 +153,11 @@ void app_main()
 
         /* What is the Device Service Name that we want
          * This translates to :
-         *     - WiFi SSID when mode is SoftAP
-         *     - device name when mode is BLE
+         *     - WiFi SSID when scheme is conn_mgr_prov_scheme_softap
+         *     - device name when scheme is conn_mgr_prov_scheme_ble
          */
         char service_name[12];
         get_device_service_name(service_name, sizeof(service_name));
-
-        /* What is the Provisioning Type that we want:
-         *      - conn_mgr_prov_mode_softap : provisioning performed over softAP transport
-         *      - conn_mgr_prov_mode_ble : provisioning performed over BLE transport (requires CONFIG_BT_ENABLED)
-         */
-        conn_mgr_prov_t prov_type = conn_mgr_prov_mode_ble;
 
         /* What is the security level that we want (0 or 1):
          *      - Security 0 is simply plain text communication.
@@ -134,27 +175,28 @@ void app_main()
 
         /* What is the service key (could be NULL)
          * This translates to :
-         *     - WiFi password when mode is SoftAP
-         *     - simply ignored when mode is BLE
+         *     - WiFi password when scheme is conn_mgr_prov_scheme_softap
+         *     - simply ignored when scheme is conn_mgr_prov_scheme_ble
          */
         const char *service_key = NULL;
 
         /* Start provisioning service */
-        conn_mgr_prov_start_provisioning(prov_type, security, pop, service_name, service_key);
+        conn_mgr_prov_start_provisioning(security, pop, service_name, service_key);
+
+        /* Uncomment the following to wait for the provisioning to finish and then release
+         * the resources of the manager. Since in this case de-initialization is triggered
+         * by the configured prov_event_handler(), we don't need to call the following */
+        // conn_mgr_prov_wait();
+        // conn_mgr_prov_deinit();
     } else {
         ESP_LOGI(TAG, "Already provisioned, starting station");
 
         /* Start wifi station */
         wifi_init_sta();
 
-        /* If provisioning is not to be started, release memory
-         * used by the BT/BLE stack which is no longer needed.
-         * The following makes sense only if we are using conn_mgr_prov_mode_ble
-         * and user application doesn't require BT/BLE to function.
-         * If user application does require BT or BLE (or both) then
-         * the following will have to be modified (or removed) to
-         * selectively free the unused stack */
-        conn_mgr_prov_mem_release();
+        /* We don't need the manager as device is already provisioned,
+         * so let's release it's resources */
+        conn_mgr_prov_deinit();
     }
 
     /* Wait for Wi-Fi connection */

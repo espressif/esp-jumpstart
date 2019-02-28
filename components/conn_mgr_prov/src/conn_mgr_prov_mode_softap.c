@@ -18,12 +18,18 @@
 #include <protocomm.h>
 #include <protocomm_httpd.h>
 
-#include "conn_mgr_prov.h"
+#include "conn_mgr_prov_priv.h"
 #include "conn_mgr_prov_mode_softap.h"
 
-static const char *TAG = "conn_mgr_prov_mode_softap";
+typedef struct softap_config {
+    protocomm_httpd_config_t httpd_config;
+    char ssid[33];
+    char password[65];
+} conn_mgr_prov_softap_config_t;
 
-extern conn_mgr_prov_t conn_mgr_prov_mode_softap;
+static const char *TAG = "conn_mgr_prov_softap";
+
+extern const conn_mgr_prov_scheme_t conn_mgr_prov_scheme_softap;
 
 static esp_err_t start_wifi_ap(const char *ssid, const char *pass)
 {
@@ -85,7 +91,7 @@ static esp_err_t prov_start(protocomm_t *pc, void *config)
         return ESP_ERR_INVALID_ARG;
     }
 
-    conn_mgr_prov_mode_softap_config_t *softap_config = (conn_mgr_prov_mode_softap_config_t *) config;
+    conn_mgr_prov_softap_config_t *softap_config = (conn_mgr_prov_softap_config_t *) config;
 
     protocomm_httpd_config_t *httpd_config = &softap_config->httpd_config;
 
@@ -109,7 +115,7 @@ static esp_err_t prov_start(protocomm_t *pc, void *config)
 
 static void *new_config(void)
 {
-    conn_mgr_prov_mode_softap_config_t *softap_config = calloc(1, sizeof(conn_mgr_prov_mode_softap_config_t));
+    conn_mgr_prov_softap_config_t *softap_config = calloc(1, sizeof(conn_mgr_prov_softap_config_t));
     if (!softap_config) {
         ESP_LOGE(TAG, "Error allocating memory for new configuration");
         return NULL;
@@ -130,7 +136,7 @@ static void delete_config(void *config)
         return;
     }
 
-    conn_mgr_prov_mode_softap_config_t *softap_config = (conn_mgr_prov_mode_softap_config_t *) config;
+    conn_mgr_prov_softap_config_t *softap_config = (conn_mgr_prov_softap_config_t *) config;
     free(softap_config);
 }
 
@@ -146,7 +152,7 @@ static esp_err_t set_config_service(void *config, const char *service_name, cons
         return ESP_ERR_INVALID_ARG;
     }
 
-    conn_mgr_prov_mode_softap_config_t *softap_config = (conn_mgr_prov_mode_softap_config_t *) config;
+    conn_mgr_prov_softap_config_t *softap_config = (conn_mgr_prov_softap_config_t *) config;
     strlcpy(softap_config->ssid, service_name, sizeof(softap_config->ssid));
     if (service_key) {
         strlcpy(softap_config->password, service_key,  sizeof(softap_config->password));
@@ -159,14 +165,12 @@ static esp_err_t set_config_endpoint(void *config, const char *endpoint_name, ui
     return ESP_OK;
 }
 
-conn_mgr_prov_t conn_mgr_prov_mode_softap = {
+const conn_mgr_prov_scheme_t conn_mgr_prov_scheme_softap = {
     .prov_start          = prov_start,
     .prov_stop           = protocomm_httpd_stop,
     .new_config          = new_config,
     .delete_config       = delete_config,
     .set_config_service  = set_config_service,
     .set_config_endpoint = set_config_endpoint,
-    .wifi_mode           = WIFI_MODE_APSTA,
-    .event_cb            = NULL,
-    .cb_user_data        = NULL,
+    .wifi_mode           = WIFI_MODE_APSTA
 };
