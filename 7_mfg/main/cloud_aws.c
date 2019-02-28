@@ -12,6 +12,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_log.h>
+#include <nvs_flash.h>
+#include <nvs.h>
 
 #include "aws_iot_config.h"
 #include "aws_iot_log.h"
@@ -23,15 +25,17 @@
 
 #define MAX_LENGTH_OF_UPDATE_JSON_BUFFER 200
 static const char *TAG = "cloud";
-#define UPGRADE_TOPIC_NAME   "outlet/upgrade"
+#define MAX_LENGTH_URL 256
 /*
  * The Json Document in the cloud will be:
  * {
  *   "reported": {
+ *      "ota_url": "",
  *      "output": true,
  *      "fw_version": "<version-string>"
  *    },
  *   "desired": {
+ *      "ota_url": "",
  *      "output": false
  *   }
  * }
@@ -42,16 +46,13 @@ static const char *TAG = "cloud";
  * - Private Key
  * - Thing Name
  */
-#define EXAMPLE_THING_NAME "change-me"
-extern const uint8_t certificate_pem_crt_start[] asm("_binary_certificate_pem_crt_start");
-extern const uint8_t certificate_pem_crt_end[] asm("_binary_certificate_pem_crt_end");
-extern const uint8_t private_pem_key_start[] asm("_binary_private_pem_key_start");
-extern const uint8_t private_pem_key_end[] asm("_binary_private_pem_key_end");
+static char *serial_no, *cert, *priv_key;
+#define MFG_PARTITION_NAME "fctry"
 
 /* Root CA Certificate */
 extern const uint8_t aws_root_ca_pem_start[] asm("_binary_aws_root_ca_pem_start");
 extern const uint8_t aws_root_ca_pem_end[] asm("_binary_aws_root_ca_pem_end");
-#define AWS_IOT_MY_MQTT_HOSTNAME   "aln7lww42a72l-ats.iot.us-east-2.amazonaws.com"
+#define AWS_IOT_MY_MQTT_HOSTNAME   "aln7lww42a72l-ats.iot.us-east-1.amazonaws.com"
 
 static int reported_state = false;
 static bool update_desired = false;
@@ -64,15 +65,23 @@ static void state_change_callback(const char *pJsonString, uint32_t JsonStringDa
     }
 }
 
-void upgrade_handler(AWS_IoT_Client *pClient, char *pTopicName, uint16_t topicNameLen,
-                     IoT_Publish_Message_Params *params, void *pClientData)
+static int retry_count = 0;
+static bool update_desired_ota = false;
+static void ota_url_state_change_callback(const char *pJsonString, uint32_t JsonStringDataLen, jsonStruct_t *pContext)
 {
-    /* Starting Firmware Upgrades */
-    printf("Upgrade Handler got:%.*s on %.*s topic\n", (int) params->payloadLen, (char *)params->payload, topicNameLen, pTopicName);
-    char *ota_url = strndup((char *)params->payload, (int) params->payloadLen);
-    do_firmware_upgrade(ota_url);
-    /* If upgrade was successful, the above function call will not return */
-    free(ota_url);
+    if (pContext != NULL) {
+        char * ota_url = strndup((char *) pJsonString, (int) JsonStringDataLen);
+        ESP_LOGI(TAG, "Delta - Output state changed to %d and data: %s", *(bool *) (pContext->pData), ota_url);
+        if (do_firmware_upgrade(ota_url) == ESP_OK) {
+            update_desired_ota = true;
+        } else {
+            retry_count++;
+            if (retry_count >= 3) {
+                update_desired_ota = true;
+            }
+        }
+        free(ota_url);
+    }
 }
 
 static bool shadowUpdateInProgress;
@@ -137,7 +146,7 @@ static void update_our_status(AWS_IoT_Client *mqttClient_p, jsonStruct_t *handle
         rc = aws_iot_finalize_json_document(JsonDocumentBuffer, sizeOfJsonDocumentBuffer);
         if (SUCCESS == rc) {
             ESP_LOGI(TAG, "Update Shadow: %s", JsonDocumentBuffer);
-            rc = aws_iot_shadow_update(mqttClient_p, EXAMPLE_THING_NAME, JsonDocumentBuffer,
+            rc = aws_iot_shadow_update(mqttClient_p, serial_no, JsonDocumentBuffer,
                                        update_status_callback, NULL, 4, true);
             shadowUpdateInProgress = true;
         }
@@ -159,8 +168,8 @@ void aws_iot_task(void *param)
     ShadowInitParameters_t sp = ShadowInitParametersDefault;
     sp.pHost = AWS_IOT_MY_MQTT_HOSTNAME;
     sp.port = AWS_IOT_MQTT_PORT;
-    sp.pClientCRT = (const char *)certificate_pem_crt_start;
-    sp.pClientKey = (const char *)private_pem_key_start;
+    sp.pClientCRT = (const char *)cert;
+    sp.pClientKey = (const char *)priv_key;
     sp.pRootCA = (const char *)aws_root_ca_pem_start;
     sp.enableAutoReconnect = false;
     sp.disconnectHandler = NULL;
@@ -168,26 +177,26 @@ void aws_iot_task(void *param)
     ESP_LOGI(TAG, "Shadow Init");
     rc = aws_iot_shadow_init(&mqttClient, &sp);
     if (SUCCESS != rc) {
-        ESP_LOGE(TAG, "aws_iot_shadow_init returned error %d, aborting...", rc);
-        abort();
+        ESP_LOGE(TAG, "aws_iot_shadow_init returned error %d", rc);
+        goto error;
     }
 
     ShadowConnectParameters_t scp = ShadowConnectParametersDefault;
-    scp.pMyThingName = EXAMPLE_THING_NAME;
-    scp.pMqttClientId = EXAMPLE_THING_NAME;
-    scp.mqttClientIdLen = (uint16_t) strlen(EXAMPLE_THING_NAME);
+    scp.pMyThingName = serial_no;
+    scp.pMqttClientId = serial_no;
+    scp.mqttClientIdLen = (uint16_t) strlen(serial_no);
 
     ESP_LOGI(TAG, "Shadow Connect");
     rc = aws_iot_shadow_connect(&mqttClient, &scp);
     if (SUCCESS != rc) {
-        ESP_LOGE(TAG, "aws_iot_shadow_connect returned error %d, aborting...", rc);
-        abort();
+        ESP_LOGE(TAG, "aws_iot_shadow_connect returned error %d", rc);
+        goto error;
     }
 
     rc = aws_iot_shadow_set_autoreconnect_status(&mqttClient, true);
     if (SUCCESS != rc) {
-        ESP_LOGE(TAG, "Unable to set Auto Reconnect to true - %d, aborting...", rc);
-        abort();
+        ESP_LOGE(TAG, "Unable to set Auto Reconnect to true - %d", rc);
+        goto error;
     }
 
     jsonStruct_t state_handler;
@@ -197,13 +206,19 @@ void aws_iot_task(void *param)
     state_handler.type = SHADOW_JSON_BOOL;
     rc = aws_iot_shadow_register_delta(&mqttClient, &state_handler);
     if (SUCCESS != rc) {
-        ESP_LOGE(TAG, "Shadow Register Delta Error");
+        ESP_LOGE(TAG, "Shadow Register State Delta Error");
     }
 
-    rc = aws_iot_mqtt_subscribe(&mqttClient, UPGRADE_TOPIC_NAME, strlen(UPGRADE_TOPIC_NAME),
-                                QOS1, upgrade_handler, NULL);
+    jsonStruct_t ota_handler;
+    char data[MAX_LENGTH_URL];
+    strcpy(data, "");
+    ota_handler.cb = ota_url_state_change_callback;
+    ota_handler.pData = &data;
+    ota_handler.pKey = "ota_url";
+    ota_handler.type = SHADOW_JSON_STRING;
+    rc = aws_iot_shadow_register_delta(&mqttClient, &ota_handler);
     if (SUCCESS != rc) {
-        ESP_LOGE(TAG, "Upgrade Handler Subscription Error");
+        ESP_LOGE(TAG, "Shadow Register OTA Delta Error");
     }
 
     output_state = app_driver_get_state();
@@ -217,6 +232,17 @@ void aws_iot_task(void *param)
             continue;
         }
 
+        if (update_desired_ota) {
+            strcpy(data, "");
+            update_our_status(&mqttClient, &ota_handler);
+            update_desired_ota = false;
+            if (retry_count >= 3) {
+                retry_count = 0;
+            } else {
+                esp_restart();
+            }
+        }
+
         output_state = app_driver_get_state();
         if (reported_state == output_state) {
             /* Don't update if the state is the same */
@@ -228,13 +254,52 @@ void aws_iot_task(void *param)
         update_our_status(&mqttClient, &state_handler);
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
-
+error:
     vTaskDelete(NULL);
+}
+
+static int alloc_and_read_from_nvs(nvs_handle handle, const char *key, char **value)
+{
+    size_t required_size = 0;
+    int error;
+    if ((error = nvs_get_str(handle, key, NULL, &required_size)) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to read key %s with error %d size %d\n", key, error, required_size);
+        return -1;
+    }
+    *value = malloc(required_size);
+    if (*value) {
+        nvs_get_str(handle, key, *value, &required_size);
+        ESP_LOGI(TAG, "Read key:%s, value:%s\n", key, *value);
+        return 0;
+    }
+    return -1;
 }
 
 int cloud_start(void)
 {
     printf("Starting cloud\n");
+    nvs_handle fctry_handle;
+    if (nvs_flash_init_partition(MFG_PARTITION_NAME) != ESP_OK) {
+        ESP_LOGE(TAG, "NVS Flash init failed");
+        return -1;
+    }
+
+    if (nvs_open_from_partition(MFG_PARTITION_NAME, "mfg_ns",
+                                NVS_READONLY, &fctry_handle) != ESP_OK) {
+        ESP_LOGE(TAG, "NVS open failed");
+        return -1;
+    }
+    if (alloc_and_read_from_nvs(fctry_handle, "serial_no", &serial_no) != 0) {
+        return -1;
+    }
+    if (alloc_and_read_from_nvs(fctry_handle, "cert", &cert) != 0) {
+        return -1;
+    }
+    if (alloc_and_read_from_nvs(fctry_handle, "priv_key", &priv_key) != 0) {
+        return -1;
+    }
+    nvs_close(fctry_handle);
+
     if (xTaskCreate(&aws_iot_task, "aws_iot_task", 9216, NULL, 5, NULL) != pdPASS) {
         ESP_LOGE(TAG, "Couldn't create cloud task\n");
         /* Indicate error to user */
