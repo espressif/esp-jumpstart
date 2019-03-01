@@ -10,7 +10,7 @@ For example, in our journey so far, you might have realised that some cloud plat
 
 You might remember the NVS partitions that we discussed in Section \ref{sec:nvs_info}. This was used to store key-value pairs persistently into the flash. Because this is stored in the flash, this information was accessible even across device reboot events. Also remember that we implemented the \textit{Reset to Factory} action in Section \ref{sec:reset_to_factory} by erasing the contents of this NVS.
 
-We can use the similar NVS partition for storing per-device unique keys. But we want that this unique information should not be erased across the \textit{Reset to Factory} events. This can be facilitated by creating another NVS partition that is primarily used for storing such unique factory-programmed information. Since this partition is programmed at the factory, we will use this NVS partition as a read-only partition, only referring to it to read the unique values that were configured for us.
+We can use the similar NVS partition for storing per-device unique key-value pairs at manufacturing time. But we want that this unique information should not be erased across the \textit{Reset to Factory} events. This can be facilitated by creating another NVS partition that is primarily used for storing such unique factory-programmed information. Since this partition is programmed at the factory, we will use this NVS partition as a read-only partition, only referring to it to read the unique values that were configured for us.
 
 Thus we can reuse the same concept to store factory unique information.
 
@@ -27,20 +27,27 @@ Now that this NVS partition is present, we can access it using the standard NVS 
 /* Error checks removed for brevity */
 nvs_handle fctry_handle;
 nvs_flash_init_partition(MFG_PARTITION_NAME);
-nvs_open_from_partition(MFG_PARTITION_NAME, “mfg_ns”,  
+nvs_open_from_partition(MFG_PARTITION_NAME, "mfg_ns",
                NVS_READWRITE, &fctry_handle);
 \end{minted}
 
-Now the NVS get operations that are performed with the \textit{fctry\_handle} NVS handle will be result in reading data from this factory NVS partition. For example,
+Now the NVS get operations that are performed with the \textit{fctry\_handle} NVS handle will result in reading data from this factory NVS partition. For example,
 
 \begin{minted}{c}
-nvs_get_str(fctry_handle, “serial_no”, buf, &buflen);
+nvs_get_str(fctry_handle, "serial_no", buf, &buflen);
 \end{minted}
 
 So, we can now disable the code that embeds any certificates in the firmware itself, and instead, read them from the unique factory partition that is flashed for this device.
 
 \section{Generating the Factory Data}\index{Generating the Factory Data}\label{sec:gen_factory_data}
 Now we are good to go from the firmware perspective. But we still need to identify some mechanism for generating the factory data that will be written to the \textit{fctry} partition.
+
+\begin{figure}
+    \centering
+    \includegraphics{../../_static/generate_factory_partition.png}
+    \caption{Generating Factory Partition}
+    \label{fig:gen_fac_part}
+\end{figure}
 
 The utility \textit{idf/nvs\_flash/nvs\_partition\_generator/nvs\_partition\_gen.py} is used to generate an NVS image on the development host. This image can then be written to the flash into the location of the \textit{fctry} partition.
 

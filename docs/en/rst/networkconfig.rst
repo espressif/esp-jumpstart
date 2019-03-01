@@ -104,7 +104,6 @@ directory of esp-jumpstart for trying this out.
 -  Launch the application and follow the wizard as shown in the images
    below.
 
-XXX add network configuration images
 
 -  If all goes well, your device would be connected to your Home Wi-Fi
    network.
@@ -158,7 +157,8 @@ infrastructure:
 
 -  **Unified Provisioning Specification:** A specification to *securely*
    transfer Wi-Fi credentials to the device, independent of the
-   transport (SoftAP, BLE). More details `here`_.
+   transport (SoftAP, BLE). More details can be here here:
+   https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html.
 
 -  **IDF Components:** Software modules that implement this
    specification in the device firmware, available through ESP-IDF
@@ -426,5 +426,3 @@ these settings on a long-press of a push-button.
 As of now, the outlet functionality and the connectivity functionality
 are separate. As our next step, let’s control and monitor the state of
 the outlet (on/off) remotely.
-
-.. _here: https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html

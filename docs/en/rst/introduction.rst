@@ -51,9 +51,10 @@ with your device driver (bulb, washing machine).
 
 You will require the following to get started:
 
--  An ESP32 development kit: `ESP32-DevKit-C`_, available through your
-   closest store. You could also use any other ESP32 development board
-   if you already have one.
+-  An ESP32 development kit: ESP32-DevKit-C
+   https://www.espressif.com/en/products/hardware/esp32-devkitc/overview
+   available through your closest store. You could also use any other
+   ESP32 development board if you already have one.
 
 -  A Development host setup (Windows, Linux or Mac) that will be used
    for development.
@@ -84,5 +85,3 @@ steps, you can do the following:
    control
 
 #. Now that you have this functional, modify to work with your driver
-
-.. _ESP32-DevKit-C: https://www.espressif.com/en/products/hardware/esp32-devkitc/overview
