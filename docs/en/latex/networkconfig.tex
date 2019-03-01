@@ -61,7 +61,6 @@ You may refer to the \textit{4\_network\_config/} directory of esp-jumpstart for
 
 \ksnotebox{As of now, only Android users can try the application out. For iOS users, we are working on enabling an application with \textit{TestFlight} soon.}
 
-XXX add network configuration images
 
 \begin{itemize}
     \item If all goes well, your device would be connected to your Home Wi-Fi network.
@@ -77,7 +76,7 @@ Espressif provides a \textbf{Unified Provisioning} module for assisting you with
 
 \item Extensible Protocol: The protocol is completely flexible and it offers the ability for the developers to send custom configuration in the provisioning process. The data representation too is left to the application to decide.
 \item Transport Flexibility: The protocol can work on Wi-Fi (SoftAP + HTTP server) or on BLE as a transport protocol. The framework provides an ability to add support for any other transport easily as long as command-response behaviour can be supported on the transport.
-\item Security Scheme Flexibility: It’s understood that each use-case may require different security scheme to secure the data that is exchanged in the provisioning process. Some applications may work with SoftAP that’s WPA2 protected or BLE with “just-works” security. Or the applications may consider the transport to be insecure and may want application level security. The unified provisioning framework allows application to choose the security as deemed suitable.
+\item Security Scheme Flexibility: It’s understood that each use-case may require different security scheme to secure the data that is exchanged in the provisioning process. Some applications may work with SoftAP that’s WPA2 protected or BLE with "just-works" security. Or the applications may consider the transport to be insecure and may want application level security. The unified provisioning framework allows application to choose the security as deemed suitable.
 \item Compact Data Representation: The protocol uses Google Protocol Buffers as a data representation for session setup and Wi-Fi provisioning. They provide a compact data representation and ability to parse the data in multiple programming languages in native format. Please note that this data representation is not forced on application specific data and the developers may choose the representation of their choice.
 
 \end{itemize}
@@ -86,7 +85,7 @@ Espressif provides a \textbf{Unified Provisioning} module for assisting you with
 
 The following components are offered as part of the provisioning infrastructure:
 \begin{itemize}
-    \item \textbf{Unified Provisioning Specification:} A specification to \textit{securely} transfer Wi-Fi credentials to the device, independent of the transport (SoftAP, BLE). More details \href{https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html}{here}.
+    \item \textbf{Unified Provisioning Specification:} A specification to \textit{securely} transfer Wi-Fi credentials to the device, independent of the transport (SoftAP, BLE). More details can be here here: \url{https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html}.
     \item \textbf{IDF Components:} Software modules that implement this specification in the device firmware, available through ESP-IDF
     \item \textbf{Phone Libraries:} Reference implementations on iOS and Android are available that can be directly incorporated into your existing phone applications
     \item \textbf{Reference Phone Applications:} Fully functional Phone applications on Android (\url{https://github.com/espressif/esp-idf-provisioning-android}) and iOS (\url{https://github.com/espressif/esp-idf-provisioning-ios}) are available for testing during your development, or for skinning with your brand's elements.

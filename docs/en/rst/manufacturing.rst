@@ -18,14 +18,14 @@ was accessible even across device reboot events. Also remember that we
 implemented the *Reset to Factory* action in Section
 :ref:`sec_reset\_to\_factory` by erasing the contents of this NVS.
 
-We can use the similar NVS partition for storing per-device unique keys.
-But we want that this unique information should not be erased across the
-*Reset to Factory* events. This can be facilitated by creating another
-NVS partition that is primarily used for storing such unique
-factory-programmed information. Since this partition is programmed at
-the factory, we will use this NVS partition as a read-only partition,
-only referring to it to read the unique values that were configured for
-us.
+We can use the similar NVS partition for storing per-device unique
+key-value pairs at manufacturing time. But we want that this unique
+information should not be erased across the *Reset to Factory* events.
+This can be facilitated by creating another NVS partition that is
+primarily used for storing such unique factory-programmed information.
+Since this partition is programmed at the factory, we will use this NVS
+partition as a read-only partition, only referring to it to read the
+unique values that were configured for us.
 
 Thus we can reuse the same concept to store factory unique information.
 
@@ -55,16 +55,16 @@ This can be done by initialising the NVS handle as follows:
     /* Error checks removed for brevity */
     nvs_handle fctry_handle;
     nvs_flash_init_partition(MFG_PARTITION_NAME);
-    nvs_open_from_partition(MFG_PARTITION_NAME, “mfg_ns”,  
+    nvs_open_from_partition(MFG_PARTITION_NAME, "mfg_ns",
                    NVS_READWRITE, &fctry_handle);
 
 Now the NVS get operations that are performed with the *fctry\_handle*
-NVS handle will be result in reading data from this factory NVS
-partition. For example,
+NVS handle will result in reading data from this factory NVS partition.
+For example,
 
 .. code:: c
 
-    nvs_get_str(fctry_handle, “serial_no”, buf, &buflen);
+    nvs_get_str(fctry_handle, "serial_no", buf, &buflen);
 
 So, we can now disable the code that embeds any certificates in the
 firmware itself, and instead, read them from the unique factory
@@ -78,6 +78,11 @@ Generating the Factory Data
 Now we are good to go from the firmware
 perspective. But we still need to identify some mechanism for generating
 the factory data that will be written to the *fctry* partition.
+
+.. figure:: ../../_static/generate_factory_partition.png
+   :alt: Generating Factory Partition
+
+   Generating Factory Partition
 
 The utility
 *idf/nvs\_flash/nvs\_partition\_generator/nvs\_partition\_gen.py* is
