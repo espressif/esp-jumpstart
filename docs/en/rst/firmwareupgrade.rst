@@ -126,15 +126,15 @@ Now let’s check the code for actually performing the firmware upgrade.
    firmware upgrade. When the firmware upgrade process is successful (or
    fails), this API returns with the appropriate error code.
 
-Send Firmware Upgrade URL
--------------------------
+The open question is how does the device receive the upgrade URL. The
+firmware upgrade command is typically different from the remote-control
+commands discussed in the earlier section. This is because the firmware
+upgrade is generally triggered by the device manufacturer for a batch or
+group of devices as they have identified.
 
-.. code:: text
-
-        curl -d '{"state":{"desired":{"ota_url":"<to-be-updated>"}}}' \
-        --tlsv1.2 --cert device.cert \
-        --key device.key \
-        https://<aws-endpoint>:8443/things/<thing-name>/shadow | python -mjson.tool        
+You as the manufacturer can make the best choice about the appropriate
+manner for delivering the firmware upgrade notification to the device,
+and then calling the *esp\_https\_ota()* API.
 
 Progress So Far
 ---------------
