@@ -6,6 +6,8 @@ set(COMPONENT_ADD_INCLUDEDIRS "")
 
 register_component()
 
-target_add_binary_data(${COMPONENT_TARGET} "certs/aws-root-ca.pem" TEXT)
-target_add_binary_data(${COMPONENT_TARGET} "certs/github_ca_cert.pem" TEXT)
+target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/server.cert" TEXT)
+target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/github_server.cert" TEXT)
+target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/endpoint.txt" TEXT)
+
 component_compile_options("-DFW_VERSION=\"v1.1\"")

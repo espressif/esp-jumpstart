@@ -44,13 +44,16 @@ build_demo:
     - make
     - cd ../
     - cd 5_cloud
+    - touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
     - make defconfig
     - make
     - cd ../
     - cd 6_ota
+    - touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
     - make defconfig
     - make
     - cd ../
     - cd 7_mfg
+    - touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
     - make defconfig
     - make

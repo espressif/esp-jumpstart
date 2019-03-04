@@ -5,6 +5,8 @@ set(COMPONENT_ADD_INCLUDEDIRS "")
 
 register_component()
 
-target_add_binary_data(${COMPONENT_TARGET} "certs/aws-root-ca.pem" TEXT)
-target_add_binary_data(${COMPONENT_TARGET} "certs/certificate.pem.crt" TEXT)
-target_add_binary_data(${COMPONENT_TARGET} "certs/private.pem.key" TEXT)
+target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/server.cert" TEXT)
+target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/device.cert" TEXT)
+target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/device.key" TEXT)
+target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/deviceid.txt" TEXT)
+target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/endpoint.txt" TEXT)
