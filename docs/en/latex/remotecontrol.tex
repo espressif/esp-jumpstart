@@ -35,13 +35,13 @@ The question is how do you make the entire contents of these files be part of yo
 ESP-IDF provides a great mechanism for enabling this. The \textit{component.mk} file can be used to inform the build system that the contents of certain files should be embedded within firmware image. This can be enabled by adding the following line into your application's \textit{component.mk} file.
 
 \begin{minted}{cmake}
-COMPONENT_EMBED_TXTFILES := certs/server-root-ca.pem 
+COMPONENT_EMBED_TXTFILES := cloud_cfg/server.cert 
 \end{minted}
 
-In the above example, the build system will make the file \textit{certs/server-root-ca.pem} be part of the firmware. The contents of this file are in the firmware's address space and can be directly addressed as follows:
+In the above example, the build system will make the file \textit{cloud_cfg/server.cert} be part of the firmware. The contents of this file are in the firmware's address space and can be directly addressed as follows:
 \begin{minted}{c}
-extern const uint8_t certificate_pem_crt_start[] asm("_binary_server_root_ca_start");
-extern const uint8_t certificate_pem_crt_end[] asm("_binary_server_root_ca_end");
+extern const uint8_t certificate_pem_crt_start[] asm("_binary_server_cert_start");
+extern const uint8_t certificate_pem_crt_end[] asm("_binary_server_cert_end");
 \end{minted}
 
 The file can then be accessed using these start and end pointers.
@@ -67,8 +67,9 @@ By now, you should have the following items ready to get your device to start ta
 \begin{enumerate}
     \item A Device Private Key (a file)
     \item A Device Certificate (a file)
-    \item A Thing Name (a string)
+    \item A Device ID (a file)
     \item A CA Certificate for the AWS-IoT service's domain name (a file)
+    \item An endpoint URL (a file)      
 \end{enumerate}
 
 Before getting into the details of the code, let us actually try to use the remote control for our device.
@@ -77,13 +78,14 @@ You may refer to the \textit{5\_cloud/} directory of esp-jumpstart for trying th
 To setup your AWS IoT example, 
 \begin{enumerate}
     \item Go to the \textit{5\_cloud/} application
-    \item Copy the files (overwriting any previous files) as mentioned below:
+    \item Copy the files (overwriting any previous files) as mentioned below: (Note that some email clients will rename the files and add a .txt extension to them. Please make sure that the downloaded files have names as expected below.)
     \begin{itemize}
-        \item The AWS CA Certificate to \textbf{5\_cloud/certs/aws-root-ca-.pem}
-        \item The Device Private Key to \textbf{5\_cloud/certs/private.pem.key}
-        \item The Device Certificate to \textbf{5\_cloud/certs/certificate.pem.crt}
+        \item The AWS CA Certificate to \textbf{5\_cloud/cloud_cfg/server.cert}
+        \item The Device Private Key to \textbf{5\_cloud/cloud_cfg/device.key}
+        \item The Device Certificate to \textbf{5\_cloud/cloud_cfg/device.cert}
+        \item The Device ID to \textbf{5\_cloud/cloud_cfg/deviceid.txt}
+        \item The Endpoint to \textbf{5\_cloud/cloud_cfg/endpoint.txt}
     \end{itemize}
-    \item Modify the thing name \textbf{EXAMPLE\_THING\_NAME} in the file \textit{5\_cloud/main/cloud.c}
     \item Build, flash and load the firmware on your device
 \end{enumerate}
 
@@ -95,24 +97,24 @@ For remote control, AWS IoT exposes a RESTful web API for all devices that conne
 Using curl, we can then read the current state of the device by executing the following command on your Linux/Windows/Mac console:
 \begin{minted}{console}
 
-curl --tlsv1.2 --cert /work/certificate.pem.crt \
-       --key /work/private.pem.key   \
-       https://aln7lww42a72l-ats.iot.us-east-2.amazonaws.com:8443/things/my_device_name/shadow \ 
+curl --tlsv1.2 --cert /work/device.cert \
+       --key /work/device.key   \
+       https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents of deviceid.txt file>/shadow \ 
        | python -mjson.tool
 
 \end{minted}
 
-AWS expects that access to a device state is only granted to entities that are authorised to do so. Hence in the command above, we use the \textit{certificate.pem.crt} and \textit{private.pem.key}, which are the same files that we have configured to be in the firmware. This ensures that we can access the device's state.
+AWS expects that access to a device state is only granted to entities that are authorised to do so. Hence in the command above, we use the \textit{device.cert} and \textit{device.key}, which are the same files that we have configured to be in the firmware. This ensures that we can access the device's state.
 
-The command above reads the state from the device \textbf{my\_device\_name}. Don't forget to replace this with the name of your thing.
+In the above command, please copy paste the contents of the deviceid.txt file between \textit{things} and \textit{shadow}.
 
 The device state can be modified as:
 \begin{minted}{console}
 
 curl -d '{"state":{"desired":{"output":false}}}' \ 
-     --tlsv1.2 --cert /work/certificate.pem.crt \ 
-     --key /work/private.pem.key \ 
-     https://aln7lww42a72l-ats.iot.us-east-2.amazonaws.com:8443/things/my_device_name/shadow \ 
+     --tlsv1.2 --cert /work/device.cert \ 
+     --key /work/device.key \ 
+     https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents of deviceid.txt file>/shadow \
      | python -mjson.tool
 \end{minted}
 
@@ -123,15 +125,15 @@ You can observe the corresponding change of state on the device whenever you cha
 So that's how remote control is achieved. Let's now quickly talk about the code.
 
 \subsection{The Code}\index{The Code}
-All the code for the cloud communication has been consolidated in the \textit{cloud.c} file. The structure of this file is similar to what the standard AWS IoT SDK expects.
+All the code for the cloud communication has been consolidated in the \textit{cloud_aws.c} file. The structure of this file is similar to what the standard AWS IoT SDK expects.
 
 The file uses our output driver's APIs, \textit{app\_driver\_get\_state()} and \textit{app\_driver\_toggle\_state()}, to fetch and modify the device state respectively.
 
 The AWS IoT requires 3 files to be embedded within your firmware:
 \begin{itemize}
-        \item The AWS CA Certificate  \textbf{5\_cloud/certs/aws-root-ca-.pem}
-        \item The Device Private Key  \textbf{5\_cloud/certs/private.pem.key}
-        \item The Device Certificate  \textbf{5\_cloud/certs/certificate.pem.crt}
+        \item The AWS CA Certificate  \textbf{5\_cloud/cloud_cfg/server.cert}
+        \item The Device Private Key  \textbf{5\_cloud/cloud_cfg/device.key}
+        \item The Device Certificate  \textbf{5\_cloud/cloud_cfg/device.cert}
 \end{itemize}
 The application uses the mechanism as shown in Section \ref{sec:embedding_files} for embedding this within the firmware.
 

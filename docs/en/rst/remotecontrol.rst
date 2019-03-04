@@ -74,17 +74,17 @@ adding the following line into your application’s *component.mk* file.
 
 .. code:: cmake
 
-    COMPONENT_EMBED_TXTFILES := certs/server-root-ca.pem 
+    COMPONENT_EMBED_TXTFILES := cloud_cfg/server.cert 
 
 In the above example, the build system will make the file
-*certs/server-root-ca.pem* be part of the firmware. The contents of this
+*cloud\_cfg/server.cert* be part of the firmware. The contents of this
 file are in the firmware’s address space and can be directly addressed
 as follows:
 
 .. code:: c
 
-    extern const uint8_t certificate_pem_crt_start[] asm("_binary_server_root_ca_start");
-    extern const uint8_t certificate_pem_crt_end[] asm("_binary_server_root_ca_end");
+    extern const uint8_t certificate_pem_crt_start[] asm("_binary_server_cert_start");
+    extern const uint8_t certificate_pem_crt_end[] asm("_binary_server_cert_end");
 
 The file can then be accessed using these start and end pointers.
 
@@ -132,9 +132,11 @@ start talking with AWS IoT:
 
 #. A Device Certificate (a file)
 
-#. A Thing Name (a string)
+#. A Device ID (a file)
 
 #. A CA Certificate for the AWS-IoT service’s domain name (a file)
+
+#. An endpoint URL (a file)
 
 Before getting into the details of the code, let us actually try to use
 the remote control for our device. You may refer to the *5\_cloud/*
@@ -145,15 +147,19 @@ To setup your AWS IoT example,
 #. Go to the *5\_cloud/* application
 
 #. Copy the files (overwriting any previous files) as mentioned below:
+   (Note that some email clients will rename the files and add a .txt
+   extension to them. Please make sure that the downloaded files have
+   names as expected below.)
 
-   -  The AWS CA Certificate to **5\_cloud/certs/aws-root-ca-.pem**
+   -  The AWS CA Certificate to **5\_cloud/cloud\_cfg/server.cert**
 
-   -  The Device Private Key to **5\_cloud/certs/private.pem.key**
+   -  The Device Private Key to **5\_cloud/cloud\_cfg/device.key**
 
-   -  The Device Certificate to **5\_cloud/certs/certificate.pem.crt**
+   -  The Device Certificate to **5\_cloud/cloud\_cfg/device.cert**
 
-#. Modify the thing name **EXAMPLE\_THING\_NAME** in the file
-   *5\_cloud/main/cloud.c*
+   -  The Device ID to **5\_cloud/cloud\_cfg/deviceid.txt**
+
+   -  The Endpoint to **5\_cloud/cloud\_cfg/endpoint.txt**
 
 #. Build, flash and load the firmware on your device
 
@@ -175,19 +181,19 @@ executing the following command on your Linux/Windows/Mac console:
 .. code:: console
 
 
-    curl --tlsv1.2 --cert /work/certificate.pem.crt \
-           --key /work/private.pem.key   \
-           https://aln7lww42a72l-ats.iot.us-east-2.amazonaws.com:8443/things/my_device_name/shadow \ 
+    curl --tlsv1.2 --cert /work/device.cert \
+           --key /work/device.key   \
+           https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents of deviceid.txt file>/shadow \ 
            | python -mjson.tool
 
 AWS expects that access to a device state is only granted to entities
 that are authorised to do so. Hence in the command above, we use the
-*certificate.pem.crt* and *private.pem.key*, which are the same files
-that we have configured to be in the firmware. This ensures that we can
-access the device’s state.
+*device.cert* and *device.key*, which are the same files that we have
+configured to be in the firmware. This ensures that we can access the
+device’s state.
 
-The command above reads the state from the device **my\_device\_name**.
-Don’t forget to replace this with the name of your thing.
+In the above command, please copy paste the contents of the deviceid.txt
+file between *things* and *shadow*.
 
 The device state can be modified as:
 
@@ -195,9 +201,9 @@ The device state can be modified as:
 
 
     curl -d '{"state":{"desired":{"output":false}}}' \ 
-         --tlsv1.2 --cert /work/certificate.pem.crt \ 
-         --key /work/private.pem.key \ 
-         https://aln7lww42a72l-ats.iot.us-east-2.amazonaws.com:8443/things/my_device_name/shadow \ 
+         --tlsv1.2 --cert /work/device.cert \ 
+         --key /work/device.key \ 
+         https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents of deviceid.txt file>/shadow \
          | python -mjson.tool
 
 This cURL command will generate an HTTP POST request, and sends the JSON
@@ -214,7 +220,7 @@ The Code
 ~~~~~~~~
 
 All the code for the cloud communication has been consolidated in the
-*cloud.c* file. The structure of this file is similar to what the
+*cloud\_aws.c* file. The structure of this file is similar to what the
 standard AWS IoT SDK expects.
 
 The file uses our output driver’s APIs, *app\_driver\_get\_state()* and
@@ -223,11 +229,11 @@ respectively.
 
 The AWS IoT requires 3 files to be embedded within your firmware:
 
--  The AWS CA Certificate **5\_cloud/certs/aws-root-ca-.pem**
+-  The AWS CA Certificate **5\_cloud/cloud\_cfg/server.cert**
 
--  The Device Private Key **5\_cloud/certs/private.pem.key**
+-  The Device Private Key **5\_cloud/cloud\_cfg/device.key**
 
--  The Device Certificate **5\_cloud/certs/certificate.pem.crt**
+-  The Device Certificate **5\_cloud/cloud\_cfg/device.cert**
 
 The application uses the mechanism as shown in Section
 :ref:`sec_embedding\_files` for embedding this within the firmware.

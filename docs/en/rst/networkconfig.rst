@@ -104,7 +104,6 @@ directory of esp-jumpstart for trying this out.
 -  Launch the application and follow the wizard as shown in the images
    below.
 
-
 -  If all goes well, your device would be connected to your Home Wi-Fi
    network.
 
