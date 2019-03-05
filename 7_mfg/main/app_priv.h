@@ -6,6 +6,8 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 #pragma once
+#include "stdbool.h"
+#include "esp_err.h"
 
 void app_driver_init(void);
 int app_driver_toggle_state(void);
