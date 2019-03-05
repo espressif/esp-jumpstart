@@ -36,8 +36,8 @@ The code for enabling this is shown as below:
 
     #include <iot_button.h>
 
-    button_handle_t btn_handle=iot_button_create(BUTTON_GPIO,
-                                    BUTTON_ACTIVE_LEVEL);
+    button_handle_t btn_handle=iot_button_create(JUMPSTART_BOARD_BUTTON_GPIO,
+                                    JUMPSTART_BOARD_BUTTON_ACTIVE_LEVEL);
     iot_button_set_evt_cb(btn_handle, BUTTON_CB_RELEASE,
                                 push_btn_cb, "RELEASE");
 
@@ -95,7 +95,7 @@ configuration as shown below:
     gpio_config_t io_conf;
     io_conf.mode = GPIO_MODE_OUTPUT;
     io_conf.pull_up_en = 1;
-    io_conf.pin_bit_mask = ((uint64_t)1 << OUTPUT_GPIO);
+    io_conf.pin_bit_mask = ((uint64_t)1 << JUMPSTART_BOARD_OUTPUT_GPIO);
 
     /* Configure the GPIO */
     gpio_config(&io_conf);
@@ -107,7 +107,7 @@ as a GPIO output with internal pull-up enabled.
 .. code:: c
 
     /* Assert GPIO */
-    gpio_set_level(OUTPUT_GPIO, target);
+    gpio_set_level(JUMPSTART_BOARD_OUTPUT_GPIO, target);
 
 Finally, the state of the GPIO is set using the *gpio\_set\_level()*
 call.
