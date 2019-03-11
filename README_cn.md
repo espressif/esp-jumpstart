@@ -9,7 +9,7 @@ ESP-Jumpstart
 
 有时，固件开发并非易事，特别是用于量产的固件。开发人员不但需要面临各种决策上的问题并权衡多种选择，而且还需开发手机 app，并接入各家云服务商。现在，我们盛情推出 ESP-Jumpstart 示例项目，内含产品开发的完整步骤、最佳做法，并融合其他同僚的经验之谈，助您快速启动基于 ESP32 的产品开发！
 
-ESP-Jumpstart 项目专注于在 ESP32上构建“产品”，展示了基于 ESP32 的完整产品开发流程。该项目分步介绍了一款真实产品的完整开发流程，即一款功能齐全、随时可推广的“智能电源插座”。其中，每个步骤均为用户/开发人员的工作流提供指南/参考，且使用了乐鑫专为 ESP32 打造的软件开发框架 ESP-IDF。
+ESP-Jumpstart 项目专注于在 ESP32 上构建“产品”，展示了基于 ESP32 的完整产品开发流程。该项目分步介绍了一款真实产品的完整开发流程，即一款功能齐全、随时可推广的“智能电源插座”。其中，每个步骤均为用户/开发人员的工作流提供指南/参考，且使用了乐鑫专为 ESP32 打造的软件开发框架 ESP-IDF。
 
 ![Smart Power Outlet]
 
@@ -28,10 +28,10 @@ ESP-Jumpstart 项目专注于在 ESP32上构建“产品”，展示了基于 ES
 
 准备工作：
 
-- ESP32 开发板：ESP32-DevKit-C（DigiKey、Mouser、亚马逊有售)
-- 按照 [ESP-IDF 快速入门指南](https://docs.espressif.com/projects/esp-idf/zh_CN/latest/get-started)，设置开发环境
+- ESP32 开发板：ESP32-DevKit-C（DigiKey、Mouser、亚马逊、淘宝、微店有售)
+- 按照 [ESP-IDF 快速入门指南](https://docs.espressif.com/projects/esp-idf/zh_CN/latest/get-started)，搭建开发环境
 
-注意，请使用 ESP-IDF v3.2 版本。您可以直接直接使用以下命令，获得 ESP-IDF v3.2。
+注意，请使用 ESP-IDF v3.2 版本。您可以直接使用以下命令，获得 ESP-IDF v3.2。
 ```
 git clone https://github.com/espressif/esp-jumpstart.git
 git clone --recursive https://github.com/espressif/esp-idf.git
