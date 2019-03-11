@@ -100,7 +100,7 @@ void app_main()
         /* Do we want a proof-of-possession: for now this has to be a string with length  > 0 */
         const char *pop = "abcd1234";
         /* What is the service key */
-        const char *service_key = "DEADCAFE";
+        const char *service_key = "";
         conn_mgr_prov_start_provisioning(prov_type, security, pop, service_name, service_key);
     } else {
         ESP_LOGI(TAG, "Already provisioned, starting station");
