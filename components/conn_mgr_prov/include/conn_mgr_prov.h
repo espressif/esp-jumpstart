@@ -62,9 +62,16 @@ esp_err_t conn_mgr_prov_is_provisioned(bool *provisioned);
 /**
  * @brief   Start provisioning
  *
- * @param[in] mode      Provisioning mode to use (BLE/SoftAP)
- * @param[in] security  Security mode
- * @param[in] pop       Pointer to proof of possesion (NULL if not present)
+ * @param[in] mode          Provisioning mode to use (BLE/SoftAP)
+ * @param[in] security      Security mode
+ * @param[in] pop           Pointer to proof of possession (NULL if not needed)
+ * @param[in] service_name  Unique name of the service. This translates to:
+ *                              - WiFi SSID when provisioning mode is softAP
+ *                              - Device name when provisioning mode is BLE
+ * @param[in] service_key   Key required by client to access the service (NULL if not needed).
+ *                          This translates to:
+ *                              - WiFi password when provisioning mode is softAP
+ *                              - ignored when provisioning mode is BLE
  *
  * @return
  *  - ESP_OK      : Provisioning started successfully

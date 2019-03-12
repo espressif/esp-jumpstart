@@ -69,4 +69,4 @@ esp_err_t wifi_prov_configure_sta(wifi_config_t *wifi_cfg);
  *  - ESP_OK      : Provisioning will be stopped
  *  - ESP_FAIL    : Failed to stop provisioning
  */
-esp_err_t wifi_prov_done();
+esp_err_t wifi_prov_done(void);
