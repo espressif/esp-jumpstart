@@ -100,7 +100,7 @@ void conn_mgr_prov_endpoint_configure(const char *ep_name);
  * @param[in] handler   Pointer to the endpoint handler
  * @param[in] user_ctx  User data
  */
-void conn_mgr_prov_endpoint_add(const char *ep_name, int (*handler)(uint32_t session_id, const uint8_t *inbuf, ssize_t inlen, uint8_t **outbuf, ssize_t *outlen, void *priv_data), void *user_ctx);
+void conn_mgr_prov_endpoint_add(const char *ep_name, protocomm_req_handler_t handler, void *user_ctx);
 
 /**
  * @brief   Remove an endpoint
@@ -114,10 +114,10 @@ void conn_mgr_prov_endpoint_add(const char *ep_name, int (*handler)(uint32_t ses
 void conn_mgr_prov_endpoint_remove(const char *ep_name);
 
 /**
- * @brief   Release the memory used during provisioning
+ * @brief   Release the memory used by provisioning service
  *
- * This API must be called by the application when it gets the callback
- * with event CM_PROV_END. It must be called incase of provisioning is done by BLE.
- * If the device is already provisioned, this API must be called if BLE is being used.
+ * If device is already found to be provisioned (ie. provisioning service
+ * doesn't need to be started) then call this API to free the memory used
+ * by both BT and BLE stack in case conn_mgr_prov_mode_ble mode is selected.
  */
 void conn_mgr_prov_mem_release();
