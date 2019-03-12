@@ -56,7 +56,7 @@ workflow, the user has to
 
 From a user experience perspective, the first step of this requires the
 user to change their phone’s Wi-Fi network. This may be confusing to
-some users. Changing the Wi-Fi network programatically through the phone
+some users. Changing the Wi-Fi network programmatically through the phone
 application may not always be possible (iOS and some variants of Android
 don’t allow phone apps to do this). But the advantage of this method
 though is that it is very reliable (SoftAP being just Wi-Fi, is an
