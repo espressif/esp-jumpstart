@@ -6,9 +6,12 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 #pragma once
+#include "stdbool.h"
+#include "esp_err.h"
 
 void app_driver_init(void);
 int app_driver_toggle_state(void);
 bool app_driver_get_state(void);
 int cloud_start(void);
 esp_err_t do_firmware_upgrade(const char *url);
+

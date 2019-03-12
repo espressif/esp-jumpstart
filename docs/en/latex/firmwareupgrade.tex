@@ -82,9 +82,14 @@ Now let's check the code for actually performing the firmware upgrade.
     \item The API \textit{esp\_https\_ota()} is then executed which initiates the firmware upgrade. When the firmware upgrade process is successful (or fails), this API returns with the appropriate error code.
 \end{itemize}
 
-The open question is how does the device receive the upgrade URL. The firmware upgrade command is typically different from the remote-control commands discussed in the earlier section. This is because the firmware upgrade is generally triggered by the device manufacturer for a batch or group of devices as they have identified.
+\section{Send Firmware Upgrade URL}\index{Send Firmware Upgrade URL}
 
-You as the manufacturer can make the best choice about the appropriate manner for delivering the firmware upgrade notification to the device, and then calling the \textit{esp\_https\_ota()} API.
+\begin{minted}
+    curl -d '{"state":{"desired":{"ota_url":"<to-be-updated>"}}}' \
+            --tlsv1.2 --cert device.cert \
+            --key device.key \
+            https://<aws-endpoint>:8443/things/<thing-name>/shadow | python -mjson.tool
+\end{minted}
 
 \section{Progress So Far}\index{Journey So Far}
 With this firmware we enable a key feature of any smart connected device, the over-the-air firmware upgrade. 
