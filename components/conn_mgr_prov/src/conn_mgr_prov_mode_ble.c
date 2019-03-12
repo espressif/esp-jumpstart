@@ -24,7 +24,13 @@ extern conn_mgr_prov_t conn_mgr_prov_mode_ble;
 
 static esp_err_t prov_start(protocomm_t *pc, void *config)
 {
-    if (config == NULL) {
+    if (!pc) {
+        ESP_LOGE(TAG, "Protocomm handle cannot be null");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    if (!config) {
+        ESP_LOGE(TAG, "Cannot start with null configuration");
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -41,7 +47,8 @@ static esp_err_t prov_start(protocomm_t *pc, void *config)
 static void *new_config(void)
 {
     conn_mgr_prov_mode_ble_config_t *ble_config = calloc(1, sizeof(conn_mgr_prov_mode_ble_config_t));
-    if (ble_config == NULL) {
+    if (!ble_config) {
+        ESP_LOGE(TAG, "Error allocating memory for new configuration");
         return NULL;
     }
 
@@ -58,6 +65,11 @@ static void *new_config(void)
 
 static void delete_config(void *config)
 {
+    if (!config) {
+        ESP_LOGE(TAG, "Cannot delete null configuration");
+        return;
+    }
+
     conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
     for (unsigned int i = 0; i < ble_config->nu_lookup_count; i++) {
         free((void *)ble_config->nu_lookup[i].name);
@@ -68,6 +80,16 @@ static void delete_config(void *config)
 
 static esp_err_t set_config_service(void *config, const char *service_name, const char *service_key)
 {
+    if (!config) {
+        ESP_LOGE(TAG, "Cannot set null configuration");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    if (!service_name) {
+        ESP_LOGE(TAG, "Service name cannot be NULL");
+        return ESP_ERR_INVALID_ARG;
+    }
+
     conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
     strlcpy(ble_config->device_name,  service_name, sizeof(ble_config->device_name));
     return ESP_OK;
@@ -75,16 +97,28 @@ static esp_err_t set_config_service(void *config, const char *service_name, cons
 
 static esp_err_t set_config_endpoint(void *config, const char *endpoint_name, uint16_t uuid)
 {
+    if (!config) {
+        ESP_LOGE(TAG, "Cannot set null configuration");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    if (!endpoint_name) {
+        ESP_LOGE(TAG, "EP name cannot be null");
+        return ESP_ERR_INVALID_ARG;
+    }
+
     conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
 
     char *copy_ep_name = strdup(endpoint_name);
     if (!copy_ep_name) {
+        ESP_LOGE(TAG, "Error allocating memory for EP name");
         return ESP_ERR_NO_MEM;
     }
 
     protocomm_ble_name_uuid_t *lookup_table = (
                 realloc(ble_config->nu_lookup, (ble_config->nu_lookup_count + 1) * sizeof(protocomm_ble_name_uuid_t)));
     if (!lookup_table) {
+        ESP_LOGE(TAG, "Error allocating memory for EP-UUID lookup table");
         return ESP_ERR_NO_MEM;
     }
 

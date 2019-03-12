@@ -72,7 +72,13 @@ static esp_err_t start_wifi_ap(const char *ssid, const char *pass)
 
 static esp_err_t prov_start(protocomm_t *pc, void *config)
 {
-    if (config == NULL) {
+    if (!pc) {
+        ESP_LOGE(TAG, "Protocomm handle cannot be null");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    if (!config) {
+        ESP_LOGE(TAG, "Cannot start with null configuration");
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -101,7 +107,8 @@ static esp_err_t prov_start(protocomm_t *pc, void *config)
 static void *new_config(void)
 {
     conn_mgr_prov_mode_softap_config_t *softap_config = calloc(1, sizeof(conn_mgr_prov_mode_softap_config_t));
-    if (softap_config == NULL) {
+    if (!softap_config) {
+        ESP_LOGE(TAG, "Error allocating memory for new configuration");
         return NULL;
     }
     protocomm_httpd_config_t default_config = {
@@ -115,15 +122,32 @@ static void *new_config(void)
 
 static void delete_config(void *config)
 {
+    if (!config) {
+        ESP_LOGE(TAG, "Cannot delete null configuration");
+        return;
+    }
+
     conn_mgr_prov_mode_softap_config_t *softap_config = (conn_mgr_prov_mode_softap_config_t *) config;
     free(softap_config);
 }
 
 static esp_err_t set_config_service(void *config, const char *service_name, const char *service_key)
 {
+    if (!config) {
+        ESP_LOGE(TAG, "Cannot set null configuration");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    if (!service_name) {
+        ESP_LOGE(TAG, "Service name cannot be NULL");
+        return ESP_ERR_INVALID_ARG;
+    }
+
     conn_mgr_prov_mode_softap_config_t *softap_config = (conn_mgr_prov_mode_softap_config_t *) config;
-    strlcpy(softap_config->ssid,     service_name, sizeof(softap_config->ssid));
-    strlcpy(softap_config->password, service_key,  sizeof(softap_config->password));
+    strlcpy(softap_config->ssid, service_name, sizeof(softap_config->ssid));
+    if (service_key) {
+        strlcpy(softap_config->password, service_key,  sizeof(softap_config->password));
+    }
     return ESP_OK;
 }
 

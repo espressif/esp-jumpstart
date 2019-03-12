@@ -64,16 +64,42 @@ static esp_err_t conn_mgr_prov_start_service(const char *service_name, const cha
     g_prov->prov_mode_config = g_prov->prov.new_config();
     if (g_prov->prov_mode_config == NULL) {
         ESP_LOGE(TAG, "Failed to allocate provisioning mode config");
+        protocomm_delete(g_prov->pc);
         return ESP_ERR_NO_MEM;
     }
 
-    g_prov->prov.set_config_service(g_prov->prov_mode_config, service_name, service_key);
+    esp_err_t ret = g_prov->prov.set_config_service(g_prov->prov_mode_config, service_name, service_key);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to configure service");
+        protocomm_delete(g_prov->pc);
+        return ret;
+    }
 
-    g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, "prov-session", 0xFF51);
-    g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, "prov-config",  0xFF52);
+    ret = g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, "prov-session", 0xFF51);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to configure security endpoint");
+        protocomm_delete(g_prov->pc);
+        return ret;
+    }
+
+    ret = g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, "prov-config",  0xFF52);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to configure wifi configuration endpoint");
+        protocomm_delete(g_prov->pc);
+        return ret;
+    }
+
     g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, "proto-ver",    0xFF53);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to configure version endpoint");
+        protocomm_delete(g_prov->pc);
+        return ret;
+    }
+
+    /* Maintain count of used up UUIDs */
     endpoint_uuid_used = 0xFF53;
 
+    /* Execute user registered callback handler */
     if (g_prov->prov.event_cb) {
         g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_ENDPOINT_CONFIG);
         g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_PROV_START);
@@ -82,35 +108,57 @@ static esp_err_t conn_mgr_prov_start_service(const char *service_name, const cha
     /* For releasing BT memory, as we need only BLE */
     conn_mgr_prov_extra_mem_release();
 
-    if (g_prov->prov.prov_start(g_prov->pc, g_prov->prov_mode_config) != ESP_OK) {
+    /* Start provisioning */
+    ret = g_prov->prov.prov_start(g_prov->pc, g_prov->prov_mode_config);
+    if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start provisioning");
-        return ESP_FAIL;
+        protocomm_delete(g_prov->pc);
+        return ret;
     }
 
     /* Set protocomm version verification endpoint for protocol */
-    protocomm_set_version(g_prov->pc, "proto-ver", "V0.1");
+    ret = protocomm_set_version(g_prov->pc, "proto-ver", "V0.1");
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set version endpoint");
+        g_prov->prov.prov_stop(g_prov->pc);
+        protocomm_delete(g_prov->pc);
+        return ret;
+    }
 
     /* Set protocomm security type for endpoint */
     if (g_prov->security == 0) {
-        protocomm_set_security(g_prov->pc, "prov-session", &protocomm_security0, NULL);
+        ret = protocomm_set_security(g_prov->pc, "prov-session", &protocomm_security0, NULL);
     } else if (g_prov->security == 1) {
-        protocomm_set_security(g_prov->pc, "prov-session", &protocomm_security1, &g_prov->pop);
+        ret = protocomm_set_security(g_prov->pc, "prov-session", &protocomm_security1, &g_prov->pop);
+    } else {
+        ESP_LOGE(TAG, "Unsupported protocomm security version %d", g_prov->security);
+        ret = ESP_ERR_INVALID_ARG;
+    }
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set security endpoint");
+        g_prov->prov.prov_stop(g_prov->pc);
+        protocomm_delete(g_prov->pc);
+        return ret;
     }
 
     /* Add endpoint for provisioning to set wifi station config */
-    if (protocomm_add_endpoint(g_prov->pc, "prov-config",
-                               wifi_prov_config_data_handler,
-                               (void *) &wifi_prov_handlers) != ESP_OK) {
+    ret = protocomm_add_endpoint(g_prov->pc, "prov-config",
+                                 wifi_prov_config_data_handler, (void *) &wifi_prov_handlers);
+    if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to set provisioning endpoint");
         g_prov->prov.prov_stop(g_prov->pc);
-        return ESP_FAIL;
+        protocomm_delete(g_prov->pc);
+        return ret;
     }
 
+    /* Execute user registered callback handler */
     if (g_prov->prov.event_cb) {
         g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_ENDPOINT_ADD);
     }
 
-    ESP_LOGI(TAG, "Provisioning started with : \n\tservice name = %s \n\tservice key = %s", service_name, service_key);
+    ESP_LOGI(TAG, "Provisioning started with : \n\tservice name = %s \n\tservice key = %s",
+             service_name ? service_name : "<NULL>",
+             service_key ? service_key : "<NULL>");
     return ESP_OK;
 }
 
@@ -215,8 +263,8 @@ static void _stop_prov_cb(void *arg)
     xTaskCreate(&stop_prov_task, "stop_prov", 2048, NULL, tskIDLE_PRIORITY, NULL);
 }
 
-/* If the provisioning was done before the timeout occured */
-esp_err_t wifi_prov_done()
+/* Call this if provisioning is completed before the timeout occurs */
+esp_err_t wifi_prov_done(void)
 {
     esp_timer_stop(g_prov->timer);
     xTaskCreate(&stop_prov_task, "stop_prov", 2048, NULL, tskIDLE_PRIORITY, NULL);
@@ -401,15 +449,17 @@ esp_err_t conn_mgr_prov_start_provisioning(conn_mgr_prov_t prov, int security, c
         return ESP_ERR_NO_MEM;
     }
 
-    /* Initialise app data */
-    g_prov->pop.len = strlen(pop);
-    g_prov->pop.data = malloc(g_prov->pop.len);
-    if (!g_prov->pop.data) {
-        ESP_LOGI(TAG, "Unable to allocate PoP data");
-        free(g_prov);
-        return ESP_ERR_NO_MEM;
+    /* Initialize app data */
+    if (pop) {
+        g_prov->pop.len = strlen(pop);
+        g_prov->pop.data = malloc(g_prov->pop.len);
+        if (!g_prov->pop.data) {
+            ESP_LOGI(TAG, "Unable to allocate PoP data");
+            free(g_prov);
+            return ESP_ERR_NO_MEM;
+        }
+        memcpy((void *)g_prov->pop.data, pop, g_prov->pop.len);
     }
-    memcpy((void *)g_prov->pop.data, pop, g_prov->pop.len);
     g_prov->security = security;
     g_prov->prov = prov;
 
