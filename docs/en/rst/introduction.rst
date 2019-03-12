@@ -68,7 +68,7 @@ steps, you can do the following:
 
 #. Directly use the final application in ESP-Jumpstart
 
-#. If you don’t have a cloud accout, configure your AWS IoT Cloud
+#. If you don’t have a cloud account, configure your AWS IoT Cloud
    configuration as mentioned in Section :ref:`sec_aws\_cloud`
 
 #. Create the manufacturing configuration file for your device’s unique
