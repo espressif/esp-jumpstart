@@ -95,8 +95,7 @@ void app_main()
         ESP_LOGE(TAG, "Error getting device provisioning state");
         return;
     }
-
-    if (! provisioned) {
+    if (!provisioned) {
         ESP_LOGI(TAG, "Starting provisioning");
         /* What is the Device Service Name that we want */
         char service_name[12];
@@ -114,7 +113,8 @@ void app_main()
         ESP_LOGI(TAG, "Already provisioned, starting station");
         /* Start the station */
         wifi_init_sta();
-        //nvs_flash_erase();
+
+        conn_mgr_prov_mem_release();
     }
 
     /* Wait for Wi-Fi connection */
