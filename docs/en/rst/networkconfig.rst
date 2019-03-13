@@ -34,7 +34,7 @@ Wi-Fi credentials. ESP-Jumpstart supports the following mechanisms:
 
 Each of these have their own pros and cons. There is no single way of
 doing this, some developers may pick one way, and some the other,
-depending upon what you value more.
+depending upon what they value more.
 
 SoftAP
 ~~~~~~
@@ -56,10 +56,10 @@ workflow, the user has to
 
 From a user experience perspective, the first step of this requires the
 user to change their phone’s Wi-Fi network. This may be confusing to
-some users. Changing the Wi-Fi network programmatically through the phone
-application may not always be possible (iOS and some variants of Android
-don’t allow phone apps to do this). But the advantage of this method
-though is that it is very reliable (SoftAP being just Wi-Fi, is an
+some users. Changing the Wi-Fi network programmatically through the
+phone application may not always be possible (iOS and some variants of
+Android don’t allow phone apps to do this). But the advantage of this
+method is that it is very reliable (SoftAP being just Wi-Fi, is an
 established mechanism), and doesn’t require a lot of additional code
 (footprint) in the device firmware.
 
@@ -261,6 +261,13 @@ unified provisioning interface:
 Let us now look at the parameters, or the configuration options of this
 API:
 
+#. **Security:** The unified provisioning module currently supports two
+   security methods for transferring the credentials: *security0* and
+   *security1*. Security0 uses no security for exchanging the
+   credentials. This is primarily used for development purposes.
+   Security1 uses elliptic curve, *curve25519* crypto for key exchange,
+   followed by *AES-CTR* encryption for data exchanged on the channel.
+
 #. **Transport:** The developer can choose which transport mechanism
    will be used for the network configuration. The options available are
    SoftAP or BLE.
@@ -273,15 +280,6 @@ API:
       transitions, and other services, that are required for the network
       configuration to take place
 
-#. **Service Name:** When the user launches the network configuration
-   app, the user will be presented with a list of unconfigured devices,
-   in her vicinity. The service name is this name that will be visible
-   to the user. You may choose a name that identifies your device
-   conveniently (abc-thermostat). It is common practice to have some
-   element in the service name that is unique or random. This helps in
-   scenarios when there could be multiple unconfigured devices that the
-   user is configuring at the same time.
-
 #. **Proof of Possession:** When a user brings in a new smart device,
    the device launches its provisioning network (BLE, SoftAP) for
    configuration. How do you make sure that only the owner of the device
@@ -289,12 +287,24 @@ API:
    option is for that. Please read the following subsection for more
    details about this option.
 
-#. **Security:** The unified provisioning module currently supports two
-   security methods for transferring the credentials: *security0* and
-   *security1*. Security0 uses no security for exchanging the
-   credentials. This is primarily used for development purposes.
-   Security1 uses elliptic curve, *curve25519* crypto for key exchange,
-   followed by *AES-CTR* encryption for data exchanged on the channel.
+#. **Service Name:** When the user launches the network configuration
+   app, the user will be presented with a list of unconfigured devices,
+   in her vicinity. The service name is this name that will be visible
+   to the user. You may choose a name that identifies your device
+   conveniently (abc-thermostat). It is common practice to have some
+   element in the service name that is unique or random. This helps in
+   scenarios when there could be multiple unconfigured devices that the
+   user is configuring at the same time. When the provisioning mode is
+   SoftAP, the service name appears as the SSID of the temporary Wi-Fi
+   access point. When the provisioning mode is BLE, this appears as the
+   BLE device name.
+
+#. **Service Key:** Service Key is an optional parameter, which, if used
+   serves as a password to protect the transport from being accessed by
+   unauthorized users. This is useful when the mode of transport is
+   SoftAP and you want the temporary Wi-Fi access point to be password
+   protected. When the provisioning mode is BLE, this option is ignored
+   altogether as BLE uses “just-works” pairing method.
 
 Proof of Possession
 ^^^^^^^^^^^^^^^^^^^
