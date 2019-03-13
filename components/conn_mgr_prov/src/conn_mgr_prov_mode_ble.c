@@ -10,7 +10,7 @@
 #include <string.h>
 #include <esp_log.h>
 #include <esp_err.h>
-#include <esp_wifi.h>
+#include <esp_bt.h>
 
 #include <protocomm.h>
 #include <protocomm_ble.h>
@@ -129,6 +129,44 @@ static esp_err_t set_config_endpoint(void *config, const char *endpoint_name, ui
     return ESP_OK;
 }
 
+/* Default event handler for releasing BT/BLE memory during/after provisioning */
+static esp_err_t ble_prov_event_handler(void *user_data, conn_mgr_cb_event_t event)
+{
+    esp_err_t ret = ESP_OK;
+    /* The following makes sense only if we are using conn_mgr_prov_mode_ble
+     * and user application doesn't require BT/BLE to function once provisioning
+     * is complete. If BT or BLE or both are required by the user application then
+     * either of the following cases can be commented out depending on the requirements */
+    switch (event) {
+        case CM_PROV_START:
+            /* If provisioning is about to start, release memory used by the unused BT stack.
+             * This is to be commented out if user application requires BT to function */
+            ret = esp_bt_mem_release(ESP_BT_MODE_CLASSIC_BT);
+            if (ret != ESP_OK) {
+                ESP_LOGE(TAG, "Failed to release BT memory");
+            } else {
+                ESP_LOGI(TAG, "Released BT memory");
+            }
+            break;
+        case CM_PROV_END:
+            /* If provisioning is about to end, release memory used by the BLE stack
+             * which will no longer be needed once provisioning is complete.
+             * This is to be commented out if user application requires BLE to function,
+             * or modified to ESP_BT_MODE_BLE (along with commenting out classic BT mem release above)
+             * if BT is required instead */
+            ret = esp_bt_mem_release(ESP_BT_MODE_BTDM);
+            if (ret != ESP_OK) {
+                ESP_LOGE(TAG, "Failed to release BTDM memory");
+            } else {
+                ESP_LOGI(TAG, "Released BTDM memory");
+            }
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
 conn_mgr_prov_t conn_mgr_prov_mode_ble = {
     .prov_start          = prov_start,
     .prov_stop           = protocomm_ble_stop,
@@ -137,6 +175,6 @@ conn_mgr_prov_t conn_mgr_prov_mode_ble = {
     .set_config_service  = set_config_service,
     .set_config_endpoint = set_config_endpoint,
     .wifi_mode           = WIFI_MODE_STA,
-    .event_cb            = NULL,
+    .event_cb            = ble_prov_event_handler,
     .cb_user_data        = NULL,
 };

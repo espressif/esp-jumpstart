@@ -24,8 +24,11 @@ static const char *TAG = "app_main";
 
 static esp_err_t event_handler(void *ctx, system_event_t *event)
 {
+    /* Pass event information to conn_mgr_prov so that it can
+     * maintain it's internal state depending upon the system event */
     conn_mgr_prov_event_handler(ctx, event);
 
+    /* Global event handler */
     switch (event->event_id) {
     case SYSTEM_EVENT_STA_START:
         esp_wifi_connect();
@@ -84,28 +87,66 @@ void app_main()
     ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL) );
 
     bool provisioned = false;
+    /* Let's find out if the device is provisioned */
     if (conn_mgr_prov_is_provisioned(&provisioned) != ESP_OK) {
         ESP_LOGE(TAG, "Error getting device provisioning state");
         return;
     }
-    if (! provisioned) {
+
+    /* If device is not yet provisioned start provisioning service */
+    if (!provisioned) {
         ESP_LOGI(TAG, "Starting provisioning");
-        /* What is the Device Service Name that we want */
+
+        /* What is the Device Service Name that we want
+         * This translates to :
+         *     - WiFi SSID when mode is SoftAP
+         *     - device name when mode is BLE
+         */
         char service_name[12];
         get_device_service_name(service_name, sizeof(service_name));
-        /* What is the Provisioning Type that we want: conn_mgr_prov_mode_softap or conn_mgr_prov_mode_ble */
+
+        /* What is the Provisioning Type that we want:
+         *      - conn_mgr_prov_mode_softap : provisioning performed over softAP transport
+         *      - conn_mgr_prov_mode_ble : provisioning performed over BLE transport (requires CONFIG_BT_ENABLED)
+         */
         conn_mgr_prov_t prov_type = conn_mgr_prov_mode_ble;
-        /* What is the security level that we want: 0 or 1 */
+
+        /* What is the security level that we want (0 or 1):
+         *      - Security 0 is simply plain text communication.
+         *      - Security 1 is secure communication which consists of secure handshake
+         *          using X25519 key exchange and proof of possession (pop) and AES-CTR
+         *          for encryption/decryption of messages.
+         */
         int security = 1;
-        /* Do we want a proof-of-possession: for now this has to be a string with length  > 0 */
+
+        /* Do we want a proof-of-possession (ignored if Security 0 is selected):
+         *      - this should be a string with length > 0
+         *      - NULL if not used
+         */
         const char *pop = "abcd1234";
-        /* What is the service key */
+
+        /* What is the service key (could be NULL)
+         * This translates to :
+         *     - WiFi password when mode is SoftAP
+         *     - simply ignored when mode is BLE
+         */
         const char *service_key = NULL;
+
+        /* Start provisioning service */
         conn_mgr_prov_start_provisioning(prov_type, security, pop, service_name, service_key);
     } else {
         ESP_LOGI(TAG, "Already provisioned, starting station");
-        /* Start the station */
+
+        /* Start wifi station */
         wifi_init_sta();
-        //nvs_flash_erase();
+
+        /* If provisioning is not to be started, release memory
+         * used by the BT/BLE stack which is no longer needed.
+         * The following makes sense only if we are using conn_mgr_prov_mode_ble
+         * and user application doesn't require BT/BLE to function.
+         * If user application does require BT or BLE (or both) then
+         * the following will have to be modified (or removed) to
+         * selectively free the unused stack */
+        conn_mgr_prov_mem_release();
     }
 }

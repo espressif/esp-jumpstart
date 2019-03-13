@@ -26,8 +26,6 @@
 
 static const char *TAG = "conn_mgr_prov";
 
-static void conn_mgr_prov_extra_mem_release();
-
 /* Handlers for wifi_config provisioning endpoint */
 extern wifi_prov_config_handlers_t wifi_prov_handlers;
 
@@ -105,9 +103,6 @@ static esp_err_t conn_mgr_prov_start_service(const char *service_name, const cha
         g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_PROV_START);
     }
 
-    /* For releasing BT memory, as we need only BLE */
-    conn_mgr_prov_extra_mem_release();
-
     /* Start provisioning */
     ret = g_prov->prov.prov_start(g_prov->pc, g_prov->prov_mode_config);
     if (ret != ESP_OK) {
@@ -168,7 +163,7 @@ void conn_mgr_prov_endpoint_configure(const char *ep_name)
     g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, ep_name, endpoint_uuid_used);
 }
 
-void conn_mgr_prov_endpoint_add(const char *ep_name, int (*handler)(uint32_t session_id, const uint8_t *inbuf, ssize_t inlen, uint8_t **outbuf, ssize_t *outlen, void *priv_data), void *user_ctx)
+void conn_mgr_prov_endpoint_add(const char *ep_name, protocomm_req_handler_t handler, void *user_ctx)
 {
     if (protocomm_add_endpoint(g_prov->pc, ep_name,
                                handler,
@@ -186,28 +181,13 @@ void conn_mgr_prov_endpoint_remove(const char *ep_name)
 void conn_mgr_prov_mem_release()
 {
 #if CONFIG_BT_ENABLED
-    /* Release memory used by BT stack */
+    /* Release memory used by BTDM stack */
     esp_err_t err = esp_bt_mem_release(ESP_BT_MODE_BTDM);
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "bt_mem_release failed %d", err);
+        ESP_LOGE(TAG, "Failed to release BTDM stack memory %d", err);
         return;
     }
-    ESP_LOGI(TAG, "BT stack memory released");
-#endif
-
-}
-
-/* Release BT memory, as we need only BLE */
-static void conn_mgr_prov_extra_mem_release()
-{
-#if CONFIG_BT_ENABLED
-    /* Release BT memory, as we need only BLE */
-    esp_err_t err = esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "bt_controller_mem_release failed %d", err);
-        return;
-    }
-    ESP_LOGI(TAG, "BT controller memory released");
+    ESP_LOGI(TAG, "BTDM stack memory released");
 #endif
 }
 
