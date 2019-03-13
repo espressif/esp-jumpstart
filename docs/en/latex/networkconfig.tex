@@ -27,7 +27,7 @@ There can be multiple channels through which your device can receive the Wi-Fi c
     \item Bluetooth Low Energy (BLE)
 \end{itemize}
 
-Each of these have their own pros and cons. There is no single way of doing this, some developers may pick one way, and some the other, depending upon what you value more.
+Each of these have their own pros and cons. There is no single way of doing this, some developers may pick one way, and some the other, depending upon what they value more.
 
 \subsection{SoftAP}\index{SoftAP}
 In the SoftAP mechanism your outlet will launch its own temporary Wi-Fi Access Point. The user can then connect their smart-phones to this temporary Wi-Fi network. And then use this connection to transfer the Home Wi-Fi's credentials to the outlet. Many connected devices in the market today use this kind of mechanism. In this network configuration workflow, the user has to 
@@ -37,7 +37,7 @@ In the SoftAP mechanism your outlet will launch its own temporary Wi-Fi Access P
     \item enter her home Wi-Fi credentials that will be then transferred to the outlet over the SoftAP connection
 \end{itemize}
 From a user experience perspective, the first step of this requires the user to change their phone's Wi-Fi network. This may be confusing to some users. Changing the Wi-Fi network programmatically through the phone application may not always be possible (iOS and some variants of Android don't allow phone apps to do this).
-But the advantage of this method though is that it is very reliable (SoftAP being just Wi-Fi, is an established mechanism), and doesn't require a lot of additional code (footprint) in the device firmware.
+But the advantage of this method is that it is very reliable (SoftAP being just Wi-Fi, is an established mechanism), and doesn't require a lot of additional code (footprint) in the device firmware.
 
 \subsection{BLE}\index{BLE}
 
@@ -148,14 +148,15 @@ In the code above, we have used the following call for invoking the unified prov
 
 Let us now look at the parameters, or the configuration options of this API:
 \begin{enumerate}
+    \item \textbf{Security:} The unified provisioning module currently supports two security methods for transferring the credentials: \textit{security0} and \textit{security1}. Security0 uses no security for exchanging the credentials. This is primarily used for development purposes. Security1 uses elliptic curve, \textit{curve25519} crypto for key exchange, followed by \textit{AES-CTR} encryption for data exchanged on the channel.
     \item \textbf{Transport:} The developer can choose which transport mechanism will be used for the network configuration. The options available are SoftAP or BLE. 
     \begin{itemize}
         \item The module is written in such a manner that, based on the developer's selection, only the relevant software libraries will get pulled into the final executable image. 
         \item The unified provisioning module will also manage the state transitions, and other services, that are required for the network configuration to take place
     \end{itemize}
-    \item \textbf{Service Name:} When the user launches the network configuration app, the user will be presented with a list of unconfigured devices, in her vicinity. The service name is this name that will be visible to the user. You may choose a name that identifies your device conveniently (abc-thermostat). It is common practice to have some element in the service name that is unique or random. This helps in scenarios when there could be multiple unconfigured devices that the user is configuring at the same time.
     \item \textbf{Proof of Possession:} When a user brings in a new smart device, the device launches its provisioning network (BLE, SoftAP) for configuration.  How do you make sure that only the owner of the device configures the device and not their neighbours? This configurable option is for that. Please read the following subsection for more details about this option.
-    \item \textbf{Security:} The unified provisioning module currently supports two security methods for transferring the credentials: \textit{security0} and \textit{security1}. Security0 uses no security for exchanging the credentials. This is primarily used for development purposes. Security1 uses elliptic curve, \textit{curve25519} crypto for key exchange, followed by \textit{AES-CTR} encryption for data exchanged on the channel.
+    \item \textbf{Service Name:} When the user launches the network configuration app, the user will be presented with a list of unconfigured devices, in her vicinity. The service name is this name that will be visible to the user. You may choose a name that identifies your device conveniently (abc-thermostat). It is common practice to have some element in the service name that is unique or random. This helps in scenarios when there could be multiple unconfigured devices that the user is configuring at the same time. When the provisioning mode is SoftAP, the service name appears as the SSID of the temporary Wi-Fi access point. When the provisioning mode is BLE, this appears as the BLE device name.
+    \item \textbf{Service Key:} Service Key is an optional parameter, which, if used serves as a password to protect the transport from being accessed by unauthorized users. This is useful when the mode of transport is SoftAP and you want the temporary Wi-Fi access point to be password protected. When the provisioning mode is BLE, this option is ignored altogether as BLE uses "just-works" pairing method.
 \end{enumerate}
 
 \subsubsection{Proof of Possession}\index{Proof of Possession}
