@@ -169,7 +169,7 @@ The code is fairly simple. A few takeaways:
 
 -  FreeRTOS is the operating system powering both the cores. FreeRTOS
    (https://www.freertos.org) is a tiny kernel that provides mechanisms
-   for task creation, inter-task communication (sempahores, message
+   for task creation, inter-task communication (semaphores, message
    queues, mutexes), interrupts and timers. In our example above, we use
    the vTaskDelay function for putting the thread to sleep for 5
    seconds. Details of the FreeRTOS APIs are available at:

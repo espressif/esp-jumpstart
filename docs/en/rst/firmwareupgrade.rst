@@ -126,15 +126,32 @@ Now let’s check the code for actually performing the firmware upgrade.
    firmware upgrade. When the firmware upgrade process is successful (or
    fails), this API returns with the appropriate error code.
 
+-  By default, we have added the GitHub’s CA certificate for the
+   firmware upgrade URL. This makes it easy for you to host your upgrade
+   image on GitHub and try out the upgrades. Ideally, you will install
+   the CA certificate of the appropriate server from where you will
+   download the upgrade image.
+
+Send Firmware Upgrade URL
+-------------------------
+
 The open question is how does the device receive the upgrade URL. The
 firmware upgrade command is typically different from the remote-control
 commands discussed in the earlier section. This is because the firmware
 upgrade is generally triggered by the device manufacturer for a batch or
-group of devices as they have identified.
+group of devices based on certain criteria.
 
-You as the manufacturer can make the best choice about the appropriate
-manner for delivering the firmware upgrade notification to the device,
-and then calling the *esp\_https\_ota()* API.
+For the sake of simplicity, we will use the same remote control
+infrastructure to pass the firmware upgrade URL command to the device.
+But note that in your production scenario, you will send this firmware
+upgrade URL using some other mechanism controlled through the cloud.
+
+::
+
+        curl -d '{"state":{"desired":{"ota_url":"<to-be-updated>"}}}' \
+                --tlsv1.2 --cert device.cert \
+                --key device.key \
+                https://<aws-endpoint>:8443/things/<thing-name>/shadow | python -mjson.tool
 
 Progress So Far
 ---------------
