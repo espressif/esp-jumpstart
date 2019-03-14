@@ -78,7 +78,7 @@ adding the following line into your application’s *component.mk* file.
 
 In the above example, the build system will make the file
 *cloud\_cfg/server.cert* be part of the firmware. The contents of this
-file are in the firmware’s address space and can be directly addressed
+file are in the firmware’s address space and can be directly accessed
 as follows:
 
 .. code:: c
@@ -151,21 +151,21 @@ To setup your AWS IoT example,
    extension to them. Please make sure that the downloaded files have
    names as expected below.)
 
-   -  The AWS CA Certificate to **5\_cloud/cloud\_cfg/server.cert**
+   -  The AWS CA Certificate to **5\_cloud/main/cloud\_cfg/server.cert**
 
-   -  The Device Private Key to **5\_cloud/cloud\_cfg/device.key**
+   -  The Device Private Key to **5\_cloud/main/cloud\_cfg/device.key**
 
-   -  The Device Certificate to **5\_cloud/cloud\_cfg/device.cert**
+   -  The Device Certificate to **5\_cloud/main/cloud\_cfg/device.cert**
 
-   -  The Device ID to **5\_cloud/cloud\_cfg/deviceid.txt**
+   -  The Device ID to **5\_cloud/main/cloud\_cfg/deviceid.txt**
 
-   -  The Endpoint to **5\_cloud/cloud\_cfg/endpoint.txt**
+   -  The Endpoint to **5\_cloud/main/cloud\_cfg/endpoint.txt**
 
 #. Build, flash and load the firmware on your device
 
-The will now connect to the AWS IoT cloud platform and will notify the
-cloud of any state changes. The firmware will also fetch any updates to
-the state from the cloud and apply them locally.
+The device will now connect to the AWS IoT cloud platform and will
+notify the cloud of any state changes. The firmware will also fetch any
+updates to the state from the cloud and apply them locally.
 
 Remote Control
 ~~~~~~~~~~~~~~
@@ -229,11 +229,11 @@ respectively.
 
 The AWS IoT requires 3 files to be embedded within your firmware:
 
--  The AWS CA Certificate **5\_cloud/cloud\_cfg/server.cert**
+-  The AWS CA Certificate **5\_cloud/main/cloud\_cfg/server.cert**
 
--  The Device Private Key **5\_cloud/cloud\_cfg/device.key**
+-  The Device Private Key **5\_cloud/main/cloud\_cfg/device.key**
 
--  The Device Certificate **5\_cloud/cloud\_cfg/device.cert**
+-  The Device Certificate **5\_cloud/main/cloud\_cfg/device.cert**
 
 The application uses the mechanism as shown in Section
 :ref:`sec_embedding\_files` for embedding this within the firmware.
