@@ -28,10 +28,11 @@ ESP-Jumpstart 项目专注于在 ESP32 上构建“产品”，展示了基于 E
 
 准备工作：
 
-- ESP32 开发板：ESP32-DevKit-C（DigiKey、Mouser、亚马逊、淘宝、微店有售)
+- ESP32 开发板：ESP32-DevKitC（[DigiKey](https://www.digikey.com.cn/products/zh?WT.z_header=search_go&keywords=esp32-devkitc)、[Mouser](https://www.mouser.cn/_/?Keyword=ESP32-DevKitC)、[亚马逊](https://www.amazon.cn/s/ref=nb_sb_noss?__mk_zh_CN=亚马逊网站&url=search-alias%3Daps&field-keywords=esp32-devkitc)、[淘宝](https://item.taobao.com/item.htm?spm=a1z38n.10677092.0.0.11891debEFopAX&id=542143157571)、[微店](https://detail.youzan.com/show/goods?alias=2fwmug42fe41s&activity_alias=undefined) 均有售。您也可以使用其他 ESP32 开发板。)
 - 按照 [ESP-IDF 快速入门指南](https://docs.espressif.com/projects/esp-idf/zh_CN/latest/get-started)，搭建开发环境
 
 注意，请使用 ESP-IDF v3.2 版本。您可以直接使用以下命令，获得 ESP-IDF v3.2。
+
 ```
 git clone https://github.com/espressif/esp-jumpstart.git
 git clone --recursive https://github.com/espressif/esp-idf.git
@@ -41,6 +42,7 @@ cd ../esp-jumpstart
 export IDF_PATH=</path/to/esp-idf/>
 make
 ```
+
 
 
 [Smart Power Outlet]: docs/_static/jumpstart-outlet.png
