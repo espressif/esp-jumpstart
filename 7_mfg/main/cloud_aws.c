@@ -17,19 +17,20 @@
 
 #include "aws_custom_utils.h"
 
-#include "aws_iot_config.h"
 #include "aws_iot_log.h"
+#include "aws_iot_config.h"
 #include "aws_iot_version.h"
 #include "aws_iot_mqtt_client_interface.h"
 #include "aws_iot_shadow_interface.h"
 
 #include "app_priv.h"
 
-#define MAX_LENGTH_OF_UPDATE_JSON_BUFFER 200
 static const char *TAG = "cloud";
-#define MAX_LENGTH_URL 256
+
+#define MAX_LENGTH_OF_UPDATE_JSON_BUFFER 300
 #define MAX_DESIRED_PARAM 2
 #define MAX_REPORTED_PARAM 3
+#define MAX_LENGTH_URL 256
 
 /*
  * The Json Document in the cloud will be:
@@ -47,15 +48,14 @@ static const char *TAG = "cloud";
  */
 
 /* Per-Device Unique components:
+ * - Device ID
  * - Certificate
  * - Private Key
- * - Device ID
  */
 static char *serial_no, *cert, *priv_key;
 #define MFG_PARTITION_NAME "fctry"
 
 /* Root CA Certificate */
-
 extern const uint8_t aws_root_ca_pem_start[] asm("_binary_server_cert_start");
 extern const uint8_t aws_root_ca_pem_end[] asm("_binary_server_cert_end");
 
@@ -65,7 +65,7 @@ extern const uint8_t endpoint_txt_end[] asm("_binary_endpoint_txt_end");
 
 static int reported_state = false;
 static bool output_changed_locally = false;
-static void state_change_callback(const char *pJsonString, uint32_t JsonStringDataLen, jsonStruct_t *pContext)
+static void output_state_change_callback(const char *pJsonString, uint32_t JsonStringDataLen, jsonStruct_t *pContext)
 {
     if (pContext != NULL) {
         ESP_LOGI(TAG, "Delta - Output state changed to %d", *(bool *) (pContext->pData));
@@ -149,7 +149,7 @@ static IoT_Error_t shadow_update(AWS_IoT_Client *mqttClient,
     rc = aws_iot_finalize_json_document(JsonDocumentBuffer, sizeOfJsonDocumentBuffer);
     if (rc != SUCCESS) {
         return rc;
-    }   
+    }
     ESP_LOGI(TAG, "Update Shadow: %s", JsonDocumentBuffer);
     rc = aws_iot_shadow_update(mqttClient, serial_no, JsonDocumentBuffer,
                                update_status_callback, NULL, 4, true);           
@@ -196,17 +196,18 @@ void aws_iot_task(void *param)
     rc = aws_iot_shadow_set_autoreconnect_status(&mqttClient, true);
     if (SUCCESS != rc) {
         ESP_LOGE(TAG, "Unable to set Auto Reconnect to true - %d", rc);
-        goto error;
+        goto aws_error;
     }
-
+    output_state = app_driver_get_state();
     jsonStruct_t output_handler;
-    output_handler.cb = state_change_callback;
+    output_handler.cb = output_state_change_callback;
     output_handler.pData = &output_state;
     output_handler.pKey = "output";
     output_handler.type = SHADOW_JSON_BOOL;
     rc = aws_iot_shadow_register_delta(&mqttClient, &output_handler);
     if (SUCCESS != rc) {
         ESP_LOGE(TAG, "Shadow Register State Delta Error %d", rc);
+        goto aws_error;
     }
 
     jsonStruct_t ota_handler;
@@ -220,26 +221,35 @@ void aws_iot_task(void *param)
     rc = aws_iot_shadow_register_delta(&mqttClient, &ota_handler);
     if (SUCCESS != rc) {
         ESP_LOGE(TAG, "Shadow Register OTA Delta Error");
+        goto aws_error;
     }
 
     jsonStruct_t fw_handler;
     fw_handler.pData = FW_VERSION;
+    fw_handler.dataLength = sizeof(FW_VERSION);
     fw_handler.pKey = "fw_version";
     fw_handler.type = SHADOW_JSON_STRING;
-    fw_handler.dataLength = sizeof(FW_VERSION);
+
     jsonStruct_t **desired_handles = malloc(MAX_DESIRED_PARAM * sizeof(jsonStruct_t *));
     if (desired_handles == NULL) {
         ESP_LOGE(TAG, "Failed to allocate memory");
-        goto error;
+        goto aws_error;
     }
 
     jsonStruct_t **reported_handles = malloc(MAX_REPORTED_PARAM * sizeof(jsonStruct_t *));
     if (reported_handles == NULL) {
         ESP_LOGE(TAG, "Failed to allocate memory");
-        goto error;
+        free(desired_handles);
+        goto aws_error;
     }
 
-    size_t desired_count, reported_count;
+    // Report the initial values once
+    size_t desired_count = 0, reported_count = 0;
+    reported_handles[reported_count++] = &fw_handler;
+    reported_handles[reported_count++] = &output_handler;
+    rc = shadow_update(&mqttClient, reported_handles, reported_count, desired_handles,  desired_count);
+    reported_state = output_state;
+
     while (NETWORK_ATTEMPTING_RECONNECT == rc || NETWORK_RECONNECTED == rc || SUCCESS == rc) {
         rc = aws_iot_shadow_yield(&mqttClient, 200);
         if (NETWORK_ATTEMPTING_RECONNECT == rc || shadowUpdateInProgress) {
@@ -250,12 +260,6 @@ void aws_iot_task(void *param)
         }
         desired_count = 0;
         reported_count = 0;
-
-        static bool first_time = true;
-        if (first_time) {
-            first_time = false;
-            reported_handles[reported_count++] = &fw_handler;
-        }
 
         if (ota_update_done) {
             // OTA update was successful
@@ -285,7 +289,14 @@ void aws_iot_task(void *param)
     if (SUCCESS != rc) {
         ESP_LOGE(TAG, "An error occurred in the loop %d", rc);
     }
+    if (reported_handles) {
+        free(reported_handles);
+    }
+    if (desired_handles) {
+        free(desired_handles);
+    }
 
+aws_error:
     ESP_LOGI(TAG, "Disconnecting");
     rc = aws_iot_shadow_disconnect(&mqttClient);
 

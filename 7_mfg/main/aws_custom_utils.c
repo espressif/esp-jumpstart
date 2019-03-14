@@ -1,3 +1,4 @@
+#include "stdio.h"
 #include "app_priv.h"
 #include "aws_custom_utils.h"
 #include "string.h"
@@ -13,43 +14,40 @@ static inline IoT_Error_t check_snprintf_ret_val(int32_t snPrintfReturn, size_t 
 	return SUCCESS;
 }
 
-static IoT_Error_t convert_data_to_string(char *pStringBuffer, size_t maxSizoStringBuffer, JsonPrimitiveType type,
+static IoT_Error_t convert_data_to_string(char *pStringBuffer, size_t maxSizeofStringBuffer, JsonPrimitiveType type,
 									   void *pData) {
 	int32_t snPrintfReturn = 0;
 	IoT_Error_t ret_val = SUCCESS;
 
-	if(maxSizoStringBuffer == 0) {
+	if(maxSizeofStringBuffer == 0) {
 		return SHADOW_JSON_ERROR;
 	}
 
 	if(type == SHADOW_JSON_INT32) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizoStringBuffer, "%i,", *(int32_t *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%i,", *(int32_t *) (pData));
 	} else if(type == SHADOW_JSON_INT16) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizoStringBuffer, "%hi,", *(int16_t *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%hi,", *(int16_t *) (pData));
 	} else if(type == SHADOW_JSON_INT8) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizoStringBuffer, "%hhi,", *(int8_t *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%hhi,", *(int8_t *) (pData));
 	} else if(type == SHADOW_JSON_UINT32) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizoStringBuffer, "%u,", *(uint32_t *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%u,", *(uint32_t *) (pData));
 	} else if(type == SHADOW_JSON_UINT16) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizoStringBuffer, "%hu,", *(uint16_t *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%hu,", *(uint16_t *) (pData));
 	} else if(type == SHADOW_JSON_UINT8) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizoStringBuffer, "%hhu,", *(uint8_t *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%hhu,", *(uint8_t *) (pData));
 	} else if(type == SHADOW_JSON_DOUBLE) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizoStringBuffer, "%f,", *(double *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%f,", *(double *) (pData));
 	} else if(type == SHADOW_JSON_FLOAT) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizoStringBuffer, "%f,", *(float *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%f,", *(float *) (pData));
 	} else if(type == SHADOW_JSON_BOOL) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizoStringBuffer, "%s,", *(bool *) (pData) ? "true" : "false");
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%s,", *(bool *) (pData) ? "true" : "false");
 	} else if(type == SHADOW_JSON_STRING) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizoStringBuffer, "\"%s\",", (char *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "\"%s\",", (char *) (pData));
 	} else if(type == SHADOW_JSON_OBJECT) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizoStringBuffer, "%s,", (char *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%s,", (char *) (pData));
 	}
 
-	ret_val = check_snprintf_ret_val(snPrintfReturn, maxSizoStringBuffer);
-	if (ret_val != SUCCESS) {
-		return ret_val;
-	}
+	ret_val = check_snprintf_ret_val(snPrintfReturn, maxSizeofStringBuffer);
 
 	return ret_val;
 }
