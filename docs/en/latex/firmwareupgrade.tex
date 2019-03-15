@@ -88,7 +88,7 @@ The open question is how does the device receive the upgrade URL. The firmware u
 
 For the sake of simplicity, we will use the same remote control infrastructure to pass the firmware upgrade URL command to the device. But note that in your production scenario, you will send this firmware upgrade URL using some other mechanism controlled through the cloud.
 
-For quickly trying out firmware upgrades, we have a sample firmware image (of the 1_hello_world application) uploaded on GitHub. We can try to upgrade to this firmware image as follows:
+For quickly trying out firmware upgrades, we have a sample firmware image (of the 1\_hello\_world application) uploaded on GitHub. We can try to upgrade to this firmware image as follows:
 
 \begin{verbatim}
     curl -d '{"state":{"desired":{"ota_url":"https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/hello-world.bin"}}}' \
