@@ -146,12 +146,19 @@ infrastructure to pass the firmware upgrade URL command to the device.
 But note that in your production scenario, you will send this firmware
 upgrade URL using some other mechanism controlled through the cloud.
 
+For quickly trying out firmware upgrades, we have a sample firmware
+image (of the 1\_hello\_world application) uploaded on GitHub. We can
+try to upgrade to this firmware image as follows:
+
 ::
 
-        curl -d '{"state":{"desired":{"ota_url":"<to-be-updated>"}}}' \
-                --tlsv1.2 --cert device.cert \
-                --key device.key \
-                https://<aws-endpoint>:8443/things/<thing-name>/shadow | python -mjson.tool
+        curl -d '{"state":{"desired":{"ota_url":"https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/hello-world.bin"}}}' \
+                --tlsv1.2 --cert cloud_cfg/device.cert \
+                --key cloud_cfg/device.key \
+                https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow | python -mjson.tool
+
+After the firmware upgrade is successful, the device will now execute
+the Hello World firmware.
 
 Progress So Far
 ---------------

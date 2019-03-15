@@ -78,8 +78,8 @@ adding the following line into your application’s *component.mk* file.
 
 In the above example, the build system will make the file
 *cloud\_cfg/server.cert* be part of the firmware. The contents of this
-file are in the firmware’s address space and can be directly accessed
-as follows:
+file are in the firmware’s address space and can be directly accessed as
+follows:
 
 .. code:: c
 
@@ -181,9 +181,9 @@ executing the following command on your Linux/Windows/Mac console:
 .. code:: console
 
 
-    curl --tlsv1.2 --cert /work/device.cert \
-           --key /work/device.key   \
-           https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents of deviceid.txt file>/shadow \ 
+    curl --tlsv1.2 --cert cloud_cfg/device.cert \
+           --key cloud_cfg/device.key   \
+           https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow \ 
            | python -mjson.tool
 
 AWS expects that access to a device state is only granted to entities
@@ -201,9 +201,9 @@ The device state can be modified as:
 
 
     curl -d '{"state":{"desired":{"output":false}}}' \ 
-         --tlsv1.2 --cert /work/device.cert \ 
-         --key /work/device.key \ 
-         https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents of deviceid.txt file>/shadow \
+         --tlsv1.2 --cert cloud_cfg/device.cert \ 
+         --key cloud_cfg/device.key \ 
+         https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow \
          | python -mjson.tool
 
 This cURL command will generate an HTTP POST request, and sends the JSON

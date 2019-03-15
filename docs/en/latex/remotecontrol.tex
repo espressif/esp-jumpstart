@@ -97,9 +97,9 @@ For remote control, AWS IoT exposes a RESTful web API for all devices that conne
 Using curl, we can then read the current state of the device by executing the following command on your Linux/Windows/Mac console:
 \begin{minted}{console}
 
-curl --tlsv1.2 --cert /work/device.cert \
-       --key /work/device.key   \
-       https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents of deviceid.txt file>/shadow \ 
+curl --tlsv1.2 --cert cloud_cfg/device.cert \
+       --key cloud_cfg/device.key   \
+       https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow \ 
        | python -mjson.tool
 
 \end{minted}
@@ -112,9 +112,9 @@ The device state can be modified as:
 \begin{minted}{console}
 
 curl -d '{"state":{"desired":{"output":false}}}' \ 
-     --tlsv1.2 --cert /work/device.cert \ 
-     --key /work/device.key \ 
-     https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents of deviceid.txt file>/shadow \
+     --tlsv1.2 --cert cloud_cfg/device.cert \ 
+     --key cloud_cfg/device.key \ 
+     https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow \
      | python -mjson.tool
 \end{minted}
 
