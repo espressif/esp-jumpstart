@@ -11,6 +11,7 @@
 #include <freertos/task.h>
 #include <iot_button.h>
 #include <nvs_flash.h>
+#include "esp_system.h"
 
 #include "app_priv.h"
 #include JUMPSTART_BOARD

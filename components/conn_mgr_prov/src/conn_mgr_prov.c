@@ -12,7 +12,10 @@
 #include <esp_err.h>
 #include <esp_wifi.h>
 #include <esp_bt.h>
+#include "esp_timer.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include <protocomm.h>
 #include <protocomm_security0.h>
 #include <protocomm_security1.h>
