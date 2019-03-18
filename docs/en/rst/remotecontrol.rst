@@ -186,14 +186,17 @@ executing the following command on your Linux/Windows/Mac console:
            https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow \ 
            | python -mjson.tool
 
-AWS expects that access to a device state is only granted to entities
-that are authorised to do so. Hence in the command above, we use the
-*device.cert* and *device.key*, which are the same files that we have
-configured to be in the firmware. This ensures that we can access the
-device’s state.
-
 In the above command, please copy paste the contents of the deviceid.txt
 file between *things* and *shadow*.
+
+**Note:** AWS expects that access to a device state is only granted to
+entities that are authorised to do so. Hence in the command above, we
+use the *device.cert* and *device.key*, which are the same files that we
+have configured to be in the firmware. This ensures that we are
+authorised to access the device’s state. In the production scenario, you
+must create separate authentication keys in the cloud for clients like
+this curl instance or phone applications, to access/modify the device
+state.
 
 The device state can be modified as:
 

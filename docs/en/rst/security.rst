@@ -50,7 +50,7 @@ obtain the trusted CA certificates by using the following command:
 
 .. code:: bash
 
-    $ openssl s_client -showcerts -connect https://www.example.com < /dev/null
+    $ openssl s_client -showcerts -connect www.example.com:443 < /dev/null
 
 This command prints out a list of certificates. The last certificate
 from this list can be embedded in your device’s firmware. Please refer

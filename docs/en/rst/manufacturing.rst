@@ -115,6 +115,9 @@ this NVS partition to flash:
 
     $ /path/to/idf/components/esptool_py/esptool/esptool.py -port /dev/cu.SLAB_USBtoUART write_flash 0x340000 device-164589345735.bin
 
+You may have to replace the */dev/cu.SLAB_USBtoUART* with the correct
+device name that appears on your host setup.
+
 Now if you boot up your firmware, it will work exactly as the firmware
 in the previous Chapter. But in this case, the firmware image itself is
 independent of the unique settings per device.
