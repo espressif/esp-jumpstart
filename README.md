@@ -29,7 +29,7 @@ Building your production firmware, is a matter of replacing the power-outlet’s
 You will require the following to get started:
 
 -   An ESP32 development kit: ESP32-DevKitC (Available on [DigiKey](https://www.digikey.com/?_ga=2.24343738.1493252097.1552534720-1988497184.1552534720), [Mouser](https://www.mouser.com/_/?Keyword=ESP32-DevKitC), [Amazon](https://www.amazon.com/s?k=esp32-devkitc&crid=34ZPSBVQ3ZVZK&sprefix=esp32-devt%2Caps%2C738&ref=nb_sb_ss_i_1_9). You could also use any other ESP32 development boards if you already have one.)
--   A Development setup (<https://docs.espressif.com/projects/esp-idf/en/latest/get-started/>)
+-   Follow the step-by-step guide at: <https://docs.espressif.com/projects/esp-jumpstart/en/latest/index.html>
 
 Please ensure to use ESP-IDF v3.2 from either the tagged release or the following command,
 ```
