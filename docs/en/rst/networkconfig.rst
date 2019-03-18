@@ -99,7 +99,7 @@ directory of esp-jumpstart for trying this out.
 -  Install the companion phone application for network configuration
    from this location:
    https://github.com/espressif/esp-idf-provisioning-android/releases.
-   Please install the latest app with **sec1-ble** as part of its name.
+   Please install the latest app with **ble-sec1** as part of its name.
 
 -  Launch the application and follow the wizard as shown in the images
    below.

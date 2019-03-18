@@ -49,7 +49,7 @@ Now we are good to go from the firmware perspective. But we still need to identi
     \label{fig:gen_fac_part}
 \end{figure}
 
-The utility \textit{idf/nvs\_flash/nvs\_partition\_generator/nvs\_partition\_gen.py} is used to generate an NVS image on the development host. This image can then be written to the flash into the location of the \textit{fctry} partition.
+The utility \textit{components/nvs\_flash/nvs\_partition\_generator/nvs\_partition\_gen.py} is used to generate an NVS image on the development host. This image can then be written to the flash into the location of the \textit{fctry} partition.
 
 This utility accepts a CSV file, and generates the image of an NVS partition from it. This CSV file stores the information about the key-value pairs that will be part of the generated NVS partition. At a factory, hundreds of thousands of these NVS partition images will be generated, one per device being manufactured, and then written to the respective devices uniquely.
 
