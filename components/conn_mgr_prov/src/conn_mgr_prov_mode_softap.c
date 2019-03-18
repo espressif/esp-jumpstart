@@ -12,6 +12,9 @@
 #include <esp_err.h>
 #include <esp_wifi.h>
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 #include <protocomm.h>
 #include <protocomm_httpd.h>
 

@@ -39,7 +39,6 @@ cd esp-idf
 git checkout -b release/v3.2 origin/release/v3.2
 cd ../esp-jumpstart
 export IDF_PATH=</path/to/esp-idf/>
-make
 ```
 
 
