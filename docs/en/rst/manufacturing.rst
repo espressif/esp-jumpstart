@@ -85,7 +85,7 @@ the factory data that will be written to the *fctry* partition.
    Generating Factory Partition
 
 The utility
-*idf/nvs\_flash/nvs\_partition\_generator/nvs\_partition\_gen.py* is
+*components/nvs\_flash/nvs\_partition\_generator/nvs\_partition\_gen.py* is
 used to generate an NVS image on the development host. This image can
 then be written to the flash into the location of the *fctry* partition.
 
