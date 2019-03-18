@@ -31,7 +31,7 @@ If this parameter is not present, then the server validation check is skipped. I
 As can be seen from the code above, the trusted CA certificate that can validate your server must be programmed into your firmware. You can obtain the trusted CA certificates by using the following command:
 
 \begin{minted}{bash}
-$ openssl s_client -showcerts -connect https://www.example.com < /dev/null
+$ openssl s_client -showcerts -connect www.example.com:443 < /dev/null
 \end{minted}
 
 This command prints out a list of certificates. The last certificate from this list can be embedded in your device's firmware. Please refer to the Section \ref{sec:embedding_files} for embedding files in your firmware.

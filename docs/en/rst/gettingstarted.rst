@@ -116,7 +116,7 @@ with most of the steps below.
 
     $ cd esp-jumpstart/1_hello_world
     $ make -j8 menuconfig
-    $ export ESPPORT=/dev/tty.SLAB_USBTOUART
+    $ export ESPPORT=/dev/cu.SLAB_USBTOUART   # Or the correct device name for your setup
     $ export ESPBAUD=921600
     $ make -j8 flash monitor
 
