@@ -113,7 +113,7 @@ this NVS partition to flash:
 
 .. code:: bash
 
-    $ /path/to/idf/components/esptool_py/esptool/esptool.py -port /dev/cu.SLAB_USBtoUART write_flash 0x340000 device-164589345735.bin
+    $ /path/to/esp8266_rtos_sdk/components/esptool_py/esptool/esptool.py -port /dev/cu.SLAB_USBtoUART write_flash 0x340000 device-164589345735.bin
 
 You may have to replace the */dev/cu.SLAB_USBtoUART* with the correct
 device name that appears on your host setup.

@@ -64,6 +64,8 @@ extern const uint8_t aws_root_ca_pem_end[] asm("_binary_server_cert_end");
 extern const uint8_t endpoint_txt_start[] asm("_binary_endpoint_txt_start");
 extern const uint8_t endpoint_txt_end[] asm("_binary_endpoint_txt_end");
 
+static AWS_IoT_Client mqttClient;
+static char received_ota_url[MAX_LENGTH_URL];
 static int reported_state = false;
 static bool output_changed_locally = false;
 static void output_state_change_callback(const char *pJsonString, uint32_t JsonStringDataLen, jsonStruct_t *pContext)
@@ -79,13 +81,9 @@ static bool ota_update_done = false;
 static void ota_url_state_change_callback(const char *pJsonString, uint32_t JsonStringDataLen, jsonStruct_t *pContext)
 {
     if (pContext != NULL) {
-        char * ota_url = strndup((char *) pJsonString, (int) JsonStringDataLen);
-        ESP_LOGI(TAG, "Delta - Output state changed to %d and data: %s", *(bool *) (pContext->pData), ota_url);
-        if (do_firmware_upgrade(ota_url) == ESP_OK) {
-            // Firmware upgrade successful
-            ota_update_done = true;
-        }
-        free(ota_url);
+        strncpy(received_ota_url, (char *) pJsonString, (int) JsonStringDataLen);
+        ESP_LOGI(TAG, "Delta - Output state changed to %d and data: %s", *(bool *) (pContext->pData), received_ota_url);
+        ota_update_done = true;
     }
 }
 
@@ -107,6 +105,8 @@ static void update_status_callback(const char *pThingName, ShadowActions_t actio
     } else if (SHADOW_ACK_ACCEPTED == status) {
         // shadow doc OTA URL reset successful
         if (ota_update_done) {
+            aws_iot_mqtt_disconnect(&mqttClient);
+            do_firmware_upgrade(received_ota_url);            
             esp_restart();
         }
         ESP_LOGI(TAG, "Update accepted");
@@ -162,7 +162,6 @@ void aws_iot_task(void *param)
 {
     IoT_Error_t rc = FAILURE;
     bool output_state = false;
-    AWS_IoT_Client mqttClient;
 
     ShadowInitParameters_t sp = ShadowInitParametersDefault;
     sp.pHost = (char *)endpoint_txt_start;
@@ -217,7 +216,6 @@ void aws_iot_task(void *param)
     ota_handler.cb = ota_url_state_change_callback;
     ota_handler.pData = &ota_url;
     ota_handler.pKey = "ota_url";
-    ota_handler.dataLength = sizeof(ota_url);
     ota_handler.type = SHADOW_JSON_STRING;
     rc = aws_iot_shadow_register_delta(&mqttClient, &ota_handler);
     if (SUCCESS != rc) {
@@ -227,10 +225,8 @@ void aws_iot_task(void *param)
 
     jsonStruct_t fw_handler;
     fw_handler.pData = FW_VERSION;
-    fw_handler.dataLength = sizeof(FW_VERSION);
     fw_handler.pKey = "fw_version";
     fw_handler.type = SHADOW_JSON_STRING;
-
     jsonStruct_t **desired_handles = malloc(MAX_DESIRED_PARAM * sizeof(jsonStruct_t *));
     if (desired_handles == NULL) {
         ESP_LOGE(TAG, "Failed to allocate memory");

@@ -9,9 +9,9 @@ be discussed is the flash partitions.
 Flash Partitions
 ----------------
 
-The ESP-IDF framework divides the flash into
-multiple logical partitions for storing various components. The typical
-way this is done is shown in the figure.
+The ESP8266\_RTOS\_SDK framework divides the
+flash into multiple logical partitions for storing various components.
+The typical way this is done is shown in the figure.
 
 .. figure:: ../../_static/flash_partitions_intro.png
    :alt: Flash Partitions Structure
@@ -65,13 +65,14 @@ workflow are as shown in the figure.
 Updating the Flash Partitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-So how exactly do we instruct the IDF
-to create a partition table that has this OTA-Data partition and the 2
-partitions for storing the firmware?
+So how exactly do we instruct the
+ESP8266\_RTOS\_SDK to create a partition table that has this OTA-Data
+partition and the 2 partitions for storing the firmware?
 
 This can be achieved by creating a partitions file. This is a simple CSV
-(Comma Separated Values) file that instructs IDF what are the partitions
-that we want, what should be their size and how should they be placed.
+(Comma Separated Values) file that instructs ESP8266\_RTOS\_SDK what are
+the partitions that we want, what should be their size and how should
+they be placed.
 
 The partitions file that is used for this example is shown below:
 
@@ -80,22 +81,22 @@ The partitions file that is used for this example is shown below:
 
     # Name,   Type, SubType, Offset,  Size, Flags
     # Note: if you change the phy_init or app partition offset, make sure to change the offset in Kconfig.projbuild
-    nvs,      data, nvs,     ,        0x6000,
-    otadata,  data, ota,     ,        0x2000,
-    phy_init, data, phy,     ,        0x1000,
-    ota_0,    app,    ota_0,   ,      1600K,
-    ota_1,    app,    ota_1,   ,      1600K,
+    nvs,      data, nvs,     0x9000,   0x4000,
+    otadata,  data, ota,     0xd000,   0x2000,
+    phy_init, data, phy,     0xf000,   0x1000,
+    ota_0,    app,  ota_0,   0x10000,  0xf000,
+    ota_1,    app,  ota_1,   0x110000, 0xf000,
 
-The above partitions file instructs the IDF to create partitions: NVS,
-OTA-Data, OTA 0 and OTA 1, and it also specifies the sizes for each of
-these.
+The above partitions file instructs the ESP8266\_RTOS\_SDK to create
+partitions: NVS, OTA-Data, OTA 0 and OTA 1, and it also specifies the
+sizes for each of these.
 
-Once we create this partition file, we should instruct IDF to use this
-custom partitioning mechanism, over its default mechanism. This can be
-enabled by updating the SDK configuration. In the case of our
-application right now, this setting has already been activated in the
-*6\_ota/sdkconfig.defaults* file. Hence you don’t have to do any extra
-step for activating this.
+Once we create this partition file, we should instruct
+ESP8266\_RTOS\_SDK to use this custom partitioning mechanism, over its
+default mechanism. This can be enabled by updating the SDK
+configuration. In the case of our application right now, this setting
+has already been activated in the *6\_ota/sdkconfig.defaults* file.
+Hence you don’t have to do any extra step for activating this.
 
 But should you wish to use a different partitions file, or update the
 offset of the primary firmware, you should modify this setting. This can

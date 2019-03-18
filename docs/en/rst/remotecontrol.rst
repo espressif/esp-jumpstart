@@ -67,10 +67,11 @@ The question is how do you make the entire contents of these files be
 part of your firmware image, and how do you access them within your
 firmware?
 
-ESP-IDF provides a great mechanism for enabling this. The *component.mk*
-file can be used to inform the build system that the contents of certain
-files should be embedded within firmware image. This can be enabled by
-adding the following line into your application’s *component.mk* file.
+ESP8266\_RTOS\_SDK provides a great mechanism for enabling this. The
+*component.mk* file can be used to inform the build system that the
+contents of certain files should be embedded within firmware image. This
+can be enabled by adding the following line into your application’s
+*component.mk* file.
 
 .. code:: cmake
 

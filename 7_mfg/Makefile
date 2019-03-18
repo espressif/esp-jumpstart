@@ -5,7 +5,7 @@
 
 PROJECT_NAME := 7_mfg
 
-JUMPSTART_BOARD := board_esp32_devkitc.h
+JUMPSTART_BOARD := board_esp8266_devkitc.h
 EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/../components
 
 include $(IDF_PATH)/make/project.mk

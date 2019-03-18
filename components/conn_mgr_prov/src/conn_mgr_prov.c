@@ -11,7 +11,6 @@
 #include <esp_log.h>
 #include <esp_err.h>
 #include <esp_wifi.h>
-#include <esp_bt.h>
 #include "esp_timer.h"
 
 #include "freertos/FreeRTOS.h"
@@ -19,13 +18,17 @@
 #include <protocomm.h>
 #include <protocomm_security0.h>
 #include <protocomm_security1.h>
-#include <protocomm_ble.h>
 #include <protocomm_httpd.h>
 
 #include <wifi_provisioning/wifi_config.h>
 
 #include "conn_mgr_prov.h"
 #include "conn_mgr_prov_priv.h"
+
+#ifdef CONFIG_BT_ENABLED
+#include <esp_bt.h>
+#include <protocomm_ble.h>
+#endif
 
 static const char *TAG = "conn_mgr_prov";
 

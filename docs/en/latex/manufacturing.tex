@@ -63,7 +63,8 @@ $ python nvs_partition_gen.py mfg_config.csv my_mfg.bin
 
 The my\_mfg.bin file is the NVS partition data that can now be programmed into the device. You can use the following command to write this NVS partition to flash:
 \begin{minted}{bash}
-$ /path/to/idf/components/esptool_py/esptool/esptool.py -port /dev/cu.SLAB_USBtoUART write_flash 0x340000 device-164589345735.bin
+$ /path/to/esp8266_rtos_sdk/components/esptool_py/esptool/esptool.py \
+-port /dev/cu.SLAB_USBtoUART write_flash 0x340000 device-164589345735.bin
 \end{minted}
 You may have to replace the \textit{/dev/cu.SLAB\_USBtoUART} with the correct device name that appears on your host setup.
 

@@ -5,7 +5,7 @@
 \chapterimage{band1.jpg}
 \chapter{The Driver} \label{the-outlet}
 
-In this Chapter we will create a basic power outlet using the driver APIs of the ESP32. The power outlet will do the following:
+In this Chapter we will create a basic power outlet using the driver APIs of the ESP8266. The power outlet will do the following:
 \begin{itemize}
     \item Provide a button that the user can press
     \item Toggle an output GPIO on every button press
@@ -69,7 +69,7 @@ gpio_config(&io_conf);
 
 \end{minted}
 
-In this example, we have chosen GPIO 27 to act as the output. We initialize the \textit{gpio\_config\_t} structure with the settings to set this as a GPIO output with internal pull-up enabled.
+In this example, we have chosen GPIO 15 to act as the output. We initialize the \textit{gpio\_config\_t} structure with the settings to set this as a GPIO output with internal pull-up enabled.
 
 \begin{minted}{c}
 /* Assert GPIO */
@@ -80,7 +80,7 @@ gpio_set_level(JUMPSTART_BOARD_OUTPUT_GPIO, target);
 Finally, the state of the GPIO is set using the \textit{gpio\_set\_level()} call.
 
 \section{Progress so far}\index{Progress so far}
-With this, now we have a power outlet functionality enabled. Once you build and flash this firmware, every time the user presses the push-button the output from the ESP32 toggles on and off. As of now, this is not a connected outlet though. 
+With this, now we have a power outlet functionality enabled. Once you build and flash this firmware, every time the user presses the push-button the output from the ESP8266 toggles on and off. As of now, this is not a connected outlet though. 
 
 As our next step, let's add Wi-Fi connectivity to this firmware.
 \end{document}

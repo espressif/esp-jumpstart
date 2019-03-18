@@ -2,7 +2,7 @@ The Driver
 ==========
 
 In this Chapter we will create a basic power outlet using the driver
-APIs of the ESP32. The power outlet will do the following:
+APIs of the ESP8266. The power outlet will do the following:
 
 -  Provide a button that the user can press
 
@@ -117,7 +117,7 @@ Progress so far
 
 With this, now we have a power outlet functionality enabled. Once you
 build and flash this firmware, every time the user presses the
-push-button the output from the ESP32 toggles on and off. As of now,
+push-button the output from the ESP8266 toggles on and off. As of now,
 this is not a connected outlet though.
 
 As our next step, let’s add Wi-Fi connectivity to this firmware.

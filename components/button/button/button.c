@@ -38,6 +38,8 @@
 #define ERR_ASSERT(tag, param)  IOT_CHECK(tag, (param) == ESP_OK, ESP_FAIL)
 #define POINT_ASSERT(tag, param, ret)    IOT_CHECK(tag, (param) != NULL, (ret))
 
+#define portYIELD_FROM_ISR() taskYIELD()
+
 typedef enum {
     BUTTON_STATE_IDLE = 0,
     BUTTON_STATE_PUSH,

@@ -77,15 +77,15 @@ using the *esp\_wifi\_connect()* call. The same action is taken even
 when we receive a Wi-Fi disconnect event.
 
 The event *SYSTEM\_EVENT\_STA\_GOT\_IP* is received when a DHCP IP
-address is obtained by ESP32. In this particular case, we only print the
-IP address on the console.
+address is obtained by ESP8266. In this particular case, we only print
+the IP address on the console.
 
 Progress so far
 ---------------
 
 You can now modify the application to enter your Wi-Fi network’s SSID
 and the passphrase. When you compile and flash this code on your
-development board, the ESP32 should connect to your Wi-Fi network and
+development board, the ESP8266 should connect to your Wi-Fi network and
 print the IP address on the console. The outlet’s functionality of
 toggling the GPIO on pressing the push-button is, of course, also
 retained.

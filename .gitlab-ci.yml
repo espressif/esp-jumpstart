@@ -1,16 +1,15 @@
 stages:
-  - build
+  - build_esp8266
 
 variables:
   BATCH_BUILD: "1"
   V: "0"
   MAKEFLAGS: "-j5 --no-keep-going"
-  IDF_PATH: "$CI_PROJECT_DIR/esp-idf"
   IDF_CI_BUILD: "1"
 
-build_demo:
-  stage: build
-  image: $CI_DOCKER_REGISTRY/esp32-ci-env
+build_demo_esp8266:
+  stage: build_esp8266
+  image: $CI_DOCKER_REGISTRY/esp8266-ci-env-new
   tags:
     - build
   script:
@@ -22,10 +21,10 @@ build_demo:
     - chmod 600 ~/.ssh/id_rsa
     - echo -e "Host gitlab.espressif.cn\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
     - git --version
-    - git submodule update --init --recursive
-    - git clone --branch release/v3.2 --depth 1 $GITLAB_SSH_SERVER/idf/esp-idf.git
-    - cd esp-idf
-    - ./tools/ci/mirror-submodule-update.sh
+    - git clone $GITLAB_SSH_SERVER/sdk/ESP8266_RTOS_SDK.git
+    - cd ESP8266_RTOS_SDK
+    - git checkout -b release/jumpstart 93e3a3f5424e76def8afb3c41e625471490c056b
+    - export IDF_PATH=$CI_PROJECT_DIR/ESP8266_RTOS_SDK
     - cd ..
     - cd 1_hello_world
     - make defconfig
@@ -56,4 +55,4 @@ build_demo:
     - cd 7_mfg
     - touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
     - make defconfig
-    - make
+    - make 
