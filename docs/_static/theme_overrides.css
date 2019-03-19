@@ -44,3 +44,8 @@ a:hover {
 .highlight .c1 {
     color: #008080;
 }
+
+.bolditalics {
+    font-weight: bold;
+    font-style: italic;
+}
