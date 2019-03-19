@@ -75,7 +75,7 @@ void app_main()
 
     /* Initialize NVS partition */
     esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
         /* NVS partition was truncated
          * and needs to be erased */
         ret = nvs_flash_erase();
@@ -114,9 +114,8 @@ void app_main()
 
         /* What is the Provisioning Type that we want:
          *      - conn_mgr_prov_mode_softap : provisioning performed over softAP transport
-         *      - conn_mgr_prov_mode_ble : provisioning performed over BLE transport (requires CONFIG_BT_ENABLED)
          */
-        conn_mgr_prov_t prov_type = conn_mgr_prov_mode_ble;
+        conn_mgr_prov_t prov_type = conn_mgr_prov_mode_softap;
 
         /* What is the security level that we want (0 or 1):
          *      - Security 0 is simply plain text communication.
@@ -141,6 +140,10 @@ void app_main()
 
         /* Start provisioning service */
         conn_mgr_prov_start_provisioning(prov_type, security, pop, service_name, service_key);
+
+        /* Restart after successful provisioning to ensure defragmented heap for further TLS cloud connection */
+        xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_EVENT, false, true, portMAX_DELAY);
+        esp_restart();
     } else {
         ESP_LOGI(TAG, "Already provisioned, starting station");
 

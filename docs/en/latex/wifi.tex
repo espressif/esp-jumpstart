@@ -63,10 +63,10 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 
 The event handler current handles 3 events. When it receives an event \textit{SYSTEM\_EVENT\_STA\_START}, it asks the station interface to connect using the \textit{esp\_wifi\_connect()} call. The same action is taken even when we receive a Wi-Fi disconnect event.
 
-The event \textit{SYSTEM\_EVENT\_STA\_GOT\_IP} is received when a DHCP IP address is obtained by ESP32. In this particular case, we  only print the IP address on the console.
+The event \textit{SYSTEM\_EVENT\_STA\_GOT\_IP} is received when a DHCP IP address is obtained by ESP8266. In this particular case, we  only print the IP address on the console.
 
 \section{Progress so far}\index{Progress so far}
-You can now modify the application to enter your Wi-Fi network's SSID and the passphrase. When you compile and flash this code on your development board, the ESP32 should connect to your Wi-Fi network and print the IP address on the console. The outlet's functionality of toggling the GPIO on pressing the push-button is, of course, also retained.
+You can now modify the application to enter your Wi-Fi network's SSID and the passphrase. When you compile and flash this code on your development board, the ESP8266 should connect to your Wi-Fi network and print the IP address on the console. The outlet's functionality of toggling the GPIO on pressing the push-button is, of course, also retained.
 
 One problem with this approach is that the Wi-Fi settings are hard-coded into the firmware image. While this is ok for a hobby project, a product will require the end-user to dynamically configure this device with their settings. This is what we will look at in the next chapter.
 

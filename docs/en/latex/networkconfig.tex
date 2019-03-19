@@ -41,6 +41,7 @@ But the advantage of this method is that it is very reliable (SoftAP being just 
 
 \subsection{BLE}\index{BLE}
 
+Note: ESP8266 does not have Bluetooth, thus this section is not applicable to ESP8266.
 In the Bluetooth Low Energy (BLE) method, your outlet will be doing a BLE advertisement. Phones in the vicinity can see this advertisement, and ask the user to do a BLE connection with your device. Then this network is used to transfer the credentials to the outlet.
 In this network configuration workflow, the user doesn't have to do the hard task of switching between Wi-Fi networks. Additionally, both iOS and Android allow phone application to scan for BLE devices in the vicinity and also connect to them through the app. This means a much smoother end-user experience.
 
@@ -54,8 +55,8 @@ You may refer to the \textit{4\_network\_config/} directory of esp-jumpstart for
 \begin{itemize}
     \item Go to the \textit{4\_network\_config} application.
     \item Build, flash and load the application.
-    \item By default, the firmware is launched in BLE provisioning mode.
-    \item Install the companion phone application for network configuration from this location: \url{https://github.com/espressif/esp-idf-provisioning-android/releases}. Please install the latest app with \textbf{ble-sec1} as part of its name.
+    \item The firmware is launched in SoftAP provisioning mode.
+    \item Install the companion phone application for network configuration from this location: \url{https://github.com/espressif/esp-idf-provisioning-android/releases}. Please install the latest app with \textbf{wifi-sec1} as part of its name.
     \item Launch the application and follow the wizard as shown in the images below.
 \end{itemize}
 
@@ -85,8 +86,8 @@ Espressif provides a \textbf{Unified Provisioning} module for assisting you with
 
 The following components are offered as part of the provisioning infrastructure:
 \begin{itemize}
-    \item \textbf{Unified Provisioning Specification:} A specification to \textit{securely} transfer Wi-Fi credentials to the device, independent of the transport (SoftAP, BLE). More details can be here here: \url{https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html}.
-    \item \textbf{IDF Components:} Software modules that implement this specification in the device firmware, available through ESP-IDF
+    \item \textbf{Unified Provisioning Specification:} A specification to \textit{securely} transfer Wi-Fi credentials to the device, independent of the transport (SoftAP, BLE(Not available in ESP8266)). More details can be here here: \url{https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html}.
+    \item \textbf{ESP8266\_RTOS\_SDK Components:} Software modules that implement this specification in the device firmware, available through ESP8266\_RTOS\_SDK
     \item \textbf{Phone Libraries:} Reference implementations on iOS and Android are available that can be directly incorporated into your existing phone applications
     \item \textbf{Reference Phone Applications:} Fully functional Phone applications on Android (\url{https://github.com/espressif/esp-idf-provisioning-android}) and iOS (\url{https://github.com/espressif/esp-idf-provisioning-ios}) are available for testing during your development, or for skinning with your brand's elements.
 \end{itemize}

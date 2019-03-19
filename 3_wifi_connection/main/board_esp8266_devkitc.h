@@ -10,4 +10,4 @@
 
 #define JUMPSTART_BOARD_BUTTON_GPIO          0      /* This is the button that is used for toggling the output */
 #define JUMPSTART_BOARD_BUTTON_ACTIVE_LEVEL  0
-#define JUMPSTART_BOARD_OUTPUT_GPIO          27     /* This is the GPIO on which the output will be set */
+#define JUMPSTART_BOARD_OUTPUT_GPIO          15     /* This is the GPIO on which the output will be set */

@@ -7,6 +7,10 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 
+#include "sdkconfig.h"
+
+#ifdef CONFIG_BT_ENABLED
+
 #include <string.h>
 #include <esp_log.h>
 #include <esp_err.h>
@@ -178,3 +182,5 @@ conn_mgr_prov_t conn_mgr_prov_mode_ble = {
     .event_cb            = ble_prov_event_handler,
     .cb_user_data        = NULL,
 };
+
+#endif /* CONFIG_BT_ENABLED */

@@ -66,15 +66,16 @@ established mechanism), and doesn’t require a lot of additional code
 BLE
 ~~~
 
-In the Bluetooth Low Energy (BLE) method, your outlet will be doing a
-BLE advertisement. Phones in the vicinity can see this advertisement,
-and ask the user to do a BLE connection with your device. Then this
-network is used to transfer the credentials to the outlet. In this
-network configuration workflow, the user doesn’t have to do the hard
-task of switching between Wi-Fi networks. Additionally, both iOS and
-Android allow phone application to scan for BLE devices in the vicinity
-and also connect to them through the app. This means a much smoother
-end-user experience.
+Note: ESP8266 does not have a bluetooth and thus does not support
+bluetooth based provisioning. In the Bluetooth Low Energy (BLE) method,
+your outlet will be doing a BLE advertisement. Phones in the vicinity
+can see this advertisement, and ask the user to do a BLE connection with
+your device. Then this network is used to transfer the credentials to
+the outlet. In this network configuration workflow, the user doesn’t
+have to do the hard task of switching between Wi-Fi networks.
+Additionally, both iOS and Android allow phone application to scan for
+BLE devices in the vicinity and also connect to them through the app.
+This means a much smoother end-user experience.
 
 One side-effect, though, of using the BLE based network configuration is
 that it also pulls in the code for Bluetooth. This means your flash
@@ -156,11 +157,13 @@ infrastructure:
 
 -  **Unified Provisioning Specification:** A specification to *securely*
    transfer Wi-Fi credentials to the device, independent of the
-   transport (SoftAP, BLE). More details can be here here:
+   transport (SoftAP, BLE(Not available in ESP8266)). More details can
+   be here here:
    https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html.
 
--  **IDF Components:** Software modules that implement this
-   specification in the device firmware, available through ESP-IDF
+-  **ESP8266\_RTOS\_SDK Components:** Software modules that implement
+   this specification in the device firmware, available through
+   ESP8266\_RTOS\_SDK
 
 -  **Phone Libraries:** Reference implementations on iOS and Android are
    available that can be directly incorporated into your existing phone

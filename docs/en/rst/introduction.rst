@@ -1,8 +1,8 @@
 Introduction
 ============
 
-ESP-Jumpstart: Build ESP32 Products Fast
-----------------------------------------
+ESP-Jumpstart: Build ESP8266 Products Fast
+------------------------------------------
 
 Building production-ready firmware can be hard. It involves multiple
 questions and decisions about the best ways of doing things. It involves
@@ -11,12 +11,13 @@ features done. What if there was a ready reference, a known set of best
 steps, gathered from previous experience of others, that you could
 jumpstart with?
 
-ESP-Jumpstart is focused on building *products* on ESP32. It is a
+ESP-Jumpstart is focused on building *products* on ESP8266. It is a
 quick-way to get started into your product development process.
 ESP-Jumpstart builds a fully functional, ready to deploy “Smart Power
 Outlet” in a sequence of incremental tutorial steps. Each step addresses
 either a user-workflow or a developer workflow. Each step is an
-application built with ESP-IDF, ESP32’s software development framework.
+application built with ESP8266\_RTOS\_SDK, ESP8266’s software
+development framework.
 
 .. figure:: ../../_static/jumpstart-outlet.png
    :alt: Smart Power Outlet
@@ -51,10 +52,10 @@ with your device driver (bulb, washing machine).
 
 You will require the following to get started:
 
--  An ESP32 development kit: ESP32-DevKit-C
-   https://www.espressif.com/en/products/hardware/esp32-devkitc/overview
+-  An ESP8266 development kit: ESP8266EX-Launcher
+   https://www.espressif.com/products/hardware/esp8266ex/overview/
    available through your closest store. You could also use any other
-   ESP32 development board if you already have one.
+   ESP8266 development board if you already have one.
 
 -  A Development host setup (Windows, Linux or Mac) that will be used
    for development.

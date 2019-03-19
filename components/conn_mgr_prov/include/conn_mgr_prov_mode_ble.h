@@ -7,6 +7,7 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 
+#ifdef CONFIG_BT_ENABLED
 #pragma once
 
 #include <protocomm.h>
@@ -17,3 +18,4 @@
 extern conn_mgr_prov_t conn_mgr_prov_mode_ble;
 
 typedef protocomm_ble_config_t conn_mgr_prov_mode_ble_config_t;
+#endif /* CONFIG_BT_ENABLED */
