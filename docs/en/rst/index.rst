@@ -1,7 +1,7 @@
 ESP-Jumpstart
 =============
 
-| **Building Products with ESP32 *fast***: Jumpstart from concept to production
+| **Building Products with ESP8266 *fast***: Jumpstart from concept to production
 
 +------------------+
 | |Jumpstart Now|_ |
