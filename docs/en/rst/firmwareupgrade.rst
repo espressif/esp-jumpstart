@@ -153,7 +153,7 @@ try to upgrade to this firmware image as follows:
 
 ::
 
-        curl -d '{"state":{"desired":{"ota_url":"https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/hello-world.bin"}}}' \
+        curl -d '{"state":{"desired":{"ota_url":"https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/hello-world8266.bin"}}}' \
                 --tlsv1.2 --cert cloud_cfg/device.cert \
                 --key cloud_cfg/device.key \
                 https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow | python -mjson.tool
