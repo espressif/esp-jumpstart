@@ -9,7 +9,7 @@ ESP-Jumpstart
 
 Building production-ready firmware can be hard. It involves multiple questions and decisions about the best ways of doing things. It involves building phone applications, and integrating cloud agents to get all the features done. What if there was a ready reference, a known set of best steps, gathered from previous experience of others, that you could jumpstart with?
 
-ESP-Jumpstart is focused on building ’products’ on ESP8266. It is a quick-way to get started into your product development process. ESP-Jumpstart builds a fully functional, ready to deploy “Smart Power Outlet” in a sequence of incremental tutorial steps. Each step addresses either a user-workflow or a developer workflow. Each step is an application built with ESP8266_RTOS_SDK, ESP8266’s software development framework.
+ESP-Jumpstart is focused on building ’products’ on ESP8266 (If you are looking for ESP32 projects, please check [ESP-Jumpstart for ESP32](https://docs.espressif.com/projects/esp-jumpstart/en/latest/index.html)). It is a quick-way to get started into your product development process. ESP-Jumpstart builds a fully functional, ready to deploy “Smart Power Outlet” in a sequence of incremental tutorial steps. Each step addresses either a user-workflow or a developer workflow. Each step is an application built with `ESP8266_RTOS_SDK`, ESP8266’s software development framework.
 
 ![Smart Power Outlet]
 
@@ -28,9 +28,11 @@ Building your production firmware, is a matter of replacing the power-outlet’s
 
 You will require the following to get started:
 
--   An ESP8266 development kit: ESP8266 Devkit-C (Available on [DigiKey](https://www.digikey.in/product-detail/en/espressif-systems/ESP8266-DEVKITC-02D-F/1965-1001-ND/9649768), [Mouser](https://www.mouser.in/ProductDetail/Espressif-Systems/ESP8266-DevKitC-02D-F?qs=qSfuJ%252Bfl%2Fd64058n5BJabA%3D%3D). You could also use any other ESP8266 development boards if you already have one.)
--   A Development setup (<https://github.com/espressif/ESP8266_RTOS_SDK>)
-Please ensure to use ESP8266_RTOS_SDK using the following command,
+-   An ESP8266 development kit: ESP8266-DevkitC (Available on [DigiKey](https://www.digikey.in/product-detail/en/espressif-systems/ESP8266-DEVKITC-02D-F/1965-1001-ND/9649768), [Mouser](https://www.mouser.in/ProductDetail/Espressif-Systems/ESP8266-DevKitC-02D-F?qs=qSfuJ%252Bfl%2Fd64058n5BJabA%3D%3D). You could also use any other ESP8266 development boards if you already have one.)
+-  Follow the step-by-step guide at [ESP-Jumpstart Getting Started](<https://docs.espressif.com/projects/esp-jumpstart/en/latest/index.html>).
+
+Please ensure to use `ESP8266_RTOS_SDK` using the following command,
+
 ```
 git clone https://github.com/espressif/esp-jumpstart.git
 git clone https://github.com/espressif/ESP8266_RTOS_SDK.git
