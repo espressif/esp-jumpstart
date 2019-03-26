@@ -105,7 +105,8 @@ The NVS partition can then be generated as:
 
 .. code:: bash
 
-    $ python nvs_partition_gen.py mfg_config.csv my_mfg.bin
+    $ python $IDF_PATH/components/nvs_flash/nvs_partition_generator/nvs_partition_gen.py --input mfg_config.csv --output my_mfg.bin --size 0x6000
+
 
 The my\_mfg.bin file is the NVS partition data that can now be
 programmed into the device. You can use the following command to write
@@ -113,7 +114,7 @@ this NVS partition to flash:
 
 .. code:: bash
 
-    $ /path/to/idf/components/esptool_py/esptool/esptool.py -port /dev/cu.SLAB_USBtoUART write_flash 0x340000 device-164589345735.bin
+    $ $IDF_PATH/components/esptool_py/esptool/esptool.py --port $ESPPORT write_flash 0x340000  my_mfg.bin
 
 You may have to replace the */dev/cu.SLAB_USBtoUART* with the correct
 device name that appears on your host setup.
