@@ -62,7 +62,7 @@ The *push\_btn\_cb* code then is simply as shown below:
         uint64_t current = xTaskGetTickCount();
         if ((current - previous) > DEBOUNCE_TIME) {
             previous = current;
-            app_driver_toggle_state();
+            app_driver_set_state(!g_output_state);
         }
     }
 
