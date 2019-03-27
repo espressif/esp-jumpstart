@@ -312,13 +312,13 @@ static int alloc_and_read_from_nvs(nvs_handle handle, const char *key, char **va
 {
     size_t required_size = 0;
     int error;
-    if ((error = nvs_get_str(handle, key, NULL, &required_size)) != ESP_OK) {
+    if ((error = nvs_get_blob(handle, key, NULL, &required_size)) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to read key %s with error %d size %d\n", key, error, required_size);
         return -1;
     }
-    *value = malloc(required_size);
+    *value = calloc(1, required_size + 1);  /* The extra byte is for the NULL termination */
     if (*value) {
-        nvs_get_str(handle, key, *value, &required_size);
+        nvs_get_blob(handle, key, *value, &required_size);
         ESP_LOGI(TAG, "Read key:%s, value:%s\n", key, *value);
         return 0;
     }
