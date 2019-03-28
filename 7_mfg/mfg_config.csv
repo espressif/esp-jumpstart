@@ -1,5 +1,5 @@
 key,type,encoding,value
 mfg_ns,namespace,,
-serial_no,file,string,/path/to/esp-jumpstart/7_mfg/main/cloud_cfg/deviceid.txt
-cert,file,string,/path/to/esp-jumpstart/7_mfg/main/cloud_cfg/device.cert
-priv_key,file,string,/path/to/esp-jumpstart/7_mfg/main/cloud_cfg/device.key
+serial_no,file,binary,/path/to/esp-jumpstart/7_mfg/main/cloud_cfg/deviceid.txt
+cert,file,binary,/path/to/esp-jumpstart/7_mfg/main/cloud_cfg/device.cert
+priv_key,file,binary,/path/to/esp-jumpstart/7_mfg/main/cloud_cfg/device.key
