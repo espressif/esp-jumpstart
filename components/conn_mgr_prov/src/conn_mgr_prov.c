@@ -71,13 +71,18 @@ struct conn_mgr_prov_ctx {
     wifi_prov_sta_fail_reason_t wifi_disconnect_reason;
 };
 
+/* Mutex to lock/unlock access to provisioning singleton
+ * context data. This is allocated only once on first init
+ * and never deleted as conn_mgr_prov is a singleton */
+static SemaphoreHandle_t prov_ctx_lock = NULL;
+
 /* Pointer to provisioning context data */
 static struct conn_mgr_prov_ctx *prov_ctx;
 
 /* Count of used endpoint UUIDs */
 static int endpoint_uuid_used = 0;
 
-/* This function must be called only after locking the control semaphore */
+/* This function is called only after locking the control mutex */
 static esp_err_t execute_event_cb(conn_mgr_prov_cb_event_t event_id)
 {
     ESP_LOGD(TAG, "execute_event_cb : %d", event_id);
@@ -90,16 +95,27 @@ static esp_err_t execute_event_cb(conn_mgr_prov_cb_event_t event_id)
         void *scheme_data = prov_ctx->mgr_config.scheme_event_handler.user_data;
 
         if (scheme_cb) {
+            /* Unlock mutex first so that user has the freedom to
+             * call conn_mgr_prov APIs from inside the callbacks
+             * without causing deadlock */
+            xSemaphoreGive(prov_ctx_lock);
             err = scheme_cb(scheme_data, event_id);
+            xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
         }
 
         if (app_cb) {
+            /* Unlock mutex first so that user has the freedom to
+             * call conn_mgr_prov APIs from inside the callbacks
+             * without causing deadlock */
+            xSemaphoreGive(prov_ctx_lock);
             err = app_cb(app_data, event_id);
+            xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
         }
     }
     return err;
 }
 
+/* This function is called only after locking the control mutex */
 static esp_err_t conn_mgr_prov_start_service(const char *service_name, const char *service_key)
 {
     const conn_mgr_prov_scheme_t *scheme = &prov_ctx->mgr_config.scheme;
@@ -238,12 +254,19 @@ static esp_err_t conn_mgr_prov_start_service(const char *service_name, const cha
 
 esp_err_t conn_mgr_prov_endpoint_configure(const char *ep_name)
 {
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+
     esp_err_t err = ESP_OK;
 
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (prov_ctx && prov_ctx->prov_scheme_config) {
         err = prov_ctx->mgr_config.scheme.set_config_endpoint(
                 prov_ctx->prov_scheme_config, ep_name, endpoint_uuid_used);
     }
+    xSemaphoreGive(prov_ctx_lock);
 
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to configure provisioning endpoint");
@@ -255,11 +278,18 @@ esp_err_t conn_mgr_prov_endpoint_configure(const char *ep_name)
 
 esp_err_t conn_mgr_prov_endpoint_add(const char *ep_name, protocomm_req_handler_t handler, void *user_ctx)
 {
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+
     esp_err_t err = ESP_OK;
 
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (prov_ctx && prov_ctx->pc) {
         err = protocomm_add_endpoint(prov_ctx->pc, ep_name, handler, user_ctx);
     }
+    xSemaphoreGive(prov_ctx_lock);
 
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to set provisioning endpoint");
@@ -269,11 +299,19 @@ esp_err_t conn_mgr_prov_endpoint_add(const char *ep_name, protocomm_req_handler_
 
 void conn_mgr_prov_endpoint_remove(const char *ep_name)
 {
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return;
+    }
+
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (prov_ctx && prov_ctx->pc) {
         protocomm_remove_endpoint(prov_ctx->pc, ep_name);
     }
+    xSemaphoreGive(prov_ctx_lock);
 }
 
+/* This function is called only after locking the control mutex */
 static void conn_mgr_prov_stop_service(void)
 {
     if (!prov_ctx || !prov_ctx->pc) {
@@ -316,6 +354,8 @@ static void conn_mgr_prov_stop_service(void)
 /* Task spawned by timer callback or by wifi_prov_done() */
 static void stop_prov_task(void *arg)
 {
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
+
     /* This delay is so that the phone app is notified first and then
      * the provisioning is stopped. Generally 100ms is enough. */
     vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -323,6 +363,7 @@ static void stop_prov_task(void *arg)
     conn_mgr_prov_stop_service();
     esp_wifi_set_mode(WIFI_MODE_STA);
 
+    xSemaphoreGive(prov_ctx_lock);
     vTaskDelete(NULL);
 }
 
@@ -335,10 +376,17 @@ static void _stop_prov_cb(void *arg)
 /* Call this if provisioning is completed before the timeout occurs */
 esp_err_t wifi_prov_done(void)
 {
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (prov_ctx && prov_ctx->timer) {
         esp_timer_stop(prov_ctx->timer);
         xTaskCreate(&stop_prov_task, "stop_prov", 2048, NULL, tskIDLE_PRIORITY, NULL);
     }
+    xSemaphoreGive(prov_ctx_lock);
     return ESP_OK;
 }
 
@@ -351,16 +399,24 @@ esp_err_t conn_mgr_prov_event_handler(void *ctx, system_event_t *event)
     /* For accessing reason codes in case of disconnection */
     system_event_info_t *info = &event->event_info;
 
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
+
     /* If pointer to provisioning application data is NULL
      * then provisioning manager is not running, therefore
      * return with error to allow the global handler to act */
     if (!prov_ctx) {
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_ERR_INVALID_STATE;
     }
 
     /* Only handle events when credential is received and
      * WiFi STA is yet to complete trying the connection */
     if (prov_ctx->prov_state != CMP_STATE_CRED_RECV) {
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_OK;
     }
 
@@ -426,30 +482,49 @@ esp_err_t conn_mgr_prov_event_handler(void *ctx, system_event_t *event)
         ret = ESP_FAIL;
         break;
     }
+
+    xSemaphoreGive(prov_ctx_lock);
     return ret;
 }
 
 esp_err_t wifi_prov_get_wifi_state(wifi_prov_sta_state_t *state)
 {
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (prov_ctx == NULL || state == NULL) {
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_FAIL;
     }
 
     *state = prov_ctx->wifi_state;
+    xSemaphoreGive(prov_ctx_lock);
     return ESP_OK;
 }
 
 esp_err_t wifi_prov_get_wifi_disconnect_reason(wifi_prov_sta_fail_reason_t *reason)
 {
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (prov_ctx == NULL || reason == NULL) {
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_FAIL;
     }
 
     if (prov_ctx->wifi_state != WIFI_PROV_STA_DISCONNECTED) {
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_FAIL;
     }
 
     *reason = prov_ctx->wifi_disconnect_reason;
+    xSemaphoreGive(prov_ctx_lock);
     return ESP_OK;
 }
 
@@ -461,11 +536,19 @@ esp_err_t conn_mgr_prov_is_provisioned(bool *provisioned)
 
     *provisioned = false;
 
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (prov_ctx &&
         prov_ctx->prov_state > CMP_STATE_IDLE &&
         prov_ctx->prov_state < CMP_STATE_FAIL) {
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_OK;
     }
+    xSemaphoreGive(prov_ctx_lock);
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     if (esp_wifi_init(&cfg) != ESP_OK) {
@@ -489,14 +572,23 @@ esp_err_t conn_mgr_prov_is_provisioned(bool *provisioned)
 
 esp_err_t wifi_prov_configure_sta(wifi_config_t *wifi_cfg)
 {
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (!prov_ctx) {
         ESP_LOGE(TAG, "Invalid state of Provisioning app");
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_FAIL;
     }
     if (prov_ctx->prov_state >= CMP_STATE_CRED_RECV) {
         ESP_LOGE(TAG, "WiFi credentials already received by provisioning app");
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_FAIL;
     }
+    xSemaphoreGive(prov_ctx_lock);
 
     /* Initialize WiFi with default config */
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -506,10 +598,13 @@ esp_err_t wifi_prov_configure_sta(wifi_config_t *wifi_cfg)
     }
 
     /* Configure WiFi as both AP and/or Station */
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (esp_wifi_set_mode(prov_ctx->mgr_config.scheme.wifi_mode) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to set WiFi mode");
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_FAIL;
     }
+    xSemaphoreGive(prov_ctx_lock);
 
     /* Configure WiFi station with host credentials
      * provided during provisioning */
@@ -530,15 +625,27 @@ esp_err_t wifi_prov_configure_sta(wifi_config_t *wifi_cfg)
     }
 
     /* Reset wifi station state for provisioning app */
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     prov_ctx->wifi_state = WIFI_PROV_STA_CONNECTING;
     prov_ctx->prov_state = CMP_STATE_CRED_RECV;
+    xSemaphoreGive(prov_ctx_lock);
     return ESP_OK;
 }
 
 esp_err_t conn_mgr_prov_init(conn_mgr_prov_config_t config)
 {
+    if (!prov_ctx_lock) {
+       /* Create mutex if this is the first time init is being called.
+        * This is created only once and never deleted because if some
+        * other thread is trying to take this mutex while it is being
+        * deleted from another thread then the reference may become
+        * invalid and cause exception */
+        prov_ctx_lock = xSemaphoreCreateMutex();
+    }
+
     if (prov_ctx) {
         ESP_LOGE(TAG, "Provisioning manager already initialized");
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_ERR_INVALID_STATE;
     }
 
@@ -546,6 +653,7 @@ esp_err_t conn_mgr_prov_init(conn_mgr_prov_config_t config)
     prov_ctx = (struct conn_mgr_prov_ctx *) calloc(1, sizeof(struct conn_mgr_prov_ctx));
     if (!prov_ctx) {
         ESP_LOGE(TAG, "Error allocating memory for singleton instance");
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_ERR_NO_MEM;
     }
 
@@ -553,24 +661,38 @@ esp_err_t conn_mgr_prov_init(conn_mgr_prov_config_t config)
     prov_ctx->prov_state = CMP_STATE_IDLE;
 
     execute_event_cb(CMP_INIT);
+    xSemaphoreGive(prov_ctx_lock);
     return ESP_OK;
 }
 
 void conn_mgr_prov_wait(void)
 {
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return;
+    }
+
     while (1) {
+        xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
         if (prov_ctx &&
             prov_ctx->prov_state > CMP_STATE_IDLE &&
             prov_ctx->prov_state < CMP_STATE_STOPPED) {
+            xSemaphoreGive(prov_ctx_lock);
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             continue;
         }
         break;
     }
+    xSemaphoreGive(prov_ctx_lock);
 }
 
 void conn_mgr_prov_deinit(void)
 {
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return;
+    }
+
     /* Wait for conn_mgr_prov_start_provisioning() to finish,
      * else its possible that deinit gets called by another thread
      * while endpoint configure/add callbacks are being executed,
@@ -580,8 +702,10 @@ void conn_mgr_prov_deinit(void)
      * getting rid of the add endpoint/configure endpoint events and
      * instead calling the related APIs before provisioning is started */
     while (1) {
+        xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
         if (prov_ctx &&
             prov_ctx->prov_state == CMP_STATE_STARTING) {
+            xSemaphoreGive(prov_ctx_lock);
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             continue;
         }
@@ -590,6 +714,7 @@ void conn_mgr_prov_deinit(void)
 
     if (!prov_ctx) {
         ESP_LOGE(TAG, "Provisioning manager not initialized");
+        xSemaphoreGive(prov_ctx_lock);
         return;
     }
 
@@ -612,6 +737,7 @@ void conn_mgr_prov_deinit(void)
     /* Free manager context */
     free(prov_ctx);
     prov_ctx = NULL;
+    xSemaphoreGive(prov_ctx_lock);
 
     /* Execute deinit event callbacks */
     if (scheme_cb) {
@@ -625,13 +751,21 @@ void conn_mgr_prov_deinit(void)
 esp_err_t conn_mgr_prov_start_provisioning(int security, const char *pop,
                                            const char *service_name, const char *service_key)
 {
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (!prov_ctx) {
         ESP_LOGE(TAG, "Provisioning manager not initialized");
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_ERR_INVALID_STATE;
     }
 
     if (prov_ctx->prov_state != CMP_STATE_IDLE) {
         ESP_LOGE(TAG, "Provisioning service already started");
+        xSemaphoreGive(prov_ctx_lock);
         return ESP_ERR_INVALID_STATE;
     }
 
@@ -641,6 +775,7 @@ esp_err_t conn_mgr_prov_start_provisioning(int security, const char *pop,
         prov_ctx->pop.data = malloc(prov_ctx->pop.len);
         if (!prov_ctx->pop.data) {
             ESP_LOGI(TAG, "Unable to allocate PoP data");
+            xSemaphoreGive(prov_ctx_lock);
             return ESP_ERR_NO_MEM;
         }
         memcpy((void *)prov_ctx->pop.data, pop, prov_ctx->pop.len);
@@ -658,6 +793,7 @@ esp_err_t conn_mgr_prov_start_provisioning(int security, const char *pop,
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to create timer");
         free((void *)prov_ctx->pop.data);
+        xSemaphoreGive(prov_ctx_lock);
         return err;
     }
 
@@ -668,19 +804,28 @@ esp_err_t conn_mgr_prov_start_provisioning(int security, const char *pop,
         ESP_LOGE(TAG, "Provisioning failed to start");
         esp_timer_delete(prov_ctx->timer);
         free((void *)prov_ctx->pop.data);
+        xSemaphoreGive(prov_ctx_lock);
         return err;
     }
     prov_ctx->prov_state = CMP_STATE_STARTED;
+    xSemaphoreGive(prov_ctx_lock);
     return ESP_OK;
 }
 
 void conn_mgr_prov_stop_provisioning(void)
 {
+    if (!prov_ctx_lock) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return;
+    }
+
     /* Wait for conn_mgr_prov_start_provisioning() to finish.
      * See conn_mgr_prov_deinit() for reason. */
     while (1) {
+        xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
         if (prov_ctx &&
             prov_ctx->prov_state == CMP_STATE_STARTING) {
+            xSemaphoreGive(prov_ctx_lock);
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             continue;
         }
@@ -689,6 +834,7 @@ void conn_mgr_prov_stop_provisioning(void)
 
     if (!prov_ctx) {
         ESP_LOGE(TAG, "Provisioning manager not initialized");
+        xSemaphoreGive(prov_ctx_lock);
         return;
     }
 
@@ -700,4 +846,6 @@ void conn_mgr_prov_stop_provisioning(void)
         prov_ctx->prov_state < CMP_STATE_STOPPED) {
         conn_mgr_prov_stop_service();
     }
+
+    xSemaphoreGive(prov_ctx_lock);
 }
