@@ -25,7 +25,7 @@ static void push_btn_cb(void *arg)
     uint64_t current = xTaskGetTickCount();
     if ((current - previous) > DEBOUNCE_TIME) {
         previous = current;
-        app_driver_toggle_state();
+        app_driver_set_state(!g_output_state);
     }
 }
 
@@ -63,10 +63,12 @@ void app_driver_init()
     gpio_config(&io_conf);
 }
 
-int IRAM_ATTR app_driver_toggle_state(void)
+int IRAM_ATTR app_driver_set_state(bool state)
 {
-    g_output_state = ! g_output_state;
-    set_output_state(g_output_state);
+    if(g_output_state != state) {
+        g_output_state = state;
+        set_output_state(g_output_state);
+    }
     return ESP_OK;
 }
 

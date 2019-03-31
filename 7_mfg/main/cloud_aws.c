@@ -69,8 +69,9 @@ static bool output_changed_locally = false;
 static void output_state_change_callback(const char *pJsonString, uint32_t JsonStringDataLen, jsonStruct_t *pContext)
 {
     if (pContext != NULL) {
-        ESP_LOGI(TAG, "Delta - Output state changed to %d", *(bool *) (pContext->pData));
-        app_driver_toggle_state();
+        bool state = *(bool *) (pContext->pData);
+        ESP_LOGI(TAG, "Delta - Output state changed to %s", state ? "true":"false");
+        app_driver_set_state(state);
         output_changed_locally = false;
     }
 }
