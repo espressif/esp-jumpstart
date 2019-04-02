@@ -15,12 +15,12 @@
 #include <protocomm.h>
 #include <protocomm_ble.h>
 
-#include "conn_mgr_prov.h"
+#include "conn_mgr_prov_priv.h"
 #include "conn_mgr_prov_mode_ble.h"
 
-static const char *TAG = "conn_mgr_prov_mode_ble";
+static const char *TAG = "conn_mgr_prov_ble";
 
-extern conn_mgr_prov_t conn_mgr_prov_mode_ble;
+extern const conn_mgr_prov_scheme_t conn_mgr_prov_scheme_ble;
 
 static esp_err_t prov_start(protocomm_t *pc, void *config)
 {
@@ -34,7 +34,7 @@ static esp_err_t prov_start(protocomm_t *pc, void *config)
         return ESP_ERR_INVALID_ARG;
     }
 
-    conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
+    conn_mgr_prov_ble_config_t *ble_config = (conn_mgr_prov_ble_config_t *) config;
 
     /* Start protocomm as BLE service */
     if (protocomm_ble_start(pc, ble_config) != ESP_OK) {
@@ -46,7 +46,7 @@ static esp_err_t prov_start(protocomm_t *pc, void *config)
 
 static void *new_config(void)
 {
-    conn_mgr_prov_mode_ble_config_t *ble_config = calloc(1, sizeof(conn_mgr_prov_mode_ble_config_t));
+    conn_mgr_prov_ble_config_t *ble_config = calloc(1, sizeof(conn_mgr_prov_ble_config_t));
     if (!ble_config) {
         ESP_LOGE(TAG, "Error allocating memory for new configuration");
         return NULL;
@@ -70,7 +70,7 @@ static void delete_config(void *config)
         return;
     }
 
-    conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
+    conn_mgr_prov_ble_config_t *ble_config = (conn_mgr_prov_ble_config_t *) config;
     for (unsigned int i = 0; i < ble_config->nu_lookup_count; i++) {
         free((void *)ble_config->nu_lookup[i].name);
     }
@@ -90,7 +90,7 @@ static esp_err_t set_config_service(void *config, const char *service_name, cons
         return ESP_ERR_INVALID_ARG;
     }
 
-    conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
+    conn_mgr_prov_ble_config_t *ble_config = (conn_mgr_prov_ble_config_t *) config;
     strlcpy(ble_config->device_name,  service_name, sizeof(ble_config->device_name));
     return ESP_OK;
 }
@@ -107,7 +107,7 @@ static esp_err_t set_config_endpoint(void *config, const char *endpoint_name, ui
         return ESP_ERR_INVALID_ARG;
     }
 
-    conn_mgr_prov_mode_ble_config_t *ble_config = (conn_mgr_prov_mode_ble_config_t *) config;
+    conn_mgr_prov_ble_config_t *ble_config = (conn_mgr_prov_ble_config_t *) config;
 
     char *copy_ep_name = strdup(endpoint_name);
     if (!copy_ep_name) {
@@ -129,52 +129,85 @@ static esp_err_t set_config_endpoint(void *config, const char *endpoint_name, ui
     return ESP_OK;
 }
 
-/* Default event handler for releasing BT/BLE memory during/after provisioning */
-static esp_err_t ble_prov_event_handler(void *user_data, conn_mgr_cb_event_t event)
+/* Used when both BT and BLE are not needed by application */
+esp_err_t conn_mgr_prov_scheme_ble_event_cb_free_btdm(void *user_data, conn_mgr_prov_cb_event_t event)
 {
     esp_err_t ret = ESP_OK;
-    /* The following makes sense only if we are using conn_mgr_prov_mode_ble
-     * and user application doesn't require BT/BLE to function once provisioning
-     * is complete. If BT or BLE or both are required by the user application then
-     * either of the following cases can be commented out depending on the requirements */
     switch (event) {
-        case CM_PROV_START:
-            /* If provisioning is about to start, release memory used by the unused BT stack.
-             * This is to be commented out if user application requires BT to function */
+        case CMP_INIT:
+            /* Release BT memory, as we need only BLE */
             ret = esp_bt_mem_release(ESP_BT_MODE_CLASSIC_BT);
             if (ret != ESP_OK) {
-                ESP_LOGE(TAG, "Failed to release BT memory");
+                ESP_LOGE(TAG, "bt_mem_release of classic BT failed %d", ret);
             } else {
-                ESP_LOGI(TAG, "Released BT memory");
+                ESP_LOGI(TAG, "BT memory released");
             }
             break;
-        case CM_PROV_END:
-            /* If provisioning is about to end, release memory used by the BLE stack
-             * which will no longer be needed once provisioning is complete.
-             * This is to be commented out if user application requires BLE to function,
-             * or modified to ESP_BT_MODE_BLE (along with commenting out classic BT mem release above)
-             * if BT is required instead */
+
+        case CMP_DEINIT:
+            /* Release memory used by BLE and Bluedroid host stack */
             ret = esp_bt_mem_release(ESP_BT_MODE_BTDM);
             if (ret != ESP_OK) {
-                ESP_LOGE(TAG, "Failed to release BTDM memory");
+                ESP_LOGE(TAG, "bt_mem_release of BTDM failed %d", ret);
             } else {
-                ESP_LOGI(TAG, "Released BTDM memory");
+                ESP_LOGI(TAG, "BTDM memory released");
             }
             break;
+
         default:
             break;
     }
     return ret;
 }
 
-conn_mgr_prov_t conn_mgr_prov_mode_ble = {
+/* Used when BT is not needed by application */
+esp_err_t conn_mgr_prov_scheme_ble_event_cb_free_bt(void *user_data, conn_mgr_prov_cb_event_t event)
+{
+    esp_err_t ret = ESP_OK;
+    switch (event) {
+        case CMP_INIT:
+            /* Release BT memory, as we need only BLE */
+            ret = esp_bt_mem_release(ESP_BT_MODE_CLASSIC_BT);
+            if (ret != ESP_OK) {
+                ESP_LOGE(TAG, "bt_mem_release of classic BT failed %d", ret);
+            } else {
+                ESP_LOGI(TAG, "BT memory released");
+            }
+            break;
+
+        default:
+            break;
+    }
+    return ret;
+}
+
+/* Used when BLE is not needed by application */
+esp_err_t conn_mgr_prov_scheme_ble_event_cb_free_ble(void *user_data, conn_mgr_prov_cb_event_t event)
+{
+    esp_err_t ret = ESP_OK;
+    switch (event) {
+        case CMP_DEINIT:
+            /* Release memory used by BLE stack */
+            ret = esp_bt_mem_release(ESP_BT_MODE_BLE);
+            if (ret != ESP_OK) {
+                ESP_LOGE(TAG, "bt_mem_release of BLE failed %d", ret);
+            } else {
+                ESP_LOGI(TAG, "BLE memory released");
+            }
+            break;
+
+        default:
+            break;
+    }
+    return ret;
+}
+
+const conn_mgr_prov_scheme_t conn_mgr_prov_scheme_ble = {
     .prov_start          = prov_start,
     .prov_stop           = protocomm_ble_stop,
     .new_config          = new_config,
     .delete_config       = delete_config,
     .set_config_service  = set_config_service,
     .set_config_endpoint = set_config_endpoint,
-    .wifi_mode           = WIFI_MODE_STA,
-    .event_cb            = ble_prov_event_handler,
-    .cb_user_data        = NULL,
+    .wifi_mode           = WIFI_MODE_STA
 };

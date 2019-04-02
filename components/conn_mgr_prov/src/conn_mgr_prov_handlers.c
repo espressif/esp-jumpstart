@@ -23,6 +23,8 @@
 
 static const char *TAG = "conn_mgr_prov_handler";
 
+extern wifi_prov_config_handlers_t wifi_prov_handlers;
+
 /* Provide definition of wifi_prov_ctx_t */
 struct wifi_prov_ctx {
     wifi_config_t wifi_cfg;
@@ -53,7 +55,7 @@ static esp_err_t get_status_handler(wifi_prov_config_get_data_t *resp_data, wifi
 
     if (wifi_prov_get_wifi_state(&resp_data->wifi_state) != ESP_OK) {
         ESP_LOGW(TAG, "Prov app not running");
-        return ESP_FAIL;
+        return ESP_ERR_INVALID_STATE;
     }
 
     if (resp_data->wifi_state == WIFI_PROV_STA_CONNECTED) {
@@ -94,7 +96,7 @@ static esp_err_t set_config_handler(const wifi_prov_config_set_data_t *req_data,
     wifi_cfg = new_config(ctx);
     if (!wifi_cfg) {
         ESP_LOGE(TAG, "Unable to alloc wifi config");
-        return ESP_FAIL;
+        return ESP_ERR_NO_MEM;
     }
 
     ESP_LOGI(TAG, "WiFi Credentials Received : \n\tssid %s \n\tpassword %s",
@@ -111,14 +113,18 @@ static esp_err_t apply_config_handler(wifi_prov_ctx_t **ctx)
     wifi_config_t *wifi_cfg = get_config(ctx);
     if (!wifi_cfg) {
         ESP_LOGE(TAG, "WiFi config not set");
-        return ESP_FAIL;
+        return ESP_ERR_INVALID_STATE;
     }
 
-    wifi_prov_configure_sta(wifi_cfg);
-    ESP_LOGI(TAG, "WiFi Credentials Applied");
+    esp_err_t ret = wifi_prov_configure_sta(wifi_cfg);
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "WiFi Credentials Applied");
+    } else {
+        ESP_LOGE(TAG, "Failed to apply WiFi Credentials");
+    }
 
     free_config(ctx);
-    return ESP_OK;
+    return ret;
 }
 
 wifi_prov_config_handlers_t wifi_prov_handlers = {

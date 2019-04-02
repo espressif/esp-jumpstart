@@ -15,6 +15,11 @@
 #include <protocomm_security.h>
 #include <wifi_provisioning/wifi_config.h>
 
+#include "conn_mgr_prov.h"
+
+/* Handlers for wifi_config provisioning endpoint */
+extern wifi_prov_config_handlers_t wifi_prov_handlers;
+
 /**
  * @brief   Get state of WiFi Station during provisioning
  *

@@ -1,4 +1,4 @@
-/* Unified Provisioning Example
+/* Connection Manager for Provisioning
 
    This example code is in the Public Domain (or CC0 licensed, at your option.)
 
@@ -8,11 +8,14 @@
 */
 
 #include <string.h>
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
+
 #include <esp_log.h>
 #include <esp_err.h>
 #include <esp_wifi.h>
-#include <esp_bt.h>
-#include "esp_timer.h"
+#include <esp_timer.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -22,26 +25,44 @@
 #include <protocomm_ble.h>
 #include <protocomm_httpd.h>
 
-#include <wifi_provisioning/wifi_config.h>
-
-#include "conn_mgr_prov.h"
 #include "conn_mgr_prov_priv.h"
 
 static const char *TAG = "conn_mgr_prov";
 
-/* Handlers for wifi_config provisioning endpoint */
-extern wifi_prov_config_handlers_t wifi_prov_handlers;
+typedef enum {
+    CMP_STATE_IDLE = 0,
+    CMP_STATE_STARTING = 1,
+    CMP_STATE_STARTED = 2,
+    CMP_STATE_CRED_RECV = 3,
+    CMP_STATE_FAIL = 4,
+    CMP_STATE_SUCCESS = 5,
+    CMP_STATE_STOPPED = 6
+} conn_mgr_prov_state_t;
 
 /**
- * @brief   Data relevant to provisioning application
+ * @brief  Context data for provisioning manager
  */
-struct wifi_prov_data {
-    conn_mgr_prov_t  prov;         /*!< Provisioning handle */
-    void        *prov_mode_config; /*!< Wifi Provisioning Mode Config */
-    int          security;         /*!< Type of security to use with protocomm */
-    protocomm_t *pc;               /*!< Protocomm handle */
-    protocomm_security_pop_t pop;  /*!< Pointer to proof of possesion */
-    esp_timer_handle_t timer;      /*!< Handle to timer */
+struct conn_mgr_prov_ctx {
+    /* Provisioning manager configuration */
+    conn_mgr_prov_config_t mgr_config;
+
+    /* State of the provisioning service */
+    conn_mgr_prov_state_t prov_state;
+
+    /* Provisioning scheme configuration */
+    void *prov_scheme_config;
+
+    /* Protocomm handle */
+    protocomm_t *pc;
+
+    /* Type of security to use with protocomm */
+    int security;
+
+    /* Pointer to proof of possession */
+    protocomm_security_pop_t pop;
+
+    /* Handle to timer */
+    esp_timer_handle_t timer;
 
     /* State of WiFi Station */
     wifi_prov_sta_state_t wifi_state;
@@ -50,50 +71,83 @@ struct wifi_prov_data {
     wifi_prov_sta_fail_reason_t wifi_disconnect_reason;
 };
 
-/* Pointer to provisioning application data */
-static struct wifi_prov_data *g_prov;
+/* Pointer to provisioning context data */
+static struct conn_mgr_prov_ctx *prov_ctx;
+
+/* Count of used endpoint UUIDs */
 static int endpoint_uuid_used = 0;
+
+/* This function must be called only after locking the control semaphore */
+static esp_err_t execute_event_cb(conn_mgr_prov_cb_event_t event_id)
+{
+    ESP_LOGD(TAG, "execute_event_cb : %d", event_id);
+    esp_err_t err = ESP_OK;
+    if (prov_ctx) {
+        conn_mgr_prov_cb_func_t app_cb = prov_ctx->mgr_config.app_event_handler.event_cb;
+        void *app_data = prov_ctx->mgr_config.app_event_handler.user_data;
+
+        conn_mgr_prov_cb_func_t scheme_cb = prov_ctx->mgr_config.scheme_event_handler.event_cb;
+        void *scheme_data = prov_ctx->mgr_config.scheme_event_handler.user_data;
+
+        if (scheme_cb) {
+            err = scheme_cb(scheme_data, event_id);
+        }
+
+        if (app_cb) {
+            err = app_cb(app_data, event_id);
+        }
+    }
+    return err;
+}
+
 static esp_err_t conn_mgr_prov_start_service(const char *service_name, const char *service_key)
 {
+    const conn_mgr_prov_scheme_t *scheme = &prov_ctx->mgr_config.scheme;
+    esp_err_t ret;
+
     /* Create new protocomm instance */
-    g_prov->pc = protocomm_new();
-    if (g_prov->pc == NULL) {
+    prov_ctx->pc = protocomm_new();
+    if (prov_ctx->pc == NULL) {
         ESP_LOGE(TAG, "Failed to create new protocomm instance");
         return ESP_FAIL;
     }
 
-    g_prov->prov_mode_config = g_prov->prov.new_config();
-    if (g_prov->prov_mode_config == NULL) {
+    prov_ctx->prov_scheme_config = scheme->new_config();
+    if (prov_ctx->prov_scheme_config == NULL) {
         ESP_LOGE(TAG, "Failed to allocate provisioning mode config");
-        protocomm_delete(g_prov->pc);
+        protocomm_delete(prov_ctx->pc);
         return ESP_ERR_NO_MEM;
     }
 
-    esp_err_t ret = g_prov->prov.set_config_service(g_prov->prov_mode_config, service_name, service_key);
+    ret = scheme->set_config_service(prov_ctx->prov_scheme_config, service_name, service_key);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to configure service");
-        protocomm_delete(g_prov->pc);
+        scheme->delete_config(prov_ctx->prov_scheme_config);
+        protocomm_delete(prov_ctx->pc);
         return ret;
     }
 
-    ret = g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, "prov-session", 0xFF51);
+    ret = scheme->set_config_endpoint(prov_ctx->prov_scheme_config, "prov-session", 0xFF51);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to configure security endpoint");
-        protocomm_delete(g_prov->pc);
+        scheme->delete_config(prov_ctx->prov_scheme_config);
+        protocomm_delete(prov_ctx->pc);
         return ret;
     }
 
-    ret = g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, "prov-config",  0xFF52);
+    ret = scheme->set_config_endpoint(prov_ctx->prov_scheme_config, "prov-config", 0xFF52);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to configure wifi configuration endpoint");
-        protocomm_delete(g_prov->pc);
+        scheme->delete_config(prov_ctx->prov_scheme_config);
+        protocomm_delete(prov_ctx->pc);
         return ret;
     }
 
-    g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, "proto-ver",    0xFF53);
+    ret = scheme->set_config_endpoint(prov_ctx->prov_scheme_config, "proto-ver", 0xFF53);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to configure version endpoint");
-        protocomm_delete(g_prov->pc);
+        scheme->delete_config(prov_ctx->prov_scheme_config);
+        protocomm_delete(prov_ctx->pc);
         return ret;
     }
 
@@ -101,57 +155,79 @@ static esp_err_t conn_mgr_prov_start_service(const char *service_name, const cha
     endpoint_uuid_used = 0xFF53;
 
     /* Execute user registered callback handler */
-    if (g_prov->prov.event_cb) {
-        g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_ENDPOINT_CONFIG);
-        g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_PROV_START);
+    ret = execute_event_cb(CMP_ENDPOINT_CONFIG);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error occurred while executing CMP_ENDPOINT_CONFIG event");
+        scheme->delete_config(prov_ctx->prov_scheme_config);
+        protocomm_delete(prov_ctx->pc);
+        return ret;
     }
 
     /* Start provisioning */
-    ret = g_prov->prov.prov_start(g_prov->pc, g_prov->prov_mode_config);
+    ret = scheme->prov_start(prov_ctx->pc, prov_ctx->prov_scheme_config);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start provisioning");
-        protocomm_delete(g_prov->pc);
-        return ret;
-    }
-
-    /* Set protocomm version verification endpoint for protocol */
-    ret = protocomm_set_version(g_prov->pc, "proto-ver", "V0.1");
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set version endpoint");
-        g_prov->prov.prov_stop(g_prov->pc);
-        protocomm_delete(g_prov->pc);
-        return ret;
-    }
-
-    /* Set protocomm security type for endpoint */
-    if (g_prov->security == 0) {
-        ret = protocomm_set_security(g_prov->pc, "prov-session", &protocomm_security0, NULL);
-    } else if (g_prov->security == 1) {
-        ret = protocomm_set_security(g_prov->pc, "prov-session", &protocomm_security1, &g_prov->pop);
-    } else {
-        ESP_LOGE(TAG, "Unsupported protocomm security version %d", g_prov->security);
-        ret = ESP_ERR_INVALID_ARG;
-    }
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set security endpoint");
-        g_prov->prov.prov_stop(g_prov->pc);
-        protocomm_delete(g_prov->pc);
-        return ret;
-    }
-
-    /* Add endpoint for provisioning to set wifi station config */
-    ret = protocomm_add_endpoint(g_prov->pc, "prov-config",
-                                 wifi_prov_config_data_handler, (void *) &wifi_prov_handlers);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set provisioning endpoint");
-        g_prov->prov.prov_stop(g_prov->pc);
-        protocomm_delete(g_prov->pc);
+        scheme->delete_config(prov_ctx->prov_scheme_config);
+        protocomm_delete(prov_ctx->pc);
         return ret;
     }
 
     /* Execute user registered callback handler */
-    if (g_prov->prov.event_cb) {
-        g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_ENDPOINT_ADD);
+    ret = execute_event_cb(CMP_PROV_START);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error occurred while executing CMP_PROV_START event");
+        scheme->prov_stop(prov_ctx->pc);
+        scheme->delete_config(prov_ctx->prov_scheme_config);
+        protocomm_delete(prov_ctx->pc);
+        return ret;
+    }
+
+    /* Set protocomm version verification endpoint for protocol */
+    ret = protocomm_set_version(prov_ctx->pc, "proto-ver", "V0.1");
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set version endpoint");
+        scheme->prov_stop(prov_ctx->pc);
+        scheme->delete_config(prov_ctx->prov_scheme_config);
+        protocomm_delete(prov_ctx->pc);
+        return ret;
+    }
+
+    /* Set protocomm security type for endpoint */
+    if (prov_ctx->security == 0) {
+        ret = protocomm_set_security(prov_ctx->pc, "prov-session", &protocomm_security0, NULL);
+    } else if (prov_ctx->security == 1) {
+        ret = protocomm_set_security(prov_ctx->pc, "prov-session", &protocomm_security1, &prov_ctx->pop);
+    } else {
+        ESP_LOGE(TAG, "Unsupported protocomm security version %d", prov_ctx->security);
+        ret = ESP_ERR_INVALID_ARG;
+    }
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set security endpoint");
+        scheme->prov_stop(prov_ctx->pc);
+        scheme->delete_config(prov_ctx->prov_scheme_config);
+        protocomm_delete(prov_ctx->pc);
+        return ret;
+    }
+
+    /* Add endpoint for provisioning to set wifi station config */
+    ret = protocomm_add_endpoint(prov_ctx->pc, "prov-config",
+                                 wifi_prov_config_data_handler, (void *) &wifi_prov_handlers);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set provisioning endpoint");
+        scheme->prov_stop(prov_ctx->pc);
+        scheme->delete_config(prov_ctx->prov_scheme_config);
+        protocomm_delete(prov_ctx->pc);
+        return ret;
+    }
+
+    /* Execute user registered callback handler */
+    ret = execute_event_cb(CMP_ENDPOINT_ADD);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error occurred while executing CMP_ENDPOINT_ADD event");
+        scheme->prov_stop(prov_ctx->pc);
+        scheme->delete_config(prov_ctx->prov_scheme_config);
+        protocomm_delete(prov_ctx->pc);
+        return ret;
     }
 
     ESP_LOGI(TAG, "Provisioning started with : \n\tservice name = %s \n\tservice key = %s",
@@ -160,82 +236,92 @@ static esp_err_t conn_mgr_prov_start_service(const char *service_name, const cha
     return ESP_OK;
 }
 
-void conn_mgr_prov_endpoint_configure(const char *ep_name)
+esp_err_t conn_mgr_prov_endpoint_configure(const char *ep_name)
 {
-    endpoint_uuid_used++;
-    g_prov->prov.set_config_endpoint(g_prov->prov_mode_config, ep_name, endpoint_uuid_used);
+    esp_err_t err = ESP_OK;
+
+    if (prov_ctx && prov_ctx->prov_scheme_config) {
+        err = prov_ctx->mgr_config.scheme.set_config_endpoint(
+                prov_ctx->prov_scheme_config, ep_name, endpoint_uuid_used);
+    }
+
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to configure provisioning endpoint");
+    } else {
+        endpoint_uuid_used++;
+    }
+    return err;
 }
 
-void conn_mgr_prov_endpoint_add(const char *ep_name, protocomm_req_handler_t handler, void *user_ctx)
+esp_err_t conn_mgr_prov_endpoint_add(const char *ep_name, protocomm_req_handler_t handler, void *user_ctx)
 {
-    if (protocomm_add_endpoint(g_prov->pc, ep_name,
-                               handler,
-                               user_ctx) != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set provisioning endpoint");
-        g_prov->prov.prov_stop(g_prov->pc);
+    esp_err_t err = ESP_OK;
+
+    if (prov_ctx && prov_ctx->pc) {
+        err = protocomm_add_endpoint(prov_ctx->pc, ep_name, handler, user_ctx);
     }
+
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set provisioning endpoint");
+    }
+    return err;
 }
 
 void conn_mgr_prov_endpoint_remove(const char *ep_name)
 {
-    protocomm_remove_endpoint(g_prov->pc, ep_name);
-}
-
-void conn_mgr_prov_mem_release()
-{
-#if CONFIG_BT_ENABLED
-    /* Release memory used by BTDM stack */
-    esp_err_t err = esp_bt_mem_release(ESP_BT_MODE_BTDM);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to release BTDM stack memory %d", err);
-        return;
+    if (prov_ctx && prov_ctx->pc) {
+        protocomm_remove_endpoint(prov_ctx->pc, ep_name);
     }
-    ESP_LOGI(TAG, "BTDM stack memory released");
-#endif
 }
 
 static void conn_mgr_prov_stop_service(void)
 {
-    /* Remove provisioning endpoint */
-    protocomm_remove_endpoint(g_prov->pc, "prov-config");
-
-    /* All the extra application added endpoints are also removed automatically when prov_stop is called. Hence, no need to give a callback with CM_ENDPOINT_REMOVE. */
-
-    /* Unset provisioning security */
-    protocomm_unset_security(g_prov->pc, "prov-session");
-    /* Unset provisioning version endpoint */
-    protocomm_unset_version(g_prov->pc, "proto-ver");
-    /* Stop protocomm service */
-    g_prov->prov.prov_stop(g_prov->pc);
-    /* Free config data */
-    g_prov->prov.delete_config(g_prov->prov_mode_config);
-    /* Delete protocomm instance */
-    protocomm_delete(g_prov->pc);
-
-    if (g_prov->prov.event_cb) {
-        g_prov->prov.event_cb(g_prov->prov.cb_user_data, CM_PROV_END);
+    if (!prov_ctx || !prov_ctx->pc) {
+        return;
     }
+
+    const conn_mgr_prov_scheme_t *scheme = &prov_ctx->mgr_config.scheme;
+
+    ESP_LOGI(TAG, "Stopping provisioning");
+
+    /* All the extra application added endpoints are also
+     * removed automatically when prov_stop is called.
+     * Hence, no need to give a callback with CMP_ENDPOINT_REMOVE. */
+    scheme->prov_stop(prov_ctx->pc);
+
+    /* Free config data */
+    scheme->delete_config(prov_ctx->prov_scheme_config);
+
+    /* Delete protocomm instance */
+    protocomm_delete(prov_ctx->pc);
+
+    prov_ctx->prov_scheme_config = NULL;
+    prov_ctx->pc = NULL;
+
+    /* Timer not needed anymore */
+    if (prov_ctx->timer) {
+        esp_timer_delete(prov_ctx->timer);
+        prov_ctx->timer = NULL;
+    }
+
+    /* Free provisioning process data */
+    free((void *)prov_ctx->pop.data);
+    prov_ctx->pop.data = NULL;
+
+    prov_ctx->prov_state = CMP_STATE_STOPPED;
+    ESP_LOGI(TAG, "Provisioning stopped");
+    execute_event_cb(CMP_PROV_END);
 }
 
 /* Task spawned by timer callback or by wifi_prov_done() */
 static void stop_prov_task(void *arg)
 {
-    /* This delay is so that the phone app is noified first and then the provisioning is stopped. Generally 100ms is enough. */
+    /* This delay is so that the phone app is notified first and then
+     * the provisioning is stopped. Generally 100ms is enough. */
     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    ESP_LOGI(TAG, "Stopping provisioning");
+
     conn_mgr_prov_stop_service();
     esp_wifi_set_mode(WIFI_MODE_STA);
-
-    /* Timer not needed anymore */
-    esp_timer_handle_t timer = g_prov->timer;
-    esp_timer_delete(timer);
-    g_prov->timer = NULL;
-
-    /* Free provisioning process data */
-    free((void *)g_prov->pop.data);
-    free(g_prov);
-    g_prov = NULL;
-    ESP_LOGI(TAG, "Provisioning stopped");
 
     vTaskDelete(NULL);
 }
@@ -249,11 +335,12 @@ static void _stop_prov_cb(void *arg)
 /* Call this if provisioning is completed before the timeout occurs */
 esp_err_t wifi_prov_done(void)
 {
-    esp_timer_stop(g_prov->timer);
-    xTaskCreate(&stop_prov_task, "stop_prov", 2048, NULL, tskIDLE_PRIORITY, NULL);
+    if (prov_ctx && prov_ctx->timer) {
+        esp_timer_stop(prov_ctx->timer);
+        xTaskCreate(&stop_prov_task, "stop_prov", 2048, NULL, tskIDLE_PRIORITY, NULL);
+    }
     return ESP_OK;
 }
-
 
 /* Event handler for starting/stopping provisioning.
  * To be called from within the context of the main
@@ -265,12 +352,19 @@ esp_err_t conn_mgr_prov_event_handler(void *ctx, system_event_t *event)
     system_event_info_t *info = &event->event_info;
 
     /* If pointer to provisioning application data is NULL
-     * then provisioning is not running, therefore return without
-     * error */
-    if (!g_prov) {
+     * then provisioning manager is not running, therefore
+     * return with error to allow the global handler to act */
+    if (!prov_ctx) {
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    /* Only handle events when credential is received and
+     * WiFi STA is yet to complete trying the connection */
+    if (prov_ctx->prov_state != CMP_STATE_CRED_RECV) {
         return ESP_OK;
     }
 
+    esp_err_t ret = ESP_OK;
     switch (event->event_id) {
     case SYSTEM_EVENT_STA_START:
         ESP_LOGI(TAG, "STA Start");
@@ -278,23 +372,24 @@ esp_err_t conn_mgr_prov_event_handler(void *ctx, system_event_t *event)
          * device is started as station. Once station starts,
          * wait for connection to establish with configured
          * host SSID and password */
-        g_prov->wifi_state = WIFI_PROV_STA_CONNECTING;
+        prov_ctx->wifi_state = WIFI_PROV_STA_CONNECTING;
         break;
 
     case SYSTEM_EVENT_STA_GOT_IP:
         ESP_LOGI(TAG, "STA Got IP");
-        /* Station got IP. That means configuraion is successful.
+        /* Station got IP. That means configuration is successful.
          * Schedule timer to stop provisioning app after 30 seconds. */
-        g_prov->wifi_state = WIFI_PROV_STA_CONNECTED;
-        if (g_prov && g_prov->timer) {
-            esp_timer_start_once(g_prov->timer, 30000 * 1000U);
+        prov_ctx->wifi_state = WIFI_PROV_STA_CONNECTED;
+        prov_ctx->prov_state = CMP_STATE_SUCCESS;
+        if (prov_ctx->timer) {
+            esp_timer_start_once(prov_ctx->timer, 30000 * 1000U);
         }
         break;
 
     case SYSTEM_EVENT_STA_DISCONNECTED:
         ESP_LOGE(TAG, "STA Disconnected");
         /* Station couldn't connect to configured host SSID */
-        g_prov->wifi_state = WIFI_PROV_STA_DISCONNECTED;
+        prov_ctx->wifi_state = WIFI_PROV_STA_DISCONNECTED;
         ESP_LOGE(TAG, "Disconnect reason : %d", info->disconnected.reason);
 
         /* Set code corresponding to the reason for disconnection */
@@ -305,53 +400,73 @@ esp_err_t conn_mgr_prov_event_handler(void *ctx, system_event_t *event)
         case WIFI_REASON_AUTH_FAIL:
         case WIFI_REASON_ASSOC_FAIL:
         case WIFI_REASON_HANDSHAKE_TIMEOUT:
-            ESP_LOGI(TAG, "STA Auth Error");
-            g_prov->wifi_disconnect_reason = WIFI_PROV_STA_AUTH_ERROR;
+            ESP_LOGE(TAG, "STA Auth Error");
+            ESP_LOGE(TAG, "Please reset to factory and retry provisioning");
+            prov_ctx->wifi_disconnect_reason = WIFI_PROV_STA_AUTH_ERROR;
+            prov_ctx->prov_state = CMP_STATE_FAIL;
             break;
         case WIFI_REASON_NO_AP_FOUND:
-            ESP_LOGI(TAG, "STA AP Not found");
-            g_prov->wifi_disconnect_reason = WIFI_PROV_STA_AP_NOT_FOUND;
+            ESP_LOGE(TAG, "STA AP Not found");
+            ESP_LOGE(TAG, "Please reset to factory and retry provisioning");
+            prov_ctx->wifi_disconnect_reason = WIFI_PROV_STA_AP_NOT_FOUND;
+            prov_ctx->prov_state = CMP_STATE_FAIL;
             break;
         default:
             /* If none of the expected reasons,
              * retry connecting to host SSID */
-            g_prov->wifi_state = WIFI_PROV_STA_CONNECTING;
+            prov_ctx->wifi_state = WIFI_PROV_STA_CONNECTING;
             esp_wifi_connect();
         }
         break;
 
     default:
+        /* This event is not intended to be handled by this handler.
+         * Return ESP_FAIL to signal global event handler to take
+         * control */
+        ret = ESP_FAIL;
         break;
     }
-    return ESP_OK;
+    return ret;
 }
 
 esp_err_t wifi_prov_get_wifi_state(wifi_prov_sta_state_t *state)
 {
-    if (g_prov == NULL || state == NULL) {
+    if (prov_ctx == NULL || state == NULL) {
         return ESP_FAIL;
     }
 
-    *state = g_prov->wifi_state;
+    *state = prov_ctx->wifi_state;
     return ESP_OK;
 }
 
 esp_err_t wifi_prov_get_wifi_disconnect_reason(wifi_prov_sta_fail_reason_t *reason)
 {
-    if (g_prov == NULL || reason == NULL) {
+    if (prov_ctx == NULL || reason == NULL) {
         return ESP_FAIL;
     }
 
-    if (g_prov->wifi_state != WIFI_PROV_STA_DISCONNECTED) {
+    if (prov_ctx->wifi_state != WIFI_PROV_STA_DISCONNECTED) {
         return ESP_FAIL;
     }
 
-    *reason = g_prov->wifi_disconnect_reason;
+    *reason = prov_ctx->wifi_disconnect_reason;
     return ESP_OK;
 }
 
 esp_err_t conn_mgr_prov_is_provisioned(bool *provisioned)
 {
+    if (!provisioned) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    *provisioned = false;
+
+    if (prov_ctx &&
+        prov_ctx->prov_state > CMP_STATE_IDLE &&
+        prov_ctx->prov_state < CMP_STATE_FAIL) {
+        return ESP_OK;
+    }
+
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     if (esp_wifi_init(&cfg) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to init wifi");
@@ -361,7 +476,6 @@ esp_err_t conn_mgr_prov_is_provisioned(bool *provisioned)
     /* Get WiFi Station configuration */
     wifi_config_t wifi_cfg;
     if (esp_wifi_get_config(ESP_IF_WIFI_STA, &wifi_cfg) != ESP_OK) {
-        *provisioned = false;
         return ESP_FAIL;
     }
 
@@ -375,8 +489,12 @@ esp_err_t conn_mgr_prov_is_provisioned(bool *provisioned)
 
 esp_err_t wifi_prov_configure_sta(wifi_config_t *wifi_cfg)
 {
-    if (!g_prov) {
+    if (!prov_ctx) {
         ESP_LOGE(TAG, "Invalid state of Provisioning app");
+        return ESP_FAIL;
+    }
+    if (prov_ctx->prov_state >= CMP_STATE_CRED_RECV) {
+        ESP_LOGE(TAG, "WiFi credentials already received by provisioning app");
         return ESP_FAIL;
     }
 
@@ -388,7 +506,7 @@ esp_err_t wifi_prov_configure_sta(wifi_config_t *wifi_cfg)
     }
 
     /* Configure WiFi as both AP and/or Station */
-    if (esp_wifi_set_mode(g_prov->prov.wifi_mode) != ESP_OK) {
+    if (esp_wifi_set_mode(prov_ctx->mgr_config.scheme.wifi_mode) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to set WiFi mode");
         return ESP_FAIL;
     }
@@ -404,6 +522,7 @@ esp_err_t wifi_prov_configure_sta(wifi_config_t *wifi_cfg)
         ESP_LOGE(TAG, "Failed to set WiFi configuration");
         return ESP_FAIL;
     }
+
     /* Connect to AP */
     if (esp_wifi_connect() != ESP_OK) {
         ESP_LOGE(TAG, "Failed to connect WiFi");
@@ -411,40 +530,122 @@ esp_err_t wifi_prov_configure_sta(wifi_config_t *wifi_cfg)
     }
 
     /* Reset wifi station state for provisioning app */
-    g_prov->wifi_state = WIFI_PROV_STA_CONNECTING;
+    prov_ctx->wifi_state = WIFI_PROV_STA_CONNECTING;
+    prov_ctx->prov_state = CMP_STATE_CRED_RECV;
     return ESP_OK;
 }
 
-esp_err_t conn_mgr_prov_start_provisioning(conn_mgr_prov_t prov, int security, const char *pop,
-        const char *service_name, const char *service_key)
+esp_err_t conn_mgr_prov_init(conn_mgr_prov_config_t config)
 {
-    /* If provisioning app data present,
-     * means provisioning app is already running */
-    if (g_prov) {
-        ESP_LOGI(TAG, "Invalid provisioning state");
+    if (prov_ctx) {
+        ESP_LOGE(TAG, "Provisioning manager already initialized");
         return ESP_ERR_INVALID_STATE;
     }
 
     /* Allocate memory for provisioning app data */
-    g_prov = (struct wifi_prov_data *) calloc(1, sizeof(struct wifi_prov_data));
-    if (!g_prov) {
-        ESP_LOGI(TAG, "Unable to allocate prov data");
+    prov_ctx = (struct conn_mgr_prov_ctx *) calloc(1, sizeof(struct conn_mgr_prov_ctx));
+    if (!prov_ctx) {
+        ESP_LOGE(TAG, "Error allocating memory for singleton instance");
         return ESP_ERR_NO_MEM;
+    }
+
+    prov_ctx->mgr_config = config;
+    prov_ctx->prov_state = CMP_STATE_IDLE;
+
+    execute_event_cb(CMP_INIT);
+    return ESP_OK;
+}
+
+void conn_mgr_prov_wait(void)
+{
+    while (1) {
+        if (prov_ctx &&
+            prov_ctx->prov_state > CMP_STATE_IDLE &&
+            prov_ctx->prov_state < CMP_STATE_STOPPED) {
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            continue;
+        }
+        break;
+    }
+}
+
+void conn_mgr_prov_deinit(void)
+{
+    /* Wait for conn_mgr_prov_start_provisioning() to finish,
+     * else its possible that deinit gets called by another thread
+     * while endpoint configure/add callbacks are being executed,
+     * which will cause unwanted behavior. Also if deinit is called
+     * in any of the endpoint related callbacks it will be stuck
+     * forever. TODO : This issue must be eliminated in future by
+     * getting rid of the add endpoint/configure endpoint events and
+     * instead calling the related APIs before provisioning is started */
+    while (1) {
+        if (prov_ctx &&
+            prov_ctx->prov_state == CMP_STATE_STARTING) {
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            continue;
+        }
+        break;
+    }
+
+    if (!prov_ctx) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return;
+    }
+
+    if (prov_ctx->timer) {
+        esp_timer_stop(prov_ctx->timer);
+    }
+
+    if (prov_ctx->prov_state >= CMP_STATE_STARTED &&
+        prov_ctx->prov_state < CMP_STATE_STOPPED) {
+        conn_mgr_prov_stop_service();
+    }
+
+    /* Extract the callbacks to be called post deinit */
+    conn_mgr_prov_cb_func_t app_cb = prov_ctx->mgr_config.app_event_handler.event_cb;
+    void *app_data = prov_ctx->mgr_config.app_event_handler.user_data;
+
+    conn_mgr_prov_cb_func_t scheme_cb = prov_ctx->mgr_config.scheme_event_handler.event_cb;
+    void *scheme_data = prov_ctx->mgr_config.scheme_event_handler.user_data;
+
+    /* Free manager context */
+    free(prov_ctx);
+    prov_ctx = NULL;
+
+    /* Execute deinit event callbacks */
+    if (scheme_cb) {
+        scheme_cb(scheme_data, CMP_DEINIT);
+    }
+    if (app_cb) {
+        app_cb(app_data, CMP_DEINIT);
+    }
+}
+
+esp_err_t conn_mgr_prov_start_provisioning(int security, const char *pop,
+                                           const char *service_name, const char *service_key)
+{
+    if (!prov_ctx) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    if (prov_ctx->prov_state != CMP_STATE_IDLE) {
+        ESP_LOGE(TAG, "Provisioning service already started");
+        return ESP_ERR_INVALID_STATE;
     }
 
     /* Initialize app data */
     if (pop) {
-        g_prov->pop.len = strlen(pop);
-        g_prov->pop.data = malloc(g_prov->pop.len);
-        if (!g_prov->pop.data) {
+        prov_ctx->pop.len = strlen(pop);
+        prov_ctx->pop.data = malloc(prov_ctx->pop.len);
+        if (!prov_ctx->pop.data) {
             ESP_LOGI(TAG, "Unable to allocate PoP data");
-            free(g_prov);
             return ESP_ERR_NO_MEM;
         }
-        memcpy((void *)g_prov->pop.data, pop, g_prov->pop.len);
+        memcpy((void *)prov_ctx->pop.data, pop, prov_ctx->pop.len);
     }
-    g_prov->security = security;
-    g_prov->prov = prov;
+    prov_ctx->security = security;
 
     /* Create timer object as a member of app data */
     esp_timer_create_args_t timer_conf = {
@@ -453,22 +654,50 @@ esp_err_t conn_mgr_prov_start_provisioning(conn_mgr_prov_t prov, int security, c
         .dispatch_method = ESP_TIMER_TASK,
         .name = "stop_softap_tm"
     };
-    esp_err_t err = esp_timer_create(&timer_conf, &g_prov->timer);
+    esp_err_t err = esp_timer_create(&timer_conf, &prov_ctx->timer);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to create timer");
-        free((void *)g_prov->pop.data);
-        free(g_prov);
+        free((void *)prov_ctx->pop.data);
         return err;
     }
 
     /* Start provisioning service */
+    prov_ctx->prov_state = CMP_STATE_STARTING;
     err = conn_mgr_prov_start_service(service_name, service_key);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Provisioning failed to start");
-        esp_timer_delete(g_prov->timer);
-        free((void *)g_prov->pop.data);
-        free(g_prov);
+        esp_timer_delete(prov_ctx->timer);
+        free((void *)prov_ctx->pop.data);
         return err;
     }
+    prov_ctx->prov_state = CMP_STATE_STARTED;
     return ESP_OK;
+}
+
+void conn_mgr_prov_stop_provisioning(void)
+{
+    /* Wait for conn_mgr_prov_start_provisioning() to finish.
+     * See conn_mgr_prov_deinit() for reason. */
+    while (1) {
+        if (prov_ctx &&
+            prov_ctx->prov_state == CMP_STATE_STARTING) {
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            continue;
+        }
+        break;
+    }
+
+    if (!prov_ctx) {
+        ESP_LOGE(TAG, "Provisioning manager not initialized");
+        return;
+    }
+
+    if (prov_ctx->timer) {
+        esp_timer_stop(prov_ctx->timer);
+    }
+
+    if (prov_ctx->prov_state >= CMP_STATE_STARTED &&
+        prov_ctx->prov_state < CMP_STATE_STOPPED) {
+        conn_mgr_prov_stop_service();
+    }
 }
