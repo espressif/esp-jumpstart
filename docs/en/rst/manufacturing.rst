@@ -115,8 +115,17 @@ this NVS partition to flash:
 
     $ $IDF_PATH/components/esptool_py/esptool/esptool.py --port $ESPPORT write_flash 0x340000 my_mfg.bin
 
-You may have to replace the */dev/cu.SLAB\_USBtoUART* with the correct
-device name that appears on your host setup.
+.. _sec_for\_esp8266\_users:
+
+For ESP8266 Users
+~~~~~~~~~~~~~~~~~
+
+If your ESP8266 board has a smaller 2MB flash,
+use this command to flash my\_mfg.bin.
+
+.. code:: bash
+
+    $ $IDF_PATH/components/esptool_py/esptool/esptool.py --port $ESPPORT write_flash 0x1D5000 my_mfg.bin
 
 Now if you boot up your firmware, it will work exactly as the firmware
 in the previous Chapter. But in this case, the firmware image itself is

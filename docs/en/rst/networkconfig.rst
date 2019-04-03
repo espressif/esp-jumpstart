@@ -112,6 +112,15 @@ directory of esp-jumpstart for trying this out.
    Wi-Fi network that is configured. This is the end product experience
    that we want.
 
+.. _sec_for\_esp8266\_users:
+
+For ESP8266 Users
+~~~~~~~~~~~~~~~~~
+
+ESP8266 supports only SoftAP based provisioning as it does not have 
+Bluetooth. Use **wifi-sec1** app for provisioning.
+
+
 .. _sec_unified\_prov:
 
 Unified Provisioning

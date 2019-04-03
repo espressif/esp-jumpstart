@@ -59,6 +59,27 @@ You will require the following to get started:
 -  A Development host setup (Windows, Linux or Mac) that will be used
    for development.
 
+.. _sec_for\_esp8266\_users:
+
+For ESP8266 Users
+~~~~~~~~~~~~~~~~~
+
+You will require the following to get started:
+
+-  An ESP8266 development kit: ESP8266-DevKit-C
+   https://www.espressif.com/products/hardware/esp8266ex/overview/
+   available through your closest store. You could also use any other
+   ESP8266 development board if you already have one.
+
+-  ESP8266\_RTOS\_SDK is Espressif’s IoT Development Framework for
+   ESP8266
+   (https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest). All
+   references to IDF, ESP-IDF are to be mapped to ESP8266\_RTOS\_SDK in
+   the context of ESP8266.
+
+-  The instructions for ESP32 and ESP8266 are common unless specified
+   under the **For ESP8266 Users** section.
+
 For the Restless
 ----------------
 
