@@ -66,7 +66,9 @@
 	    <div class="g-recaptcha" data-sitekey="6LdeMJMUAAAAAMbioS9r_X_baAeUNPT1nG5FNRpn"></div>
 	    <br/>
 	    <br/>
-
+	    <input type="checkbox" name="gdpr"> Please check here to provide consent to store your email address. Please read our privacy policy <a href="./privacy-policy/">here</a></input>
+	    <br/>
+	    <br/>
 	    <input type="submit" style="background-color: #d12e26; color: #fff" value="Generate">
 
 	  </form>
@@ -74,16 +76,22 @@
 	</div>
       </div>
     </div>
-    <script>
-      window.onload = function() {
-	  var recaptcha = document.forms["myform"]["g-recaptcha-response"];
-	  recaptcha.required = true;
-	  recaptcha.oninvalid = function(e) {
-	      // do something
-	      alert("Please complete the captcha");
-	  }
-};
-    </script>
+<script>
+  window.onload = function() {
+      var recaptcha = document.forms["myform"]["g-recaptcha-response"];
+      recaptcha.required = true;
+      recaptcha.oninvalid = function(e) {
+          // do something
+          alert("Please complete the captcha");
+      }
+      var gdpr = document.forms["myform"]["gdpr"];
+      gdpr.required = true;
+      gdpr.oninvalid = function(e) {
+	  // do something
+	  alert("We need your consent to store your email ID and associate it with the device certificates that we have created for you. Note that we do not store the actual certificates and they cannot be recovered if you lose them.");
+      }
+  };
+</script>
     <script>
       var form = document.getElementById("myform");
       form.onsubmit = function (e) {
