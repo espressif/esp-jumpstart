@@ -85,8 +85,8 @@ the factory data that will be written to the *fctry* partition.
    Generating Factory Partition
 
 The utility
-*components/nvs\_flash/nvs\_partition\_generator/nvs\_partition\_gen.py* is
-used to generate an NVS image on the development host. This image can
+*components/nvs\_flash/nvs\_partition\_generator/nvs\_partition\_gen.py*
+is used to generate an NVS image on the development host. This image can
 then be written to the flash into the location of the *fctry* partition.
 
 This utility accepts a CSV file, and generates the image of an NVS
@@ -107,16 +107,15 @@ The NVS partition can then be generated as:
 
     $ python $IDF_PATH/components/nvs_flash/nvs_partition_generator/nvs_partition_gen.py --input mfg_config.csv --output my_mfg.bin --size 0x6000
 
-
 The my\_mfg.bin file is the NVS partition data that can now be
 programmed into the device. You can use the following command to write
 this NVS partition to flash:
 
 .. code:: bash
 
-    $ $IDF_PATH/components/esptool_py/esptool/esptool.py --port $ESPPORT write_flash 0x340000  my_mfg.bin
+    $ $IDF_PATH/components/esptool_py/esptool/esptool.py --port $ESPPORT write_flash 0x340000 my_mfg.bin
 
-You may have to replace the */dev/cu.SLAB_USBtoUART* with the correct
+You may have to replace the */dev/cu.SLAB\_USBtoUART* with the correct
 device name that appears on your host setup.
 
 Now if you boot up your firmware, it will work exactly as the firmware
