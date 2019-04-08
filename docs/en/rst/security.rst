@@ -76,9 +76,9 @@ This is achieved by building a chain of trust from the hardware, to the
 software bootloader to the application firmware.
 
 .. figure:: ../../_static/secure_boot.png
-   :alt: Generating Factory Partition
+   :alt: Secure Boot
 
-   Generating Factory Partition
+   Secure Boot
 
 The process works as follows:
 
