@@ -643,6 +643,7 @@ esp_err_t conn_mgr_prov_init(conn_mgr_prov_config_t config)
         prov_ctx_lock = xSemaphoreCreateMutex();
     }
 
+    xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (prov_ctx) {
         ESP_LOGE(TAG, "Provisioning manager already initialized");
         xSemaphoreGive(prov_ctx_lock);
