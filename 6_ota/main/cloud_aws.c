@@ -84,13 +84,11 @@ static bool ota_update_done = false;
 static void ota_url_state_change_callback(const char *pJsonString, uint32_t JsonStringDataLen, jsonStruct_t *pContext)
 {
     if (pContext != NULL) {
-        char * ota_url = strndup((char *) pJsonString, (int) JsonStringDataLen);
-        ESP_LOGI(TAG, "Delta - Output state changed to %d and data: %s", *(bool *) (pContext->pData), ota_url);
-        if (do_firmware_upgrade(ota_url) == ESP_OK) {
+        ESP_LOGI(TAG, "Delta - OTA URL received: %s", (char *)pContext->pData);
+        if (do_firmware_upgrade((char *)pContext->pData) == ESP_OK) {
             // Firmware upgrade successful
             ota_update_done = true;
         }
-        free(ota_url);
     }
 }
 
