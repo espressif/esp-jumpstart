@@ -29,7 +29,7 @@ Host.
 ESP-IDF
 -------
 
-ESP-IDF is Espressif’s IoT Development Framework.
+ESP-IDF is Espressif’s IoT Development Framework for ESP32.
 
 -  ESP-IDF is a collection of libraries and header files that provides
    the core software components that are required to build any software
@@ -125,6 +125,20 @@ is successful, it will write the generated firmware to the device.
 
 Once the flashing is successful, the device will reset and you will see
 the console output from this firmware.
+
+.. _sec_for\_esp8266\_users:
+
+For ESP8266 Users
+~~~~~~~~~~~~~~~~~
+
+Please make sure that the IDF\_PATH is set to
+the path of ESP8266\_RTOS\_SDK. ESP8266 uses the branch platform/esp8266
+of esp-jumpstart. Switch to this branch using the following command.
+
+::
+
+    $ cd esp-jumpstart
+    $ git checkout -b platform/esp8266 origin/platform/esp8266
 
 The Code
 --------

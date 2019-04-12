@@ -65,7 +65,12 @@ The my\_mfg.bin file is the NVS partition data that can now be programmed into t
 \begin{minted}{bash}
 $ $IDF_PATH/components/esptool_py/esptool/esptool.py --port $ESPPORT write_flash 0x340000 my_mfg.bin
 \end{minted}
-You may have to replace the \textit{/dev/cu.SLAB\_USBtoUART} with the correct device name that appears on your host setup.
+
+\subsection{For ESP8266 Users}\index{For ESP8266 Users}\label{sec:for_esp8266_users}
+If your ESP8266 board has a smaller 2MB flash, use this command to flash my_mfg.bin.
+\begin{minted}{bash}
+$ $IDF_PATH/components/esptool_py/esptool/esptool.py --port $ESPPORT write_flash 0x1D5000 my_mfg.bin
+\end{minted}
 
 Now if you boot up your firmware, it will work exactly as the firmware in the previous Chapter. But in this case, the firmware image itself is independent of the unique settings per device. 
 

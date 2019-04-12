@@ -20,7 +20,7 @@ The PC, or the Development Host can be any of Linux, Windows or Mac. The ESP32 b
 
 \section{ESP-IDF}\index{ESP-IDF}
 
-ESP-IDF is Espressif's IoT Development Framework. 
+ESP-IDF is Espressif's IoT Development Framework for ESP32. 
 \begin{itemize}
     \item ESP-IDF is a collection of libraries and header files that provides the core software components that are required to build any software projects on ESP32. 
     \item ESP-IDF also provides tools and utilities that are required for typical developer and production usecases, like build, flash, debug and measure.
@@ -91,6 +91,14 @@ This will then build the entire SDK and the application. Once the build is succe
 \ksnotebox{On some development boards you may have to press a specific button configuration in order to put the development board into the 'flashing mode'. Please refer to your development board's documentation for these details. For ESP32-DevKit-C, no such button press is required, the board is automatically put into the flashing mode by the flasher utility.}
 
 Once the flashing is successful, the device will reset and you will see the console output from this firmware.
+
+\subsection{For ESP8266 Users}\index{For ESP8266 Users}\label{sec:for_esp8266_users}
+Please make sure that the IDF\_PATH is set to the path of ESP8266\_RTOS\_SDK. ESP8266 uses the branch platform/esp8266 of esp-jumpstart. Switch to this branch using the following command.
+
+\begin{verbatim}
+$ cd esp-jumpstart
+$ git checkout -b platform/esp8266 origin/platform/esp8266
+\end{verbatim}
 
 \section{The Code}\index{The Code}
 Now let's look at the code of the Hello World Application. It is only a few lines of code as shown below:
