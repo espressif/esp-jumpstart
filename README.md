@@ -1,3 +1,5 @@
+> If you have already been using ESP Jumpstart, please have a look at some breaking [Changes](CHANGES.md).
+
 ESP-Jumpstart
 =============
 [[中文]](./README_cn.md)
