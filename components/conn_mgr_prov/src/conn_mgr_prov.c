@@ -264,7 +264,7 @@ esp_err_t conn_mgr_prov_endpoint_configure(const char *ep_name)
     xSemaphoreTake(prov_ctx_lock, portMAX_DELAY);
     if (prov_ctx && prov_ctx->prov_scheme_config) {
         err = prov_ctx->mgr_config.scheme.set_config_endpoint(
-                prov_ctx->prov_scheme_config, ep_name, endpoint_uuid_used);
+                prov_ctx->prov_scheme_config, ep_name, endpoint_uuid_used + 1);
     }
     xSemaphoreGive(prov_ctx_lock);
 
