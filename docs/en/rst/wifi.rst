@@ -1,6 +1,8 @@
 Wi-Fi Connection
 ================
 
+:link_to_translation:`zh_CN:[中文]`
+
 Let’s now get this power outlet on a Wi-Fi network. In this Chapter we
 will connect to a hard-coded Wi-Fi network that is embedded within the
 device’s firmware executable image. You may refer to the

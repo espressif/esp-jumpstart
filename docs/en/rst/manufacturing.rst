@@ -1,6 +1,8 @@
 Manufacturing
 =============
 
+:link_to_translation:`zh_CN:[中文]`
+
 While building IoT products, it is often the case that some unique
 information needs to be stored in each device.
 

@@ -1,6 +1,8 @@
 Getting Started
 ===============
 
+:link_to_translation:`zh_CN:[中文]`
+
 In this chapter, our aim would be to get our development setup
 functional, and also to get an understanding for the development tools
 and repositories available around ESP32.

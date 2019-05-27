@@ -1,6 +1,8 @@
 Security Considerations
 =======================
 
+:link_to_translation:`zh_CN:[中文]`
+
 Any discussion about connected devices is incomplete without discussion
 about the security considerations. Let us look at some of the security
 considerations that should be taken into account.

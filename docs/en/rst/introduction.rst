@@ -1,6 +1,8 @@
 Introduction
 ============
 
+:link_to_translation:`zh_CN:[中文]`
+
 ESP-Jumpstart: Build ESP32 Products Fast
 ----------------------------------------
 
