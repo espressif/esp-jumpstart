@@ -35,6 +35,7 @@
 *.i*86
 *.x86_64
 *.hex
+*.pyc
 
 # Debug files
 *.dSYM/
@@ -69,3 +70,9 @@ dkms.conf
 **/sdkconfig
 **/sdkconfig.old
 **/build
+
+# Doc build artifacts
+docs/*/*/_build/
+docs/*/*/sphinx-warning-log.txt
+docs/*/*/sphinx-warning-log-sanitized.txt
+
