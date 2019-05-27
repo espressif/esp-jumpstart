@@ -1,6 +1,8 @@
 The Driver
 ==========
 
+:link_to_translation:`zh_CN:[中文]`
+
 In this Chapter we will create a basic power outlet using the driver
 APIs of the ESP32. The power outlet will do the following:
 

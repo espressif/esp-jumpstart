@@ -1,6 +1,8 @@
 Remote Control (Cloud)
 ======================
 
+:link_to_translation:`zh_CN:[中文]`
+
 The true potential for smart connected devices can be realised when the
 connectivity is used to control or monitor the device remotely, or
 through integration with other services. This is where the cloud

@@ -1,6 +1,8 @@
 Network Configuration
 =====================
 
+:link_to_translation:`zh_CN:[中文]`
+
 In the previous example, we had hard-coded the Wi-Fi credentials into
 the firmware. This obviously doesn’t work for an end-user product.
 

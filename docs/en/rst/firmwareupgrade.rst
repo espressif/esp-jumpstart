@@ -1,6 +1,8 @@
 Firmware Upgrades
 =================
 
+:link_to_translation:`zh_CN:[中文]`
+
 Before we discuss firmware upgrades, one pertinent topic that needs to
 be discussed is the flash partitions.
 
