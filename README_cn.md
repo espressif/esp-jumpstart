@@ -2,7 +2,7 @@ ESP-Jumpstart
 =============
 [[English]](./README.md)
 
-| ![Cover Page](https://docs.espressif.com/projects/esp-jumpstart/zh_CN/latest/index.html) |
+| [![Cover Page]](https://docs.espressif.com/projects/esp-jumpstart/zh_CN/latest/index.html) |
 |:--------------------------:|
 | **ESP-Jumpstart：快速构建基于 ESP32 的产品** |
 
