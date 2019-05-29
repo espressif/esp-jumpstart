@@ -4,7 +4,7 @@ ESP-Jumpstart
 =============
 [[中文]](./README_cn.md)
 
-| ![Cover Page](https://docs.espressif.com/projects/esp-jumpstart/en/latest/index.html) |
+| [![Cover Page]](https://docs.espressif.com/projects/esp-jumpstart/en/latest/index.html) |
 |:--------------------------:|
 | **ESP-Jumpstart: Build ESP32 Products Fast** |
 
