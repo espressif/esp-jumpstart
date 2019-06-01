@@ -1,11 +1,10 @@
-ESP-Jumpstart
-=============
+# ESP-Jumpstart
+
 [[English]](./README.md)
 
 | [![Cover Page]](https://docs.espressif.com/projects/esp-jumpstart/zh_CN/latest/index.html) |
 |:--------------------------:|
 | **ESP-Jumpstart：快速构建基于 ESP32 的产品** |
-
 
 有时，固件开发并非易事，特别是用于量产的固件。开发人员不但需要面临各种决策上的问题并权衡多种选择，而且还需开发手机 app，并接入各家云服务商。现在，我们盛情推出 ESP-Jumpstart 示例项目，内含产品开发的完整步骤、最佳做法，并融合其他同僚的经验之谈，助您快速启动基于 ESP32 的产品开发！
 
@@ -42,11 +41,10 @@ cd ../esp-jumpstart
 export IDF_PATH=</path/to/esp-idf/>
 ```
 
+### Documentation Build Status
 
+[![Documentation Status](https://readthedocs.com/projects/espressif-esp-jumpstart-zh-cn/badge/?version=latest)](https://docs.espressif.com/projects/esp-jumpstart/zh_CN/latest/)
 
 [Smart Power Outlet]: docs/_static/jumpstart-outlet.png
 [Jumpstart Applicability]: docs/_static/jumpstart-outlet-blocks.png
 [Cover Page]: docs/_static/cover_page.svg
-
-
-
