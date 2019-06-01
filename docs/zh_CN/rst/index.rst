@@ -15,7 +15,7 @@ ESP-Jumpstart
 | `Jumpstart Now`_ |
 +------------------+
 
- 
+
 .. toctree::
    :hidden:
 
@@ -31,6 +31,6 @@ ESP-Jumpstart
 
 
 
-.. |Jumpstart Now| image:: ../../_static/cover_page.svg
+.. |Jumpstart Now| image:: ../../_static/cover_page.jpg
 .. _Jumpstart Now: introduction.html
 
