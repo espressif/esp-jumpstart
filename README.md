@@ -1,13 +1,12 @@
 > If you have already been using ESP Jumpstart, please have a look at some breaking [Changes](CHANGES.md).
 
-ESP-Jumpstart
-=============
+# ESP-Jumpstart
+
 [[中文]](./README_cn.md)
 
 | [![Cover Page]](https://docs.espressif.com/projects/esp-jumpstart/en/latest/index.html) |
 |:--------------------------:|
 | **ESP-Jumpstart: Build ESP32 Products Fast** |
-
 
 Building production-ready firmware can be hard. It involves multiple questions and decisions about the best ways of doing things. It involves building phone applications, and integrating cloud agents to get all the features done. What if there was a ready reference, a known set of best steps, gathered from previous experience of others, that you could jumpstart with?
 
@@ -43,9 +42,10 @@ cd ../esp-jumpstart
 export IDF_PATH=</path/to/esp-idf/>
 ```
 
+### Documentation Build Status
+
+[![Documentation Status](https://readthedocs.com/projects/espressif-esp-jumpstart/badge/?version=latest)](https://docs.espressif.com/projects/esp-jumpstart/en/latest/)
 
   [Smart Power Outlet]: docs/_static/jumpstart-outlet.png
   [Jumpstart Applicability]: docs/_static/jumpstart-outlet-blocks.png
   [Cover Page]: docs/_static/cover_page.svg
-
-

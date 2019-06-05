@@ -259,17 +259,9 @@ latex_elements = {
 #'preamble': '',
 }
 
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-  ('index', 'ReadtheDocsTemplate.tex', u'Read the Docs Template Documentation',
-   u'Read the Docs', 'manual'),
-]
-
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-#latex_logo = None
+latex_logo = "../../_static/cover_page_pdf.jpg"
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
