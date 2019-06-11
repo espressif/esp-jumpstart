@@ -188,6 +188,7 @@ void aws_iot_task(void *param)
     jsonStruct_t output_handler;
     output_handler.cb = output_state_change_callback;
     output_handler.pData = &output_state;
+    output_handler.dataLength = sizeof(output_state);
     output_handler.pKey = "output";
     output_handler.type = SHADOW_JSON_BOOL;
     rc = aws_iot_shadow_register_delta(&mqttClient, &output_handler);
