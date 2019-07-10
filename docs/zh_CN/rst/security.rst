@@ -85,7 +85,7 @@ Secure Boot 可以确保 ESP32 从 flash 运行任何软件时，软件受信任
 
    -  固件签名验证通过后，Bootloader 加载并执行固件。
 
-如上所述，启动设备 Secure Boot 之前，我们需要先进行其他一些操作。请参考 `Secure Boot 相关文档 <https://docs.espressif.com/projects/esp-idf/en/latest/security/secure-boot.html>`_，查看更多详细信息。
+如上所述，启动设备 Secure Boot 之前，我们需要先进行其他一些操作。请参考 `Secure Boot 相关文档 <https://docs.espressif.com/projects/esp-idf/en/v3.2.2/security/secure-boot.html>`_，查看更多详细信息。
 
 Flash 加密
 ~~~~~~~~~~~~~~~
@@ -99,7 +99,7 @@ flash 加密可以确保储存在 ESP32 flash 中的应用程序固件保持加�
 
    flash 加密
 
-请参考 `flash 加密文档 <https://docs.espressif.com/projects/esp-idf/en/latest/security/flash-encryption.html>`_，查看如何启用 flash 加密功能。
+请参考 `flash 加密文档 <https://docs.espressif.com/projects/esp-idf/en/v3.2.2/security/flash-encryption.html>`_，查看如何启用 flash 加密功能。
 
 NVS 加密
 ~~~~~~~~~~~~~~
@@ -126,4 +126,4 @@ NVS 加密
 
    -  正常执行其他的 NVS 操作。
 
-请参考 `NVS 加密相关文档 <https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/storage/nvs_flash.html#nvs-encryption>`_，查看更多详细信息。
+请参考 `NVS 加密相关文档 <https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/storage/nvs_flash.html#nvs-encryption>`_，查看更多详细信息。
