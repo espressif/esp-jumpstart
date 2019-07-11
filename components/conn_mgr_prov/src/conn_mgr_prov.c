@@ -22,8 +22,6 @@
 #include <protocomm.h>
 #include <protocomm_security0.h>
 #include <protocomm_security1.h>
-#include <protocomm_ble.h>
-#include <protocomm_httpd.h>
 
 #include "conn_mgr_prov_priv.h"
 
