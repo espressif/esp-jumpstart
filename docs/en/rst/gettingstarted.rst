@@ -45,7 +45,7 @@ Setting up IDF
 ~~~~~~~~~~~~~~
 
 Please follow the steps in this documentation for setting up IDF:
-https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html.
+https://docs.espressif.com/projects/esp-idf/en/v3.2.2/get-started/index.html.
 Please complete all the steps on this page.
 
 Before proceeding, please ensure that you have setup your development

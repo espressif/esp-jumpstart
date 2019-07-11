@@ -168,7 +168,7 @@ infrastructure:
 -  **Unified Provisioning Specification:** A specification to *securely*
    transfer Wi-Fi credentials to the device, independent of the
    transport (SoftAP, BLE). More details can be here here:
-   https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html.
+   https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/provisioning/provisioning.html.
 
 -  **IDF Components:** Software modules that implement this
    specification in the device firmware, available through ESP-IDF
@@ -344,7 +344,7 @@ Additional Details
 ~~~~~~~~~~~~~~~~~~
 
 More details about Unified provisioning are available at:
-https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html
+https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/provisioning/provisioning.html
 
 .. _sec_nvs\_info:
 
@@ -382,7 +382,7 @@ Additional Details
 ~~~~~~~~~~~~~~~~~~
 
 More details about NVS are available at:
-https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/storage/nvs_flash.html
+https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/storage/nvs_flash.html
 
 Reset to Factory
 ----------------

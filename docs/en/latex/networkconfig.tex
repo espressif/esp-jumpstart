@@ -83,11 +83,11 @@ Espressif provides a \textbf{Unified Provisioning} module for assisting you with
 
 \end{itemize}
 
-\ksnotebox{More details about Unified provisioning are available at: \url{https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html}}
+\ksnotebox{More details about Unified provisioning are available at: \url{https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/provisioning/provisioning.html}}
 
 The following components are offered as part of the provisioning infrastructure:
 \begin{itemize}
-    \item \textbf{Unified Provisioning Specification:} A specification to \textit{securely} transfer Wi-Fi credentials to the device, independent of the transport (SoftAP, BLE). More details can be here here: \url{https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html}.
+    \item \textbf{Unified Provisioning Specification:} A specification to \textit{securely} transfer Wi-Fi credentials to the device, independent of the transport (SoftAP, BLE). More details can be here here: \url{https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/provisioning/provisioning.html}.
     \item \textbf{IDF Components:} Software modules that implement this specification in the device firmware, available through ESP-IDF
     \item \textbf{Phone Libraries:} Reference implementations on iOS and Android are available that can be directly incorporated into your existing phone applications
     \item \textbf{Reference Phone Applications:} Fully functional Phone applications on Android (\url{https://github.com/espressif/esp-idf-provisioning-android}) and iOS (\url{https://github.com/espressif/esp-idf-provisioning-ios}) are available for testing during your development, or for skinning with your brand's elements.
@@ -171,7 +171,7 @@ At manufacturing, every device can be programmed with a unique random key. This 
 
 \subsection{Additional Details}\index{Additional Details}
 
-More details about Unified provisioning are available at: \url{https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/provisioning/provisioning.html}
+More details about Unified provisioning are available at: \url{https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/provisioning/provisioning.html}
 
 \section{NVS: Persistent key-value store}\index{NVS: Persistent key-value store}\label{sec:nvs_info}
 In the Unified Provisioning section above, we mentioned in passing that the Wi-Fi credentials are stored in the NVS. The NVS is a software component that maintains a persistent storage of key-value pairs. Since the storage is persistent this information is available even across reboots and power shutdowns. The NVS uses a dedicated section of the flash to store this information.
@@ -191,7 +191,7 @@ Application developers can also use the NVS to store any additional data that yo
 
 \subsection{Additional Details}\index{Additional Details}
 
-More details about NVS are available at: \url{https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/storage/nvs_flash.html}
+More details about NVS are available at: \url{https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/storage/nvs_flash.html}
 
 \section{Reset to Factory}\index{Reset to Factory}
 Another common behaviour that is expected of products is \textit{Reset to Factory Settings}. Once the user configuration is stored into the NVS as discussed above, reset to factory behaviour can be achieved by simply erasing the NVS partition.

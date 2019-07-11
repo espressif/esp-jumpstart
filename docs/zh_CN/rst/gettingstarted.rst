@@ -29,7 +29,7 @@ ESP-IDF 是乐鑫为 ESP32 提供的物联网开发框架。
 设置 ESP-IDF
 ~~~~~~~~~~~~~~
 
-请参照 `ESP-IDF 入门指南 <https://docs.espressif.com/projects/esp-idf/zh_CN/latest/get-started/index.html>`_，按照步骤设置 ESP-IDF。注：请完成链接页面的所有步骤。
+请参照 `ESP-IDF 入门指南 <https://docs.espressif.com/projects/esp-idf/zh_CN/v3.2.2/get-started/index.html>`_，按照步骤设置 ESP-IDF。注：请完成链接页面的所有步骤。
 
 在进行下面步骤之前，请确认您已经正确设置了开发主机，并按照上面链接中的步骤构建了第一个应用程序。如果上面步骤已经完成，那让我们继续探索 ESP-IDF。
 

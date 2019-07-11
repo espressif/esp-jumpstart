@@ -121,7 +121,7 @@ The process works as follows:
 As you might have noticed, you will have to perform some additional
 steps for enabling secure boot on your devices. Please head over to the
 detailed information about Secure Boot
-(https://docs.espressif.com/projects/esp-idf/en/latest/security/secure-boot.html\ Secure
+(https://docs.espressif.com/projects/esp-idf/en/v3.2.2/security/secure-boot.html\ Secure
 Boot) to understand further.
 
 Encrypted Flash
@@ -146,7 +146,7 @@ contents.
 
 For more information about enabling flash encryption, you can head over
 to additional documentation of Flash Encryption
-(https://docs.espressif.com/projects/esp-idf/en/latest/security/flash-encryption.html).
+(https://docs.espressif.com/projects/esp-idf/en/v3.2.2/security/flash-encryption.html).
 
 Encrypting NVS
 ~~~~~~~~~~~~~~
@@ -188,4 +188,4 @@ The process works as follows: The process works as follows:
 
 For more information about using NVS encryption, you can head over to
 the additional documentation at
-https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/storage/nvs_flash.html#nvs-encryption.
+https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/storage/nvs_flash.html#nvs-encryption.
