@@ -1,3 +1,7 @@
 COMPONENT_SRCDIRS := src
 COMPONENT_ADD_INCLUDEDIRS := include
 COMPONENT_PRIV_INCLUDEDIRS := src
+
+ifneq ($(filter y, $(CONFIG_BT_ENABLED) $(CONFIG_BLUEDROID_ENABLED)),y y)
+	COMPONENT_OBJEXCLUDE := src/conn_mgr_prov_mode_ble.o
+endif
