@@ -98,13 +98,12 @@ directory of esp-jumpstart for trying this out.
 
 -  By default, the firmware is launched in BLE provisioning mode.
 
--  Install the companion phone application for network configuration
-   from this location:
-   https://github.com/espressif/esp-idf-provisioning-android/releases.
-   Please install the latest app with **ble-sec1** as part of its name.
+-  Install the companion phone application for network configuration.
+   Android:
+   https://play.google.com/store/apps/details?id=com.espressif.provble,
+   iOS: https://apps.apple.com/in/app/esp-ble-provisioning/id1473590141.
 
--  Launch the application and follow the wizard as shown in the images
-   below.
+-  Launch the application and follow the wizard.
 
 -  If all goes well, your device would be connected to your Home Wi-Fi
    network.
@@ -120,8 +119,7 @@ For ESP8266 Users
 ~~~~~~~~~~~~~~~~~
 
 ESP8266 supports only SoftAP based provisioning as it does not have 
-Bluetooth. Use **wifi-sec1** app for provisioning.
-
+Bluetooth. Use **ESP SoftAP Provisioning** app for provisioning.
 
 .. _sec_unified\_prov:
 
@@ -167,22 +165,28 @@ infrastructure:
 
 -  **Unified Provisioning Specification:** A specification to *securely*
    transfer Wi-Fi credentials to the device, independent of the
-   transport (SoftAP, BLE). More details can be here here:
-   https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/provisioning/provisioning.html.
+   transport (SoftAP, BLE). More details can be found here:
+   https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/provisioning/provisioning.html.
 
 -  **IDF Components:** Software modules that implement this
-   specification in the device firmware, available through ESP-IDF
+   specification in the device firmware, available through ESP-IDF.
+   More details can be found here:
+   https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/provisioning/wifi_provisioning.html.
 
--  **Phone Libraries:** Reference implementations on iOS and Android are
-   available that can be directly incorporated into your existing phone
-   applications
+-  **Phone apps:** Android: BLE
+   Provisioning(\ https://play.google.com/store/apps/details?id=com.espressif.provble),
+   SoftAP
+   Provisioning(\ https://play.google.com/store/apps/details?id=com.espressif.provsoftap).
+   iOS: BLE
+   Provisioning(\ https://apps.apple.com/in/app/esp-ble-provisioning/id1473590141),
+   SoftAP
+   Provisioning(\ https://apps.apple.com/in/app/esp-softap-provisioning/id1474040630)
 
--  **Reference Phone Applications:** Fully functional Phone applications
-   on Android
-   (https://github.com/espressif/esp-idf-provisioning-android) and iOS
-   (https://github.com/espressif/esp-idf-provisioning-ios) are available
-   for testing during your development, or for skinning with your
-   brand’s elements.
+- **Phone App sources:** Sources for the phone apps for
+    Android (https://github.com/espressif/esp-idf-provisioning-android) and
+    iOS (https://github.com/espressif/esp-idf-provisioning-ios)
+    are available for testing during your development,
+    or for skinning with your brand's elements.
 
 The Code
 ~~~~~~~~
@@ -192,31 +196,35 @@ shown below:
 
 .. code:: c
 
+   wifi_prov_mgr_init(config);
+   if (wifi_prov_mgr_is_provisioned(&provisioned) != ESP_OK) {
+       return;
+   }
 
-    if (conn_mgr_prov_is_provisioned(&provisioned) != ESP_OK) {
-        return;
-    }
+   if (provisioned != true) {
+       /* Start provisioning service */
+       wifi_prov_mgr_start_provisioning(security, pop,
+                   service_name, service_key);
+   } else {
+       /* Start the station */
+       wifi_init_sta();
+   }
 
-    if (provisioned != true) {
-        /* Starting unified provisioning */
-        conn_mgr_prov_start_provisioning(prov_type,
-                   security, pop, service_name, service_key);
-    } else {
-        /* Start the station */
-        wifi_init_sta();
-    }
-
-The *conn\_mgr\_prov* component provides a wrapper over the unified
+The *wifi_provisioning* component provides a wrapper over the unified
 provisioning interface. Some notes about the code above:
 
--  The *conn\_mgr\_prov\_is\_provisionined()* API checks whether Wi-Fi
+-  The *wifi_prov_mgr_init* API initialises the Wi-Fi provisioning
+   manager. This should be the first API call before invoking any other
+   Wi-Fi provisioning APIs.
+
+-  The *wifi_prov_mgr_is_provisionined()* API checks whether Wi-Fi
    network credentials have already been configured or not. These are
    typically stored in a flash partition called the *NVS*. More about
    NVS later in this Chapter.
 
 -  If no Wi-Fi network credentials are available, the firmware launches
    the unified provisioning using the call
-   *conn\_mgr\_prov\_start\_provisioning()*. This API will take care of
+   *wifi_prov_mgr_start_provisioning()*. This API will take care of
    everything, specifically:
 
    #. It will start the SoftAP or BLE transport as configured
@@ -247,27 +255,68 @@ the event handler for taking care of this:
 
 .. code:: c
 
-    esp_err_t event_handler(void *ctx, system_event_t *event)
-    {
-         conn_mgr_prov_event_handler(ctx, event);
-       
-         switch(event->event_id) {
-         case SYSTEM_EVENT_STA_START:
-    ...
-    ...
-    ...
+   esp_err_t event_handler(void *ctx, system_event_t *event)
+   {
+        wifi_prov_mgr_event_handler(ctx, event);
+
+        switch(event->event_id) {
+        case SYSTEM_EVENT_STA_START:
+   ...
+   ...
+   ...
 
 Configurable Options
 ^^^^^^^^^^^^^^^^^^^^
 
-In the code above, we have used the following call for invoking the
-unified provisioning interface:
+In the code above, we first initialise the Wi-Fi Provisioning manager
+with a config structure, an example of which is as below:
 
 .. code:: c
 
-        /* Starting unified provisioning */
-        conn_mgr_prov_start_provisioning(prov_type,
-                   security, pop, service_name, service_key);
+       /* Configuration for the provisioning manager */
+       wifi_prov_mgr_config_t config = {
+           .scheme = wifi_prov_scheme_ble,
+           .scheme_event_handler = WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM,
+           .app_event_handler = {
+               .event_cb = prov_event_handler,
+               .user_data = NULL
+           }
+       };
+       wifi_prov_mgr_init(config);
+
+The paramters are as follows:
+
+#. **Scheme:** What is the Provisioning Scheme that we want? SoftAP
+   (wifi\_prov\_scheme\_softap) or BLE (wifi\_prov\_scheme\_ble)?
+
+#. **Scheme Event Handler:** Any default scheme specific event handler that you would like to choose.
+    Normally, this is used just to reclaim some memory after provisioning is done.
+
+    - WIFI\_PROV\_SCHEME\_BLE\_EVENT\_HANDLER\_FREE\_BTDM - Free both classic BT and BLE (BTDM) memory.
+        Used when main application doesn’t require Bluetooth at all
+
+    - WIFI\_PROV\_SCHEME\_BLE\_EVENT\_HANDLER\_FREE\_BLE - Free only BLE memory.
+        Used when main application requires classic BT.
+
+    - WIFI\_PROV\_SCHEME\_BLE\_EVENT\_HANDLER\_FREE\_BT - Free only classic BT.
+        Used when main application requires BLE. In this case freeing happens right when the manager is initialized.
+
+    - WIFI\_PROV\_EVENT\_HANDLER\_NONE Don’t use any scheme specific handler.
+        Used when provisioning scheme is not BLE (i.e. SoftAP or Console), or when main application wants to handle
+        the memory reclaiming on its own, or needs both BLE and classic BT to function.
+
+#. **Application Event Handler:** Applications may want to use the
+   provisioning events. A handler for that can be registered here. Any
+   application specific user data can also be indicated here, which will
+   be passed to the event handler.
+
+After initialising, we have used the following call for starting the
+provisioning:
+
+.. code:: c
+
+       /* Start provisioning service */
+       wifi_prov_mgr_start_provisioning(security, pop, service_name, service_key);
 
 Let us now look at the parameters, or the configuration options of this
 API:
@@ -276,20 +325,9 @@ API:
    security methods for transferring the credentials: *security0* and
    *security1*. Security0 uses no security for exchanging the
    credentials. This is primarily used for development purposes.
-   Security1 uses elliptic curve, *curve25519* crypto for key exchange,
-   followed by *AES-CTR* encryption for data exchanged on the channel.
-
-#. **Transport:** The developer can choose which transport mechanism
-   will be used for the network configuration. The options available are
-   SoftAP or BLE.
-
-   -  The module is written in such a manner that, based on the
-      developer’s selection, only the relevant software libraries will
-      get pulled into the final executable image.
-
-   -  The unified provisioning module will also manage the state
-      transitions, and other services, that are required for the network
-      configuration to take place
+   Security1 uses secure communication which consists of secure
+   handshake using *X25519* key exchange and proof of possession (pop)
+   and *AES-CTR* for encryption/decryption of messages.
 
 #. **Proof of Possession:** When a user brings in a new smart device,
    the device launches its provisioning network (BLE, SoftAP) for
@@ -343,8 +381,11 @@ configuration.
 Additional Details
 ~~~~~~~~~~~~~~~~~~
 
-More details about Unified provisioning are available at:
-https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/provisioning/provisioning.html
+More details about Unified provisioning and the Wi-Fi provisioning
+abstraction layer are available at:
+https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/provisioning/provisioning.html
+and
+https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/provisioning/wifi_provisioning.html
 
 .. _sec_nvs\_info:
 
@@ -382,7 +423,7 @@ Additional Details
 ~~~~~~~~~~~~~~~~~~
 
 More details about NVS are available at:
-https://docs.espressif.com/projects/esp-idf/en/v3.2.2/api-reference/storage/nvs_flash.html
+https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/storage/nvs_flash.html
 
 Reset to Factory
 ----------------

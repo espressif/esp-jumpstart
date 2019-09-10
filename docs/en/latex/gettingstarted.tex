@@ -28,7 +28,7 @@ ESP-IDF is Espressif's IoT Development Framework for ESP32.
 
 \subsection{Setting up IDF}\index{Setting up IDF}
 
-Please follow the steps in this documentation for setting up IDF: \url{https://docs.espressif.com/projects/esp-idf/en/v3.2.2/get-started/index.html}. Please complete all the steps on this page.
+Please follow the steps in this documentation for setting up IDF: \url{https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html}. Please complete all the steps on this page.
 
 Before proceeding, please ensure that you have setup your development host, and have built the first application as indicated in this page. Now that you have done that, let's look at some additional details about IDF.
 
@@ -69,10 +69,10 @@ The ESP-Jumpstart repository contains a sequence of \textit{applications} that w
 $ git clone --recursive https://github.com/espressif/esp-jumpstart
 \end{verbatim}
 
-Since we are building a production-ready firmware here, we would want to base our development on a stable release of IDF. Currently, ESP-Jumpstart uses the stable version 3.2 of ESP-IDF. Let us first switch to that version of ESP-IDF.
+Since we are building a production-ready firmware here, we would want to base our development on a stable release of IDF. Currently, ESP-Jumpstart uses the stable version 3.3 of ESP-IDF. Let us first switch to that version of ESP-IDF.
 \begin{verbatim}
 $ cd esp-idf
-$ git checkout -b release/v3.2 remotes/origin/release/v3.2
+$ git checkout -b release/v3.3 remotes/origin/release/v3.3
 $ git submodule update --recursive
 \end{verbatim}
 
