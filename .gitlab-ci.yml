@@ -23,7 +23,7 @@ build_demo:
     - echo -e "Host gitlab.espressif.cn\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
     - git --version
     - git submodule update --init --recursive
-    - git clone --branch release/v3.2 --depth 1 $GITLAB_SSH_SERVER/idf/esp-idf.git
+    - git clone --branch release/v3.3 --depth 1 $GITLAB_SSH_SERVER/idf/esp-idf.git
     - cd esp-idf
     - ./tools/ci/mirror-submodule-update.sh
     - cd ..
