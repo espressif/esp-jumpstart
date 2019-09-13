@@ -22,6 +22,8 @@
 
 #include "app_priv.h"
 
+#define SERV_NAME_PREFIX    "PROV_"
+
 static const char *TAG = "app_main";
 
 /* Signal Wi-Fi events on this event-group */
@@ -101,10 +103,9 @@ static void wifi_init_sta()
 static void get_device_service_name(char *service_name, size_t max)
 {
     uint8_t eth_mac[6];
-    const char *ssid_prefix = "PROV_";
     esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
     snprintf(service_name, max, "%s%02X%02X%02X",
-             ssid_prefix, eth_mac[3], eth_mac[4], eth_mac[5]);
+             SERV_NAME_PREFIX, eth_mac[3], eth_mac[4], eth_mac[5]);
 }
 
 void app_main()
