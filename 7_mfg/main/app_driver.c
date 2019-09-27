@@ -16,17 +16,10 @@
 #include "app_priv.h"
 #include JUMPSTART_BOARD
 
-#define DEBOUNCE_TIME  30
-
 static bool g_output_state;
 static void push_btn_cb(void *arg)
 {
-    static uint64_t previous;
-    uint64_t current = xTaskGetTickCount();
-    if ((current - previous) > DEBOUNCE_TIME) {
-        previous = current;
-        app_driver_set_state(!g_output_state);
-    }
+    app_driver_set_state(!g_output_state);
 }
 
 static void button_press_3sec_cb(void *arg)
