@@ -23,37 +23,48 @@ build_demo:
     - echo -e "Host gitlab.espressif.cn\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
     - git --version
     - git submodule update --init --recursive
-    - git clone --branch release/v3.3 --depth 1 $GITLAB_SSH_SERVER/idf/esp-idf.git
+    - git clone --recursive --branch release/v4.0 --depth 1 $GITLAB_SSH_SERVER/idf/esp-idf.git
+    - export PATH="$IDF_PATH/tools:$PATH"
     - cd esp-idf
-    - ./tools/ci/mirror-submodule-update.sh
+    - source tools/ci/setup_python.sh
+    - source tools/ci/configure_ci_environment.sh
+    - tools/idf_tools.py --non-interactive install && eval "$(tools/idf_tools.py --non-interactive export)" || exit 1
     - cd ..
     - cd 1_hello_world
-    - make defconfig
+    - make defconfig && make -j5
+    - make clean && rm sdkconfig && rm -r build
+    - idf.py build
     - make
     - cd ../
     - cd 2_drivers
-    - make defconfig
-    - make
+    - make defconfig && make -j5
+    - make clean && rm sdkconfig && rm -r build
+    - idf.py build
     - cd ../
     - cd 3_wifi_connection
-    - make defconfig
-    - make
+    - make defconfig && make -j5
+    - make clean && rm sdkconfig && rm -r build
+    - idf.py build
     - cd ../
     - cd 4_network_config
-    - make defconfig
-    - make
+    - make defconfig && make -j5
+    - make clean && rm sdkconfig && rm -r build
+    - idf.py build
     - cd ../
     - cd 5_cloud
     - touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
-    - make defconfig
-    - make
+    - make defconfig && make -j5
+    - make clean && rm sdkconfig && rm -r build
+    - idf.py build
     - cd ../
     - cd 6_ota
     - touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
-    - make defconfig
-    - make
+    - make defconfig && make -j5
+    - make clean && rm sdkconfig && rm -r build
+    - idf.py build
     - cd ../
     - cd 7_mfg
     - touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
-    - make defconfig
-    - make
+    - make defconfig && make -j5
+    - make clean && rm sdkconfig && rm -r build
+    - idf.py build

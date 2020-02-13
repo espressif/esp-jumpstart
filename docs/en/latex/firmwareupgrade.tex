@@ -65,7 +65,7 @@ The above partitions file instructs the IDF to create partitions: NVS, OTA-Data,
 
 Once we create this partition file, we should instruct IDF to use this custom partitioning mechanism, over its default mechanism. This can be enabled by updating the SDK configuration. In the case of our application right now, this setting has already been activated in the \textit{6\_ota/sdkconfig.defaults} file. Hence you don't have to do any extra step for activating this.
 
-But should you wish to use a different partitions file, or update the offset of the primary firmware, you should modify this setting. This can be done by executing the \textit{make menuconfig} command, and then configuring correct options in \textit{menuconfig} -> \textit{Partition Table}.
+But should you wish to use a different partitions file, or update the offset of the primary firmware, you should modify this setting. This can be done by executing the \textit{idf.py menuconfig} command, and then configuring correct options in \textit{menuconfig} -> \textit{Partition Table}.
 
 \subsection{For ESP8266 Users}\index{For ESP8266 Users}\label{sec:for_esp8266_users}
 If your ESP8266 board has a smaller 2MB flash, please use this partition table.

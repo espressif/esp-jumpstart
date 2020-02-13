@@ -69,10 +69,17 @@ The question is how do you make the entire contents of these files be
 part of your firmware image, and how do you access them within your
 firmware?
 
-ESP-IDF provides a great mechanism for enabling this. The *component.mk*
+ESP-IDF provides a great mechanism for enabling this. The *CMakeLists.txt*
 file can be used to inform the build system that the contents of certain
 files should be embedded within firmware image. This can be enabled by
-adding the following line into your application’s *component.mk* file.
+adding the following line into your application’s *CMakeLists.txt* file.
+
+.. code:: cmake
+
+    target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/server.cert" TEXT)
+
+If you are using Legacy GNU make based build system instead of cmake, the same can be
+enabled by adding the following line into your application's *component.mk* file.
 
 .. code:: cmake
 

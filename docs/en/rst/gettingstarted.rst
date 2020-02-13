@@ -45,7 +45,7 @@ Setting up IDF
 ~~~~~~~~~~~~~~
 
 Please follow the steps in this documentation for setting up IDF:
-https://docs.espressif.com/projects/esp-idf/en/release-v3.3/get-started/index.html.
+https://docs.espressif.com/projects/esp-idf/en/release-v4.0/get-started/index.html.
 Please complete all the steps on this page.
 
 Before proceeding, please ensure that you have setup your development
@@ -82,7 +82,7 @@ interfaced peripherals and the SDK configuration.
 An application must contain one *main* component. This is the primary
 component that holds the application logic. The application may
 additionally include other components as may be desired. The
-application’s *Makefile* defines the build instructions for the
+application’s *CMakeLists.txt/Makefile* defines the build instructions for the
 application. Additionally, an optional *sdkconfig.defaults* may be
 placed that picks up the default SDK configuration that should be
 selected for this application.
@@ -101,13 +101,13 @@ ESP-Jumpstart git repository https://github.com/espressif/esp-jumpstart.
 
 Since we are building a production-ready firmware here, we would want to
 base our development on a stable release of IDF. Currently,
-ESP-Jumpstart uses the stable version 3.3 of ESP-IDF. Let us first
+ESP-Jumpstart uses the stable version 4.0 of ESP-IDF. Let us first
 switch to that version of ESP-IDF.
 
 ::
 
     $ cd esp-idf
-    $ git checkout -b release/v3.3 remotes/origin/release/v3.3
+    $ git checkout -b release/v4.0 remotes/origin/release/v4.0
     $ git submodule update --recursive
 
 Now we build our first, *Hello World*, application from ESP-Jumpstart
@@ -117,10 +117,10 @@ with most of the steps below.
 ::
 
     $ cd esp-jumpstart/1_hello_world
-    $ make -j8 menuconfig
     $ export ESPPORT=/dev/cu.SLAB_USBTOUART   # Or the correct device name for your setup
     $ export ESPBAUD=921600
-    $ make -j8 flash monitor
+    $ idf.py menuconfig
+    $ idf.py flash monitor
 
 This will then build the entire SDK and the application. Once the build
 is successful, it will write the generated firmware to the device.
