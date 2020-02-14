@@ -32,7 +32,15 @@ At times, the firmware has to use certain files directly. Most commonly, in the 
 
 The question is how do you make the entire contents of these files be part of your firmware image, and how do you access them within your firmware?
 
-ESP-IDF provides a great mechanism for enabling this. The \textit{component.mk} file can be used to inform the build system that the contents of certain files should be embedded within firmware image. This can be enabled by adding the following line into your application's \textit{component.mk} file.
+
+ESP-IDF provides a great mechanism for enabling this. The \textit{CMakeLists.txt} file can be used to inform the build system that the contents of certain files should be embedded within firmware image. This can be enabled by adding the following line into your application's \textit{CMakeLists.txt}.
+
+\begin{minted}{cmake}
+target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/server.cert" TEXT)
+\end{minted}
+
+
+If you are using Legacy GNU make based build system instead of cmake, the same can be enabled by adding the following line into your application's \textit{component.mk} file.
 
 \begin{minted}{cmake}
 COMPONENT_EMBED_TXTFILES := cloud_cfg/server.cert 

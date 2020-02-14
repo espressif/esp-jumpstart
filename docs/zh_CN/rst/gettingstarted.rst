@@ -29,7 +29,7 @@ ESP-IDF 是乐鑫为 ESP32 提供的物联网开发框架。
 设置 ESP-IDF
 ~~~~~~~~~~~~~~
 
-请参照 `ESP-IDF 入门指南 <https://docs.espressif.com/projects/esp-idf/zh_CN/release-v3.3/get-started/index.html>`_，按照步骤设置 ESP-IDF。注：请完成链接页面的所有步骤。
+请参照 `ESP-IDF 入门指南 <https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.0/get-started/index.html>`_，按照步骤设置 ESP-IDF。注：请完成链接页面的所有步骤。
 
 在进行下面步骤之前，请确认您已经正确设置了开发主机，并按照上面链接中的步骤构建了第一个应用程序。如果上面步骤已经完成，那让我们继续探索 ESP-IDF。
 
@@ -54,7 +54,7 @@ ESP-IDF 中的所有软件均以“组件”的形式提供，比如操作系统
 
    应用程序架构
 
-应用程序必须包含一个 *main* 组件，这是保存应用程序逻辑的主要组件。除此之外，应用程序根据自身需求还可以包含其他组件。应用程序的 *Makefile* 文件定义了应用程序的构建指令，此外，应用程序还包含一个可选的 *sdkconfig.defaults* 文件，用于存放应用程序默认的 SDK 配置。 
+应用程序必须包含一个 *main* 组件，这是保存应用程序逻辑的主要组件。除此之外，应用程序根据自身需求还可以包含其他组件。应用程序的 *CMakeLists.txt/Makefile* 文件定义了应用程序的构建指令，此外，应用程序还包含一个可选的 *sdkconfig.defaults* 文件，用于存放应用程序默认的 SDK 配置。 
 
 获取 ESP-Jumpstart 库
 ---------------------
@@ -65,12 +65,12 @@ ESP-Jumpstart 库包含了一系列由 ESP-IDF 构建的 *应用程序*，我们
 
     $ git clone --recursive https://github.com/espressif/esp-jumpstart
 
-我们将构建一个可用于量产的固件，因此选择使用 ESP-IDF 稳定版本进行开发。目前 ESP-Jumpstart 使用的是 ESP-IDF v3.3 稳定版本，请切换到这一版本。
+我们将构建一个可用于量产的固件，因此选择使用 ESP-IDF 稳定版本进行开发。目前 ESP-Jumpstart 使用的是 ESP-IDF v4.0 稳定版本，请切换到这一版本。
 
 ::
 
     $ cd esp-idf
-    $ git checkout -b release/v3.3 remotes/origin/release/v3.3
+    $ git checkout -b release/v4.0 remotes/origin/release/v4.0
     $ git submodule update --recursive
 
 现在，我们构建 ESP-Jumpstart 中的第一个应用程序 *Hello World*，并将其烧录到开发板上，具体步骤如下，相信您已经熟悉这些步骤：
@@ -78,10 +78,10 @@ ESP-Jumpstart 库包含了一系列由 ESP-IDF 构建的 *应用程序*，我们
 ::
 
     $ cd esp-jumpstart/1_hello_world
-    $ make -j8 menuconfig
     $ export ESPPORT=/dev/cu.SLAB_USBTOUART   # Or the correct device name for your setup
     $ export ESPBAUD=921600
-    $ make -j8 flash monitor
+    $ idf.py menuconfig
+    $ idf.py flash monitor
 
 上面的步骤将构建整个 SDK 和应用程序。构建成功后，将会把生成的固件烧录到开发板。
 

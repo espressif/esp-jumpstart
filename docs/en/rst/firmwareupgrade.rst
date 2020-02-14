@@ -102,7 +102,7 @@ step for activating this.
 
 But should you wish to use a different partitions file, or update the
 offset of the primary firmware, you should modify this setting. This can
-be done by executing the *make menuconfig* command, and then configuring
+be done by executing the *idf.py menuconfig* command, and then configuring
 correct options in *menuconfig* -> *Partition Table*.
 
 .. _sec_for\_esp8266\_users:

@@ -85,8 +85,8 @@ Espressif provides a \textbf{Unified Provisioning} module for assisting you with
 
 The following components are offered as part of the provisioning infrastructure:
 \begin{itemize}
-    \item \textbf{Unified Provisioning Specification:} A specification to \textit{securely} transfer Wi-Fi credentials to the device, independent of the transport (SoftAP, BLE). More details can be found here: \url{https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/provisioning/provisioning.html}.
-    \item \textbf{IDF Components:} Software modules that implement this specification in the device firmware, available through ESP-IDF. More details can be found here: \url{https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/provisioning/wifi_provisioning.html}.
+    \item \textbf{Unified Provisioning Specification:} A specification to \textit{securely} transfer Wi-Fi credentials to the device, independent of the transport (SoftAP, BLE). More details can be found here: \url{https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/provisioning/provisioning.html}.
+    \item \textbf{IDF Components:} Software modules that implement this specification in the device firmware, available through ESP-IDF. More details can be found here: \url{https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/provisioning/wifi_provisioning.html}.
     \item \textbf{Phone apps:} Android: BLE Provisioning(\url{https://play.google.com/store/apps/details?id=com.espressif.provble}), SoftAP Provisioning(\url{https://play.google.com/store/apps/details?id=com.espressif.provsoftap}). iOS: BLE Provisioning(\url{https://apps.apple.com/in/app/esp-ble-provisioning/id1473590141}), SoftAP Provisioning(\url{https://apps.apple.com/in/app/esp-softap-provisioning/id1474040630})
     \item \textbf{Phone App sources:} Sources for the phone apps for Android (\url{https://github.com/espressif/esp-idf-provisioning-android}) and iOS (\url{https://github.com/espressif/esp-idf-provisioning-ios}) are available for testing during your development, or for skinning with your brand's elements.
 \end{itemize}
@@ -191,7 +191,7 @@ At manufacturing, every device can be programmed with a unique random key. This 
 
 \subsection{Additional Details}\index{Additional Details}
 
-More details about Unified provisioning and the Wi-Fi provisioning abstraction layer are available at: \url{https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/provisioning/provisioning.html} and \url{https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/provisioning/wifi_provisioning.html}
+More details about Unified provisioning and the Wi-Fi provisioning abstraction layer are available at: \url{https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/provisioning/provisioning.html} and \url{https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/provisioning/wifi_provisioning.html}
 
 \section{NVS: Persistent key-value store}\index{NVS: Persistent key-value store}\label{sec:nvs_info}
 In the Unified Provisioning section above, we mentioned in passing that the Wi-Fi credentials are stored in the NVS. The NVS is a software component that maintains a persistent storage of key-value pairs. Since the storage is persistent this information is available even across reboots and power shutdowns. The NVS uses a dedicated section of the flash to store this information.
@@ -211,7 +211,7 @@ Application developers can also use the NVS to store any additional data that yo
 
 \subsection{Additional Details}\index{Additional Details}
 
-More details about NVS are available at: \url{https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/storage/nvs_flash.html}
+More details about NVS are available at: \url{https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/storage/nvs_flash.html}
 
 \section{Reset to Factory}\index{Reset to Factory}
 Another common behaviour that is expected of products is \textit{Reset to Factory Settings}. Once the user configuration is stored into the NVS as discussed above, reset to factory behaviour can be achieved by simply erasing the NVS partition.

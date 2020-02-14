@@ -94,7 +94,7 @@ ESP8266 不具备蓝牙功能，因此现阶段仅支持 SoftAP 配网模式。E
 
 配网底层结构包含以下组件：
 
--  **统一配置规范**：用于将 Wi-Fi 信息安全地传输到设备，与传输模式（SoftAP 或 BLE 模式）无关。请参考 `统一配置相关文档 <https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/provisioning/provisioning.html>`_，查看详细信息。
+-  **统一配置规范**：用于将 Wi-Fi 信息安全地传输到设备，与传输模式（SoftAP 或 BLE 模式）无关。请参考 `统一配置相关文档 <https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/provisioning/provisioning.html>`_，查看详细信息。
 
 -  **IDF 组件**：在设备固件中实现此规范的软件模块，可通过 ESP-IDF 获取。
 
@@ -197,7 +197,7 @@ ESP8266 不具备蓝牙功能，因此现阶段仅支持 SoftAP 配网模式。E
 补充信息
 ~~~~~~~~~~~~~~~~~~
 
-请参考 `统一配置相关文档 <https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/provisioning/provisioning.html>`_，查看详细信息。
+请参考 `统一配置相关文档 <https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/provisioning/provisioning.html>`_，查看详细信息。
 
 .. _sec_nvs\_info:
 
@@ -221,7 +221,7 @@ NVS 经过专门设计，不但可以防止设备断电带来的数据损坏影�
 补充信息
 ~~~~~~~~~~~~~~~~~~
 
-请参考 `NVS 相关文档 <https://docs.espressif.com/projects/esp-idf/en/release-v3.3/api-reference/storage/nvs_flash.html>`_，查看详细信息.
+请参考 `NVS 相关文档 <https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/storage/nvs_flash.html>`_，查看详细信息.
 
 恢复出厂设置
 ----------------

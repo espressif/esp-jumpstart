@@ -71,7 +71,7 @@ OTA 固件升级过程中，状态变更如图所示：
 
 创建此分区文件后，我们应指示 IDF 使用该自定义分区，而非默认分区，可以通过更新 SDK 配置来启用自定义分区。本应用程序示例中，此项设置已经在 *6\_ota/sdkconfig.defaults* 文件中激活，因此无需再进行其他激活操作。
 
-但如果希望使用不同的分区文件，或更新主固件的偏移量，请修改此设置。可以通过执行 *make menuconfig* 命令来实现，然后在 *menuconfig* -> *Partition Table* 中配置正确的选项。 
+但如果希望使用不同的分区文件，或更新主固件的偏移量，请修改此设置。可以通过执行 *idf.py menuconfig* 命令来实现，然后在 *menuconfig* -> *Partition Table* 中配置正确的选项。 
 
 .. _sec_for\_esp8266\_users:
 

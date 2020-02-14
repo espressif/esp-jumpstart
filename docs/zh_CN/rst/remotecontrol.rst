@@ -39,7 +39,13 @@ TLS 协议内容之一是使用 CA 证书进行服务器验证，因此 TLS 层�
 
 但问题是如何将这些文件的内容全部嵌入固件中并进行访问？
 
-ESP-IDF 提供了一个很好的实现方法，即使用 *component.mk* 文件告诉构建系统哪些文件的内容需要嵌入到固件映像中。只要将下面的代码添加到 *component.mk* 文件中即可。
+ESP-IDF 提供了一个很好的实现方法，即使用 *CMakeLists.txt* 文件告诉构建系统哪些文件的内容需要嵌入到固件映像中。只要将下面的代码添加到 *CMakeLists.txt* 文件中即可。
+
+.. code:: cmake
+
+    target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/server.cert" TEXT) 
+
+如果你使用的是 Legacy GNU 构建系统，而非 CMake 构建系统，向您应用中的 component.mk 文件加入如下行同样可以使能该功能。
 
 .. code:: cmake
 
