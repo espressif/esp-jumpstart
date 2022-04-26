@@ -107,7 +107,7 @@ The NVS partition can then be generated as:
 
 .. code:: bash
 
-    $ python $IDF_PATH/components/nvs_flash/nvs_partition_generator/nvs_partition_gen.py --input mfg_config.csv --output my_mfg.bin --size 0x6000
+    $ python $IDF_PATH/components/nvs_flash/nvs_partition_generator/nvs_partition_gen.py generate mfg_config.csv my_mfg.bin 0x6000
 
 The my\_mfg.bin file is the NVS partition data that can now be
 programmed into the device. You can use the following command to write

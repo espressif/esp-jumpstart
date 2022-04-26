@@ -11,30 +11,39 @@
 #include <freertos/task.h>
 #include <esp_log.h>
 #include <esp_wifi.h>
-#include <esp_event_loop.h>
+#include <esp_event.h>
 
 #include <nvs_flash.h>
 #include "app_priv.h"
 
+#include <esp_idf_version.h>
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 1, 0)
+// Features supported in 4.1+
+#define ESP_NETIF_SUPPORTED
+#endif
+
+#ifdef ESP_NETIF_SUPPORTED
+#include <esp_netif.h>
+#else
+#include <tcpip_adapter.h>
+#endif
+
 static const char *TAG = "app_main";
 
-static esp_err_t event_handler(void *ctx, system_event_t *event)
+/* Event handler for catching system events */
+static void event_handler(void* arg, esp_event_base_t event_base,
+                          int32_t event_id, void* event_data)
 {
-    switch (event->event_id) {
-    case SYSTEM_EVENT_STA_START:
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
-        break;
-    case SYSTEM_EVENT_STA_GOT_IP:
-        ESP_LOGI(TAG, "Connected with IP Address:%s", ip4addr_ntoa(&event->event_info.got_ip.ip_info.ip));
-        break;
-    case SYSTEM_EVENT_STA_DISCONNECTED:
-        ESP_LOGI(TAG, "Disconnected. Connecting to the AP again...\n");
+    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+        ESP_LOGI(TAG, "Connected with IP Address:" IPSTR, IP2STR(&event->ip_info.ip));
+        /* Signal main application to continue execution */
+    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+        ESP_LOGI(TAG, "Disconnected. Connecting to the AP again...");
         esp_wifi_connect();
-        break;
-    default:
-        break;
     }
-    return ESP_OK;
 }
 
 #define EXAMPLE_ESP_WIFI_SSID ""
@@ -80,9 +89,19 @@ void app_main()
         return;
     }
 
-    /* Initialize TCP/IP and the event loop */
+    /* Initialize TCP/IP */
+#ifdef ESP_NETIF_SUPPORTED
+    esp_netif_init();
+#else
     tcpip_adapter_init();
-    ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL) );
+#endif
+    /* Initialize the event loop */
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    /* Register our event handler for Wi-Fi and IP and related events */
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
+
 
     /* Start the station */
     wifi_init_sta();

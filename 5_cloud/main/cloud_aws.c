@@ -175,7 +175,7 @@ void aws_iot_task(void *param)
         rc = aws_iot_shadow_connect(&mqttClient, &scp);
         if(SUCCESS != rc) {
             ESP_LOGE(TAG, "Error(%d) connecting to %s:%d", rc, sp.pHost, sp.port);
-            vTaskDelay(1000 / portTICK_RATE_MS);
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
     } while (SUCCESS != rc);
 
@@ -241,7 +241,7 @@ void aws_iot_task(void *param)
             rc = shadow_update(&mqttClient, reported_handles, reported_count, desired_handles,  desired_count);
         }
 
-        vTaskDelay(1000 / portTICK_RATE_MS);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
     if (SUCCESS != rc) {
