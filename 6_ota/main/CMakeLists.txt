@@ -1,5 +1,6 @@
 set(COMPONENT_SRCS "app_main.c"
 					"app_driver.c"
+                    "app_wifi.c"
                     "cloud_aws.c"
                     "aws_custom_utils.c"
                     "ota.c")

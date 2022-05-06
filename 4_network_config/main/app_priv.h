@@ -7,7 +7,11 @@
 */
 #pragma once
 
+#include "stdbool.h"
+#include "esp_err.h"
+
 void app_driver_init(void);
 int app_driver_set_state(bool state);
 bool app_driver_get_state(void);
-
+esp_err_t app_wifi_init(void);
+esp_err_t app_wifi_start(void);
