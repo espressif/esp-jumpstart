@@ -1,54 +1,64 @@
 stages:
   - build
 
-variables:
-  BATCH_BUILD: "1"
-  V: "0"
-  MAKEFLAGS: "-j5 --no-keep-going"
-  IDF_PATH: "$CI_PROJECT_DIR/esp-idf"
-  IDF_CI_BUILD: "1"
+.build_all_examples: &build_all_examples |
+  cd 1_hello_world
+  idf.py build
+  cd ../
+  cd 2_drivers
+  idf.py build
+  cd ../
+  cd 3_wifi_connection
+  idf.py build
+  cd ../
+  cd 4_network_config
+  idf.py build
+  cd ../
+  cd 5_cloud
+  touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
+  idf.py build
+  cd ../
+  cd 6_ota
+  touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
+  idf.py build
+  cd ../
+  cd 7_mfg
+  touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
+  idf.py build
 
-build_demo:
+.fetch_aws_iot: &fetch_aws_iot |
+  git submodule update --init --recursive
+
+.build_template:
   stage: build
-  image: $CI_DOCKER_REGISTRY/$CI_IMAGE
+  image: espressif/idf:latest
   tags:
     - build
+    - internet
+  variables:
+    PEDANTIC_FLAGS: "-Werror -Werror=deprecated-declarations -Werror=unused-variable -Werror=unused-but-set-variable -Werror=unused-function"
+    EXTRA_CFLAGS: "${PEDANTIC_FLAGS}"
+    EXTRA_CXXFLAGS: "${PEDANTIC_FLAGS}"
   script:
-    # add gitlab ssh key
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo -n $GITLAB_KEY > ~/.ssh/id_rsa_base64
-    - base64 --decode --ignore-garbage ~/.ssh/id_rsa_base64 > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - echo -e "Host gitlab.espressif.cn\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-    - git --version
-    - git submodule update --init --recursive
-    - git clone --recursive --branch ${IDF_GIT_BRANCH} --depth 1 ${IDF_GIT_PATH}/esp-idf.git
-    - export PATH="$IDF_PATH/tools:$PATH"
-    - cd esp-idf
-    - ./install.sh
-    - . export.sh
-    - cd ..
-    - cd 1_hello_world
-    - idf.py build
-    - cd ../
-    - cd 2_drivers
-    - idf.py build
-    - cd ../
-    - cd 3_wifi_connection
-    - idf.py build
-    - cd ../
-    - cd 4_network_config
-    - idf.py build
-    - cd ../
-    - cd 5_cloud
-    - touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
-    - idf.py build
-    - cd ../
-    - cd 6_ota
-    - touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
-    - idf.py build
-    - cd ../
-    - cd 7_mfg
-    - touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
-    - idf.py build
+    - *fetch_aws_iot
+    - *build_all_examples
+
+build_idf_v4.1:
+  extends: .build_template
+  image: espressif/idf:release-v4.1
+
+build_idf_v4.2:
+  extends: .build_template
+  image: espressif/idf:release-v4.2
+
+build_idf_v4.3:
+  extends: .build_template
+  image: espressif/idf:release-v4.3
+
+build_idf_v4.4:
+  extends: .build_template
+  image: espressif/idf:release-v4.4
+
+build_idf_master:
+  extends: .build_template
+  image: espressif/idf:latest
