@@ -32,10 +32,10 @@ You will require the following to get started:
 -   An ESP32 development kit: ESP32-DevKitC (Available on [DigiKey](https://www.digikey.com/?_ga=2.24343738.1493252097.1552534720-1988497184.1552534720), [Mouser](https://www.mouser.com/_/?Keyword=ESP32-DevKitC), [Amazon](https://www.amazon.com/s?k=esp32-devkitc&crid=34ZPSBVQ3ZVZK&sprefix=esp32-devt%2Caps%2C738&ref=nb_sb_ss_i_1_9). You could also use any other ESP32 development boards if you already have one.)
 -   Follow the step-by-step guide at [ESP-Jumpstart Getting Started](https://docs.espressif.com/projects/esp-jumpstart/en/latest/index.html).
 
-Please ensure to use ESP-IDF v4.0 from either the tagged release or the following command,
+Please ensure to use ESP-IDF v4.4 from either the tagged release or the following command,
 ```
 git clone --recursive https://github.com/espressif/esp-jumpstart.git
-git clone -b release/v4.0 --recursive https://github.com/espressif/esp-idf.git
+git clone -b release/v4.4 --recursive https://github.com/espressif/esp-idf.git
 cd esp-jumpstart
 export IDF_PATH=</path/to/esp-idf/>
 ```

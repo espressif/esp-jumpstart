@@ -45,7 +45,7 @@ Setting up IDF
 ~~~~~~~~~~~~~~
 
 Please follow the steps in this documentation for setting up IDF:
-https://docs.espressif.com/projects/esp-idf/en/release-v4.0/get-started/index.html.
+https://docs.espressif.com/projects/esp-idf/en/release-v4.4/get-started/index.html.
 Please complete all the steps on this page.
 
 Before proceeding, please ensure that you have setup your development
@@ -101,13 +101,13 @@ ESP-Jumpstart git repository https://github.com/espressif/esp-jumpstart.
 
 Since we are building a production-ready firmware here, we would want to
 base our development on a stable release of IDF. Currently,
-ESP-Jumpstart uses the stable version 4.0 of ESP-IDF. Let us first
+ESP-Jumpstart uses the stable version 4.4 of ESP-IDF. Let us first
 switch to that version of ESP-IDF.
 
 ::
 
     $ cd esp-idf
-    $ git checkout -b release/v4.0 remotes/origin/release/v4.0
+    $ git checkout -b release/v4.4 remotes/origin/release/v4.4
     $ git submodule update --recursive
 
 Now we build our first, *Hello World*, application from ESP-Jumpstart
