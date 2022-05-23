@@ -166,12 +166,12 @@ infrastructure:
 -  **Unified Provisioning Specification:** A specification to *securely*
    transfer Wi-Fi credentials to the device, independent of the
    transport (SoftAP, BLE). More details can be found here:
-   https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/provisioning/provisioning.html.
+   https://docs.espressif.com/projects/esp-idf/en/release-v4.4/api-reference/provisioning/provisioning.html.
 
 -  **IDF Components:** Software modules that implement this
    specification in the device firmware, available through ESP-IDF.
    More details can be found here:
-   https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/provisioning/wifi_provisioning.html.
+   https://docs.espressif.com/projects/esp-idf/en/release-v4.4/api-reference/provisioning/wifi_provisioning.html.
 
 -  **Phone apps:** Android: BLE
    Provisioning(\ https://play.google.com/store/apps/details?id=com.espressif.provble),
@@ -383,9 +383,9 @@ Additional Details
 
 More details about Unified provisioning and the Wi-Fi provisioning
 abstraction layer are available at:
-https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/provisioning/provisioning.html
+https://docs.espressif.com/projects/esp-idf/en/release-v4.4/api-reference/provisioning/provisioning.html
 and
-https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/provisioning/wifi_provisioning.html
+https://docs.espressif.com/projects/esp-idf/en/release-v4.4/api-reference/provisioning/wifi_provisioning.html
 
 .. _sec_nvs\_info:
 
@@ -423,7 +423,7 @@ Additional Details
 ~~~~~~~~~~~~~~~~~~
 
 More details about NVS are available at:
-https://docs.espressif.com/projects/esp-idf/en/release-v4.0/api-reference/storage/nvs_flash.html
+https://docs.espressif.com/projects/esp-idf/en/release-v4.4/api-reference/storage/nvs_flash.html
 
 Reset to Factory
 ----------------

@@ -29,7 +29,7 @@ ESP-IDF 是乐鑫为 ESP32 提供的物联网开发框架。
 设置 ESP-IDF
 ~~~~~~~~~~~~~~
 
-请参照 `ESP-IDF 入门指南 <https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.0/get-started/index.html>`_，按照步骤设置 ESP-IDF。注：请完成链接页面的所有步骤。
+请参照 `ESP-IDF 入门指南 <https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/get-started/index.html>`_，按照步骤设置 ESP-IDF。注：请完成链接页面的所有步骤。
 
 在进行下面步骤之前，请确认您已经正确设置了开发主机，并按照上面链接中的步骤构建了第一个应用程序。如果上面步骤已经完成，那让我们继续探索 ESP-IDF。
 
@@ -65,12 +65,12 @@ ESP-Jumpstart 库包含了一系列由 ESP-IDF 构建的 *应用程序*，我们
 
     $ git clone --recursive https://github.com/espressif/esp-jumpstart
 
-我们将构建一个可用于量产的固件，因此选择使用 ESP-IDF 稳定版本进行开发。目前 ESP-Jumpstart 使用的是 ESP-IDF v4.0 稳定版本，请切换到这一版本。
+我们将构建一个可用于量产的固件，因此选择使用 ESP-IDF 稳定版本进行开发。目前 ESP-Jumpstart 使用的是 ESP-IDF v4.4 稳定版本，请切换到这一版本。
 
 ::
 
     $ cd esp-idf
-    $ git checkout -b release/v4.0 remotes/origin/release/v4.0
+    $ git checkout -b release/v4.4 remotes/origin/release/v4.4
     $ git submodule update --recursive
 
 现在，我们构建 ESP-Jumpstart 中的第一个应用程序 *Hello World*，并将其烧录到开发板上，具体步骤如下，相信您已经熟悉这些步骤：
