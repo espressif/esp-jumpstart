@@ -5,7 +5,7 @@ set(COMPONENT_SRCS "app_main.c"
                     "aws_custom_utils.c"
                     "ota.c")
 set(COMPONENT_ADD_INCLUDEDIRS "")
-set(JUMPSTART_BOARD "board_esp32_devkitc.h")
+set(JUMPSTART_BOARD "board_devkits.h")
 
 register_component()
 
