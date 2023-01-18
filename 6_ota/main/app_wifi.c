@@ -206,7 +206,11 @@ esp_err_t app_wifi_start(void)
          *      - this should be a string with length > 0
          *      - NULL if not used
          */
+        #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+        const char *pop = NULL;
+        #else
         const char *pop = "abcd1234";
+        #endif
 
         /* What is the service key (could be NULL)
          * This translates to :

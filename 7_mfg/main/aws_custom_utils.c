@@ -24,13 +24,13 @@ static IoT_Error_t convert_data_to_string(char *pStringBuffer, size_t maxSizeofS
 	}
 
 	if(type == SHADOW_JSON_INT32) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%i,", *(int32_t *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%i,", *(int *) (pData));
 	} else if(type == SHADOW_JSON_INT16) {
 		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%hi,", *(int16_t *) (pData));
 	} else if(type == SHADOW_JSON_INT8) {
 		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%hhi,", *(int8_t *) (pData));
 	} else if(type == SHADOW_JSON_UINT32) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%u,", *(uint32_t *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%u,", *(uint *) (pData));
 	} else if(type == SHADOW_JSON_UINT16) {
 		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%hu,", *(uint16_t *) (pData));
 	} else if(type == SHADOW_JSON_UINT8) {
