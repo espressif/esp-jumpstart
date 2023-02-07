@@ -2,29 +2,25 @@ stages:
   - build
 
 .build_all_examples: &build_all_examples |
-  cd 1_hello_world
-  idf.py build
-  cd ../
-  cd 2_drivers
-  idf.py build
-  cd ../
-  cd 3_wifi_connection
-  idf.py build
-  cd ../
-  cd 4_network_config
-  idf.py build
-  cd ../
-  cd 5_cloud
+  for EXAMPLE in $EXAMPLES; do
+  cd $CI_PROJECT_DIR/$EXAMPLE
+  echo Building $EXAMPLE
+  if [[ "$EXAMPLE" == "5_cloud" || "$EXAMPLE" == "6_ota" || "$EXAMPLE" == "7_mfg" ]]; then
   touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
+  fi
+  for TARGET in $EXAMPLE_TARGETS; do
+  echo Building for $TARGET
+  idf.py set-target $TARGET
   idf.py build
-  cd ../
-  cd 6_ota
-  touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
-  idf.py build
-  cd ../
-  cd 7_mfg
-  touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
-  idf.py build
+  mkdir -p $CI_PROJECT_DIR/esp-jumpstart-bins-${CI_JOB_ID}/$EXAMPLE/$TARGET/
+  cp $CI_PROJECT_DIR/$EXAMPLE/build/*.bin $CI_PROJECT_DIR/esp-jumpstart-bins-${CI_JOB_ID}/$EXAMPLE/$TARGET/
+  done
+  echo Build Complete for $EXAMPLE
+  done
+  echo Generating zip file for binaries generated
+  cd $CI_PROJECT_DIR
+  echo Generating zip file for binaries generated
+  tar -zcvf esp-jumpstart-bins-${CI_JOB_ID}.zip esp-jumpstart-bins-${CI_JOB_ID}/
 
 .fetch_aws_iot: &fetch_aws_iot |
   git submodule update --init --recursive
@@ -39,6 +35,8 @@ stages:
     PEDANTIC_FLAGS: "-Werror -Werror=deprecated-declarations -Werror=unused-variable -Werror=unused-but-set-variable -Werror=unused-function"
     EXTRA_CFLAGS: "${PEDANTIC_FLAGS}"
     EXTRA_CXXFLAGS: "${PEDANTIC_FLAGS}"
+    EXAMPLE_TARGETS: "esp32"
+    EXAMPLES: "1_hello_world 2_drivers 3_wifi_connection 4_network_config 5_cloud 6_ota 7_mfg"
   script:
     - *fetch_aws_iot
     - *build_all_examples
@@ -54,11 +52,23 @@ build_idf_v4.2:
 build_idf_v4.3:
   extends: .build_template
   image: espressif/idf:release-v4.3
+  variables:
+    EXAMPLE_TARGETS: "esp32 esp32c3"
 
 build_idf_v4.4:
   extends: .build_template
   image: espressif/idf:release-v4.4
+  variables:
+    EXAMPLE_TARGETS: "esp32 esp32c3 esp32s3"
+
+build_idf_v5.0:
+  extends: .build_template
+  image: espressif/idf:release-v5.0
+  variables:
+    EXAMPLE_TARGETS: "esp32 esp32c3 esp32s3"
 
 build_idf_master:
   extends: .build_template
   image: espressif/idf:latest
+  variables:
+    EXAMPLE_TARGETS: "esp32 esp32c3 esp32s3"

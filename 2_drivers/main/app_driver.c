@@ -10,11 +10,36 @@
 #include <freertos/semphr.h>
 #include <freertos/task.h>
 #include <iot_button.h>
-
+#include <ws2812_led.h>
 #include "app_priv.h"
-#include JUMPSTART_BOARD
 
-static bool g_output_state;
+/* This is the button that is used for toggling the power */
+#define BUTTON_GPIO          CONFIG_EXAMPLE_BOARD_BUTTON_GPIO
+#define BUTTON_ACTIVE_LEVEL  0
+
+/* This is the GPIO on which the power will be set */
+#define OUTPUT_GPIO    CONFIG_EXAMPLE_OUTPUT_GPIO
+static bool g_output_state = false;
+
+/* These values correspoind to H,S,V = 120,100,10 */
+#define DEFAULT_RED     0
+#define DEFAULT_GREEN   25
+#define DEFAULT_BLUE    0
+
+static void app_indicator_set(bool state)
+{
+    if (state) {
+        ws2812_led_set_rgb(DEFAULT_RED, DEFAULT_GREEN, DEFAULT_BLUE);
+    } else {
+        ws2812_led_clear();
+    }
+}
+
+static void app_indicator_init(void)
+{
+    ws2812_led_init();
+}
+
 static void push_btn_cb(void *arg)
 {
     app_driver_set_state(!g_output_state);
@@ -22,7 +47,7 @@ static void push_btn_cb(void *arg)
 
 static void configure_push_button(int gpio_num, void (*btn_cb)(void *))
 {
-    button_handle_t btn_handle = iot_button_create(JUMPSTART_BOARD_BUTTON_GPIO, JUMPSTART_BOARD_BUTTON_ACTIVE_LEVEL);
+    button_handle_t btn_handle = iot_button_create(BUTTON_GPIO, BUTTON_ACTIVE_LEVEL);
     if (btn_handle) {
         iot_button_set_evt_cb(btn_handle, BUTTON_CB_RELEASE, btn_cb, "RELEASE");
     }
@@ -30,21 +55,26 @@ static void configure_push_button(int gpio_num, void (*btn_cb)(void *))
 
 static void set_output_state(bool target)
 {
-    gpio_set_level(JUMPSTART_BOARD_OUTPUT_GPIO, target);
+    gpio_set_level(OUTPUT_GPIO, target);
+    app_indicator_set(target);
 }
 
 void app_driver_init()
 {
-    configure_push_button(JUMPSTART_BOARD_BUTTON_GPIO, push_btn_cb);
+    configure_push_button(BUTTON_GPIO, push_btn_cb);
 
     /* Configure output */
     gpio_config_t io_conf = {
         .mode = GPIO_MODE_OUTPUT,
         .pull_up_en = 1,
     };
-    io_conf.pin_bit_mask = ((uint64_t)1 << JUMPSTART_BOARD_OUTPUT_GPIO);
+    io_conf.pin_bit_mask = ((uint64_t)1 << OUTPUT_GPIO);
     /* Configure the GPIO */
     gpio_config(&io_conf);
+
+    /* Configure the onboard LED for indication */
+    app_indicator_init();
+    app_driver_set_state(!g_output_state);
 }
 
 int IRAM_ATTR app_driver_set_state(bool state)

@@ -178,6 +178,8 @@ try to upgrade to this firmware image as follows:
                 --key cloud_cfg/device.key \
                 https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow | python -mjson.tool
 
+If you are using an ESP32C3 DevKit, change hello-world.bin to hello-world-c3m-idf5.bin.
+
 After the firmware upgrade is successful, the device will now execute
 the Hello World firmware.
 

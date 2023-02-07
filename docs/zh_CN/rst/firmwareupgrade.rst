@@ -125,6 +125,8 @@ ESP8266 用户
                 --key cloud_cfg/device.key \
                 https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow | python -mjson.tool
 
+如果您使用ESP32C3系列开发板，请把hello-world.bin更改为hello-world-c3m-idf5.bin。
+
 固件升级成功后，设备将执行 Hello World 固件。
 
 未完待续
