@@ -1,5 +1,12 @@
 stages:
   - build
+  - deploy
+
+variables:
+  V: "0"
+  MAKEFLAGS: "-j8 --no-keep-going"
+  ESP_DOCS_ENV_IMAGE: "$CI_DOCKER_REGISTRY/esp-idf-doc-env-v5.4:1-1"
+  ESP_DOCS_PATH: "$CI_PROJECT_DIR"
 
 .build_all_examples: &build_all_examples |
   for EXAMPLE in $EXAMPLES; do
@@ -7,6 +14,9 @@ stages:
   echo Building $EXAMPLE
   if [[ "$EXAMPLE" == "5_cloud" || "$EXAMPLE" == "6_ota" || "$EXAMPLE" == "7_mfg" ]]; then
   touch main/cloud_cfg/server.cert main/cloud_cfg/device.cert main/cloud_cfg/device.key main/cloud_cfg/deviceid.txt main/cloud_cfg/endpoint.txt
+  fi
+  if [[ "$EXAMPLE" == "6_ota" || "$EXAMPLE" == "7_mfg" ]]; then
+  touch main/cloud_cfg/github_server.cert
   fi
   for TARGET in $EXAMPLE_TARGETS; do
   echo Building for $TARGET
@@ -41,34 +51,96 @@ stages:
     - *fetch_aws_iot
     - *build_all_examples
 
-build_idf_v4.1:
+build_idf_v5.1:
   extends: .build_template
-  image: espressif/idf:release-v4.1
-
-build_idf_v4.2:
-  extends: .build_template
-  image: espressif/idf:release-v4.2
-
-build_idf_v4.3:
-  extends: .build_template
-  image: espressif/idf:release-v4.3
+  image: espressif/idf:release-v5.1
   variables:
-    EXAMPLE_TARGETS: "esp32 esp32c3"
+    EXAMPLE_TARGETS: "esp32 esp32s2 esp32c3 esp32s3 esp32c6"
 
-build_idf_v4.4:
+build_idf_v5.2:
   extends: .build_template
-  image: espressif/idf:release-v4.4
+  image: espressif/idf:release-v5.2
   variables:
-    EXAMPLE_TARGETS: "esp32 esp32c3 esp32s3"
+    EXAMPLE_TARGETS: "esp32 esp32s2 esp32c3 esp32s3 esp32c6"
 
-build_idf_v5.0:
+build_idf_v5.3:
   extends: .build_template
-  image: espressif/idf:release-v5.0
+  image: espressif/idf:release-v5.3
   variables:
-    EXAMPLE_TARGETS: "esp32 esp32c3 esp32s3"
+    EXAMPLE_TARGETS: "esp32 esp32s2 esp32c3 esp32s3 esp32c6"
 
-build_idf_master:
+build_idf_v5.4:
   extends: .build_template
-  image: espressif/idf:latest
+  image: espressif/idf:release-v5.4
   variables:
-    EXAMPLE_TARGETS: "esp32 esp32c3 esp32s3"
+    EXAMPLE_TARGETS: "esp32 esp32s2 esp32c3 esp32s3 esp32c6"
+
+build_idf_v5.5:
+  extends: .build_template
+  image: espressif/idf:release-v5.5
+  variables:
+    EXAMPLE_TARGETS: "esp32 esp32s2 esp32c3 esp32s3 esp32c6"
+
+# Documentation build job
+build_docs:
+  stage: build
+  image: $ESP_DOCS_ENV_IMAGE
+  tags:
+    - build_docs
+  artifacts:
+    paths:
+      - docs/_build/*/*/*.txt
+      - docs/_build/*/*/html/*
+    expire_in: 4 days
+  # No cleaning when the artifacts
+  after_script: []
+  script:
+    - cd docs
+    - pip install -r requirements.txt
+    - build-docs -l en -t esp32
+    - build-docs -l zh_CN -t esp32
+
+.deploy_docs_template:
+  stage: deploy
+  image: $ESP_DOCS_ENV_IMAGE
+  tags:
+    - deploy_docs
+  needs:
+    - build_docs
+  script:
+    - source ${CI_PROJECT_DIR}/docs/utils.sh
+    - add_doc_server_ssh_keys $DOCS_DEPLOY_PRIVATEKEY $DOCS_DEPLOY_SERVER $DOCS_DEPLOY_SERVER_USER
+    - export GIT_VER=$(git describe --always)
+    - pip install -r ${CI_PROJECT_DIR}/docs/requirements.txt
+    - deploy-docs
+
+deploy_docs_preview:
+  extends:
+    - .deploy_docs_template
+  except:
+    refs:
+      - master
+      - /^release\/v/
+  variables:
+    TYPE: "preview"
+    DOCS_BUILD_DIR: "${CI_PROJECT_DIR}/docs/_build/"
+    DOCS_DEPLOY_PRIVATEKEY: "$DOCS_PREVIEW_PRIVATEKEY"
+    DOCS_DEPLOY_SERVER: "$DOCS_PREVIEW_SERVER"
+    DOCS_DEPLOY_SERVER_USER: "$DOCS_PREVIEW_USER"
+    DOCS_DEPLOY_PATH: "$DOCS_PREVIEW_PATH"
+    DOCS_DEPLOY_URL_BASE: "$DOCS_PREVIEW_URL_BASE"
+
+deploy_docs_production:
+  extends:
+    - .deploy_docs_template
+  only:
+    refs:
+      - master
+  variables:
+    TYPE: "production"
+    DOCS_BUILD_DIR: "${CI_PROJECT_DIR}/docs/_build/"
+    DOCS_DEPLOY_PRIVATEKEY: "$DOCS_PROD_PRIVATEKEY"
+    DOCS_DEPLOY_SERVER: "$DOCS_PROD_SERVER"
+    DOCS_DEPLOY_SERVER_USER: "$DOCS_PROD_USER"
+    DOCS_DEPLOY_PATH: "$DOCS_PROD_PATH"
+    DOCS_DEPLOY_URL_BASE: "$DOCS_PROD_URL_BASE"

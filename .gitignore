@@ -71,8 +71,27 @@ dkms.conf
 **/sdkconfig.old
 **/build
 
-# Doc build artifacts
+# ESP-IDF Component Manager artifacts
+**/dependencies.lock
+**/managed_components/
+
+# Doc build artifacts (ReadTheDocs legacy)
 docs/*/*/_build/
 docs/*/*/sphinx-warning-log.txt
 docs/*/*/sphinx-warning-log-sanitized.txt
+
+# ESP-Docs build artifacts
+docs/_build/
+docs/xml/
+docs/xml_in/
+docs/doxygen-warning-log.txt
+docs/.doctrees/
+
+# AWS IoT certificate and configuration files
+**/cloud_cfg/device.cert
+**/cloud_cfg/device.key
+**/cloud_cfg/deviceid.txt
+**/cloud_cfg/endpoint.txt
+**/cloud_cfg/server.cert
+**/cloud_cfg/github_server.cert
 

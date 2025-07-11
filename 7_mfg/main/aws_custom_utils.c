@@ -30,7 +30,7 @@ static IoT_Error_t convert_data_to_string(char *pStringBuffer, size_t maxSizeofS
 	} else if(type == SHADOW_JSON_INT8) {
 		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%hhi,", *(int8_t *) (pData));
 	} else if(type == SHADOW_JSON_UINT32) {
-		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%u,", *(uint *) (pData));
+		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%u,", *(unsigned int *) (pData));
 	} else if(type == SHADOW_JSON_UINT16) {
 		snPrintfReturn = snprintf(pStringBuffer, maxSizeofStringBuffer, "%hu,", *(uint16_t *) (pData));
 	} else if(type == SHADOW_JSON_UINT8) {
@@ -91,7 +91,7 @@ static IoT_Error_t generate_json_object(char *object_name, char *pJsonDocument, 
 			if(ret_val != SUCCESS) {
 				return ret_val;
 			}
-			if(pTemporary->pKey != NULL && pTemporary->pData != NULL) {				
+			if(pTemporary->pKey != NULL && pTemporary->pData != NULL) {
                 ret_val = convert_data_to_string(pJsonDocument + strlen(pJsonDocument), remSizeOfJsonBuffer,
 											  pTemporary->type, pTemporary->pData);
 			} else {
@@ -109,7 +109,7 @@ static IoT_Error_t generate_json_object(char *object_name, char *pJsonDocument, 
 	ret_val = check_snprintf_ret_val(snPrintfReturn, maxSizeOfJsonDocument);
 	if (ret_val != SUCCESS) {
 		return ret_val;
-	}	
+	}
 
 	return ret_val;
 }
@@ -124,7 +124,7 @@ IoT_Error_t custom_aws_iot_shadow_add_desired(char *pJsonDocument,
 
 IoT_Error_t custom_aws_iot_shadow_add_reported(char *pJsonDocument,
 					     size_t maxSizeOfJsonDocument,
-						 uint8_t count, 
+						 uint8_t count,
 						 jsonStruct_t **handler)
 {
 	return generate_json_object("reported", pJsonDocument, maxSizeOfJsonDocument, count, handler);

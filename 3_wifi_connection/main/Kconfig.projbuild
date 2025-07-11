@@ -2,8 +2,9 @@ menu "Example Configuration"
 
     config EXAMPLE_BOARD_BUTTON_GPIO
         int "Boot Button GPIO"
-        default 0 if !IDF_TARGET_ESP32C3
-        default 9 if IDF_TARGET_ESP32C3
+        default 28 if IDF_TARGET_ESP32C5
+        default 9 if IDF_TARGET_ESP32C3 || IDF_TARGET_ESP32C6 || IDF_TARGET_ESP32C2 || IDF_TARGET_ESP32H2
+        default 0
         help
             GPIO number on which the "Boot" button is connected. This is generally used
             by the application for custom operations like toggling states, resetting to defaults, etc.
@@ -14,5 +15,14 @@ menu "Example Configuration"
         help
             This is an output GPIO that will be connected to a relay or other driver circuit in most cases.
             If the power changes, this GPIO output level will also change.
+
+    config WS2812_LED_GPIO
+        int "WS2812 LED GPIO"
+        default 27 if IDF_TARGET_ESP32C5
+        default 8 if IDF_TARGET_ESP32C3 || IDF_TARGET_ESP32C6 || IDF_TARGET_ESP32H2
+        default 48 if IDF_TARGET_ESP32S3
+        default 18
+        help
+            Set the WS2812 RGB LED GPIO.
 
 endmenu

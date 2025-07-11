@@ -6,11 +6,13 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 
+#include <stdio.h>
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
 #include <freertos/task.h>
+#include <driver/gpio.h>
 #include <iot_button.h>
-#include <ws2812_led.h>
+#include <button_gpio.h>
+#include <led_strip.h>
 #include "app_priv.h"
 
 /* This is the button that is used for toggling the power */
@@ -26,30 +28,73 @@ static bool g_output_state = false;
 #define DEFAULT_GREEN   25
 #define DEFAULT_BLUE    0
 
+static led_strip_handle_t g_led_strip = NULL;
+
 static void app_indicator_set(bool state)
 {
-    if (state) {
-        ws2812_led_set_rgb(DEFAULT_RED, DEFAULT_GREEN, DEFAULT_BLUE);
-    } else {
-        ws2812_led_clear();
+    if (g_led_strip) {
+        if (state) {
+            led_strip_set_pixel(g_led_strip, 0, DEFAULT_RED, DEFAULT_GREEN, DEFAULT_BLUE);
+            led_strip_refresh(g_led_strip);
+            printf("LED: ON (Green)\n");
+        } else {
+            led_strip_clear(g_led_strip);
+            printf("LED: OFF\n");
+        }
     }
 }
 
 static void app_indicator_init(void)
 {
-    ws2812_led_init();
+    /* LED strip common configuration */
+    led_strip_config_t strip_config = {
+        .strip_gpio_num = CONFIG_WS2812_LED_GPIO,
+        .max_leds = 1,
+        .led_model = LED_MODEL_WS2812,
+        .color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_GRB,
+        .flags = {
+            .invert_out = false,
+        }
+    };
+
+    /* LED strip backend configuration: RMT */
+    led_strip_rmt_config_t rmt_config = {
+        .clk_src = RMT_CLK_SRC_DEFAULT,
+        .resolution_hz = 10 * 1000 * 1000, /* 10MHz */
+        .mem_block_symbols = 64,
+        .flags = {
+            .with_dma = false,
+        }
+    };
+
+    /* Create the LED strip */
+    ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &g_led_strip));
+    printf("WS2812 LED initialized on GPIO %d\n", CONFIG_WS2812_LED_GPIO);
 }
 
-static void push_btn_cb(void *arg)
+static void push_btn_cb(void *button_handle, void *usr_data)
 {
     app_driver_set_state(!g_output_state);
 }
 
-static void configure_push_button(int gpio_num, void (*btn_cb)(void *))
+static void configure_push_button(int gpio_num, void (*btn_cb)(void *, void *))
 {
-    button_handle_t btn_handle = iot_button_create(BUTTON_GPIO, BUTTON_ACTIVE_LEVEL);
-    if (btn_handle) {
-        iot_button_set_evt_cb(btn_handle, BUTTON_CB_RELEASE, btn_cb, "RELEASE");
+    button_config_t btn_cfg = {
+        .long_press_time = 1000,
+        .short_press_time = 50,
+    };
+
+    button_gpio_config_t gpio_cfg = {
+        .gpio_num = BUTTON_GPIO,
+        .active_level = BUTTON_ACTIVE_LEVEL,
+        .enable_power_save = false,
+        .disable_pull = false,
+    };
+
+    button_handle_t btn_handle;
+    esp_err_t ret = iot_button_new_gpio_device(&btn_cfg, &gpio_cfg, &btn_handle);
+    if (ret == ESP_OK) {
+        iot_button_register_cb(btn_handle, BUTTON_PRESS_UP, NULL, btn_cb, "RELEASE");
     }
 }
 
