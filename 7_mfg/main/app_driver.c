@@ -39,10 +39,8 @@ static void app_indicator_set(bool state)
         if (state) {
             led_strip_set_pixel(g_led_strip, 0, DEFAULT_RED, DEFAULT_GREEN, DEFAULT_BLUE);
             led_strip_refresh(g_led_strip);
-            printf("LED: ON (Green)\n");
         } else {
             led_strip_clear(g_led_strip);
-            printf("LED: OFF\n");
         }
     }
 }
@@ -117,6 +115,11 @@ static void configure_push_button(int gpio_num, void (*btn_cb)(void *, void *))
 static void set_output_state(bool target)
 {
     gpio_set_level(OUTPUT_GPIO, target);
+    if (target) {
+        printf("Ouput: ON\n");
+    } else {
+        printf("Output: OFF\n");
+    }
     app_indicator_set(target);
 }
 
@@ -143,6 +146,7 @@ int IRAM_ATTR app_driver_set_state(bool state)
     if(g_output_state != state) {
         g_output_state = state;
         set_output_state(g_output_state);
+        publish_reported_state(g_output_state);
     }
     return ESP_OK;
 }

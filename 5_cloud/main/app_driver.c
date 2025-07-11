@@ -143,6 +143,7 @@ int IRAM_ATTR app_driver_set_state(bool state)
     if(g_output_state != state) {
         g_output_state = state;
         set_output_state(g_output_state);
+        publish_reported_state(g_output_state);
     }
     return ESP_OK;
 }
