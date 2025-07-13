@@ -77,6 +77,7 @@ static void app_indicator_init(void)
 
 static void push_btn_cb(void *button_handle, void *usr_data)
 {
+    printf("Button pressed! Toggling power state...\n");
     app_driver_set_state(!g_output_state);
 }
 
@@ -104,23 +105,27 @@ static void configure_push_button(int gpio_num, void (*btn_cb)(void *, void *))
     esp_err_t ret = iot_button_new_gpio_device(&btn_cfg, &gpio_cfg, &btn_handle);
     if (ret == ESP_OK) {
         iot_button_register_cb(btn_handle, BUTTON_PRESS_UP, NULL, btn_cb, "RELEASE");
-
-        /* Register 3-second long press callback */
         button_event_args_t long_press_args = {
             .long_press.press_time = 3000,
         };
         iot_button_register_cb(btn_handle, BUTTON_LONG_PRESS_START, &long_press_args, button_press_3sec_cb, NULL);
+        printf("Button configured on GPIO %d\n", BUTTON_GPIO);
+    } else {
+        printf("Failed to configure button: %s\n", esp_err_to_name(ret));
     }
 }
 
 static void set_output_state(bool target)
 {
     gpio_set_level(OUTPUT_GPIO, target);
+    printf("Power Output GPIO %d: %s\n", OUTPUT_GPIO, target ? "ON" : "OFF");
     app_indicator_set(target);
 }
 
 void app_driver_init()
 {
+    printf("Initializing Smart Power Outlet drivers...\n");
+
     configure_push_button(BUTTON_GPIO, push_btn_cb);
 
     /* Configure output */
@@ -131,10 +136,13 @@ void app_driver_init()
     io_conf.pin_bit_mask = ((uint64_t)1 << OUTPUT_GPIO);
     /* Configure the GPIO */
     gpio_config(&io_conf);
+    printf("Output GPIO %d configured\n", OUTPUT_GPIO);
 
     /* Configure the onboard LED for indication */
     app_indicator_init();
     app_driver_set_state(!g_output_state);
+
+    printf("Smart Power Outlet ready! Press button to toggle power.\n");
 }
 
 int IRAM_ATTR app_driver_set_state(bool state)
@@ -142,6 +150,7 @@ int IRAM_ATTR app_driver_set_state(bool state)
     if(g_output_state != state) {
         g_output_state = state;
         set_output_state(g_output_state);
+        printf("Power state changed to: %s\n", state ? "ON" : "OFF");
     }
     return ESP_OK;
 }

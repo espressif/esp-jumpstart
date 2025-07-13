@@ -39,15 +39,16 @@ static void app_indicator_set(bool state)
         if (state) {
             led_strip_set_pixel(g_led_strip, 0, DEFAULT_RED, DEFAULT_GREEN, DEFAULT_BLUE);
             led_strip_refresh(g_led_strip);
+            printf("LED: ON (Green)\n");
         } else {
             led_strip_clear(g_led_strip);
+            printf("LED: OFF\n");
         }
     }
 }
 
 static void app_indicator_init(void)
 {
-#ifdef CONFIG_WS2812_LED_ENABLE
     /* LED strip common configuration */
     led_strip_config_t strip_config = {
         .strip_gpio_num = CONFIG_WS2812_LED_GPIO,
@@ -62,7 +63,7 @@ static void app_indicator_init(void)
     /* LED strip backend configuration: RMT */
     led_strip_rmt_config_t rmt_config = {
         .clk_src = RMT_CLK_SRC_DEFAULT,
-        .resolution_hz = 10 * 1000 * 1000, // 10MHz
+        .resolution_hz = 10 * 1000 * 1000, /* 10MHz */
         .mem_block_symbols = 64,
         .flags = {
             .with_dma = false,
@@ -71,11 +72,12 @@ static void app_indicator_init(void)
 
     /* Create the LED strip */
     ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &g_led_strip));
-#endif
+    printf("WS2812 LED initialized on GPIO %d\n", CONFIG_WS2812_LED_GPIO);
 }
 
 static void push_btn_cb(void *button_handle, void *usr_data)
 {
+    printf("Button pressed! Toggling power state...\n");
     app_driver_set_state(!g_output_state);
 }
 
@@ -103,28 +105,27 @@ static void configure_push_button(int gpio_num, void (*btn_cb)(void *, void *))
     esp_err_t ret = iot_button_new_gpio_device(&btn_cfg, &gpio_cfg, &btn_handle);
     if (ret == ESP_OK) {
         iot_button_register_cb(btn_handle, BUTTON_PRESS_UP, NULL, btn_cb, "RELEASE");
-
-        /* Register 3-second long press callback */
         button_event_args_t long_press_args = {
             .long_press.press_time = 3000,
         };
         iot_button_register_cb(btn_handle, BUTTON_LONG_PRESS_START, &long_press_args, button_press_3sec_cb, NULL);
+        printf("Button configured on GPIO %d\n", BUTTON_GPIO);
+    } else {
+        printf("Failed to configure button: %s\n", esp_err_to_name(ret));
     }
 }
 
 static void set_output_state(bool target)
 {
     gpio_set_level(OUTPUT_GPIO, target);
-    if (target) {
-        printf("Ouput: ON\n");
-    } else {
-        printf("Output: OFF\n");
-    }
+    printf("Power Output GPIO %d: %s\n", OUTPUT_GPIO, target ? "ON" : "OFF");
     app_indicator_set(target);
 }
 
 void app_driver_init()
 {
+    printf("Initializing Smart Power Outlet drivers...\n");
+
     configure_push_button(BUTTON_GPIO, push_btn_cb);
 
     /* Configure output */
@@ -135,10 +136,13 @@ void app_driver_init()
     io_conf.pin_bit_mask = ((uint64_t)1 << OUTPUT_GPIO);
     /* Configure the GPIO */
     gpio_config(&io_conf);
+    printf("Output GPIO %d configured\n", OUTPUT_GPIO);
 
     /* Configure the onboard LED for indication */
     app_indicator_init();
     app_driver_set_state(!g_output_state);
+
+    printf("Smart Power Outlet ready! Press button to toggle power.\n");
 }
 
 int IRAM_ATTR app_driver_set_state(bool state)
@@ -146,6 +150,7 @@ int IRAM_ATTR app_driver_set_state(bool state)
     if(g_output_state != state) {
         g_output_state = state;
         set_output_state(g_output_state);
+        printf("Power state changed to: %s\n", state ? "ON" : "OFF");
         publish_reported_state(g_output_state);
     }
     return ESP_OK;
