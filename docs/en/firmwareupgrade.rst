@@ -108,32 +108,30 @@ correct options in *menuconfig* -> *Partition Table*.
 The Code
 --------
 
-Now let’s check the code for actually performing the firmware upgrade.
+Now let's check the code for actually performing the firmware upgrade.
 
 .. code:: c
 
         esp_http_client_config_t config = {
             .url = url,
-            .cert_pem = (char *)upgrade_server_cert_pem_start,
+            .crt_bundle_attach = esp_crt_bundle_attach,
         };
         esp_err_t ret = esp_https_ota(&config);
 
 -  The *esp\_http\_client\_config\_t* structure is used to define the
    OTA upgrade source. This includes the URL that should be upgraded
-   from, and also the CA certificate for validating the server from
-   which the upgrade should be fetched. Please note that it is quite
-   critical to ensure the validation of the CA certificate as mentioned
-   in the Section :ref:`sec_security\_first`.
+   from. For server certificate validation, this implementation uses
+   ESP-IDF's built-in certificate bundle (*esp_crt_bundle_attach*)
+   instead of embedding individual CA certificates. This provides
+   automatic validation for most common certificate authorities.
 
 -  The API *esp\_https\_ota()* is then executed which initiates the
    firmware upgrade. When the firmware upgrade process is successful (or
    fails), this API returns with the appropriate error code.
 
--  By default, we have added the GitHub’s CA certificate for the
-   firmware upgrade URL. This makes it easy for you to host your upgrade
-   image on GitHub and try out the upgrades. Ideally, you will install
-   the CA certificate of the appropriate server from where you will
-   download the upgrade image.
+-  By default, the certificate bundle includes certificates for most
+   common certificate authorities, including GitHub. This makes it easy
+   for you to host your upgrade image on GitHub and try out the upgrades.
 
 Send Firmware Upgrade URL
 -------------------------
@@ -149,18 +147,20 @@ infrastructure to pass the firmware upgrade URL command to the device.
 But note that in your production scenario, you will send this firmware
 upgrade URL using some other mechanism controlled through the cloud.
 
-For quickly trying out firmware upgrades, we have a sample firmware
-image (of the 1\_hello\_world application) uploaded on GitHub. We can
-try to upgrade to this firmware image as follows:
+For quickly trying out firmware upgrades, we have sample firmware images (of the 1_hello_world application) uploaded on GitHub for all supported platforms. We can try to upgrade to these firmware images as follows:
 
 ::
 
-        curl -d '{"state":{"desired":{"ota_url":"https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/hello-world.bin"}}}' \
+        curl -d '{"state":{"desired":{"ota_url":"https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/esp32/1_hello_world.bin"}}}' \
                 --tlsv1.2 --cert cloud_cfg/device.cert \
                 --key cloud_cfg/device.key \
                 https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow | python -mjson.tool
 
-If you are using an ESP32C3 DevKit, change hello-world.bin to hello-world-c3m-idf5.bin.
+**Note:** For other platforms, use the following URLs:
+- **ESP32-C3**: `https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/esp32c3/1_hello_world.bin`
+- **ESP32-C6**: `https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/esp32c6/1_hello_world.bin`
+- **ESP32-S2**: `https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/esp32s2/1_hello_world.bin`
+- **ESP32-S3**: `https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/esp32s3/1_hello_world.bin`
 
 After the firmware upgrade is successful, the device will now execute
 the Hello World firmware.
