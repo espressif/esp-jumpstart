@@ -94,15 +94,15 @@ OTA 固件升级过程中，状态变更如图所示：
 
         esp_http_client_config_t config = {
             .url = url,
-            .cert_pem = (char *)upgrade_server_cert_pem_start,
+            .crt_bundle_attach = esp_crt_bundle_attach,
         };
         esp_err_t ret = esp_https_ota(&config);
 
--  使用 *esp\_http\_client\_config\_t* 定义 OTA 升级源，包括标记升级地址的 URL，用于验证服务器的 CA 证书（升级从此服务器处获取）。注意，请确保按照 :ref:`sec_security\_first` 章节进行 CA 证书验证，这一步非常重要。
+-  使用 *esp\_http\_client\_config\_t* 定义 OTA 升级源，包括标记升级地址的 URL。对于服务器证书验证，此实现使用 ESP-IDF 内置的证书包（*esp_crt_bundle_attach*）而不是嵌入单个 CA 证书。这为大多数常见证书颁发机构提供自动验证。
 
 -  然后执行 *esp\_https\_ota()* API 启动固件升级，固件升级成功（或失败）后，此 API 将返回相应的代码（或错误代码）。
 
--  默认情况下，我们为固件升级 URL 添加了 GitHub 的 CA 证书，这样您就可以轻松地在 GitHub 上存放升级固件并进行升级。理想情况下，您将安装相应服务器的 CA 证书，并从该服务器下载升级固件。
+-  默认情况下，证书包包含大多数常见证书颁发机构的证书，包括 GitHub。这样您就可以轻松地在 GitHub 上存放升级固件并进行升级。
 
 发送固件升级 URL
 -------------------------
@@ -111,16 +111,20 @@ OTA 固件升级过程中，状态变更如图所示：
 
 为了简便起见，我们使用相同的远程控制基础架构将固件升级 URL 指令传递给设备。请注意，在批量生产时，您将使用其他的云控制机制发送固件升级 URL。
 
-为了快速进行固件升级，我们在 GitHub 上传了一个固件示例（1\_hello\_world 应用程序），可以按照下述方式快速升级该固件映像：
+为了快速进行固件升级，我们在 GitHub 上传了固件示例（1_hello_world 应用程序）用于所有支持的平台，可以按照下述方式快速升级该固件映像：
 
 ::
 
-        curl -d '{"state":{"desired":{"ota_url":"https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/hello-world.bin"}}}' \
+        curl -d '{"state":{"desired":{"ota_url":"https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/esp32/1_hello_world.bin"}}}' \
                 --tlsv1.2 --cert cloud_cfg/device.cert \
                 --key cloud_cfg/device.key \
                 https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow | python -mjson.tool
 
-如果您使用ESP32C3系列开发板，请把hello-world.bin更改为hello-world-c3m-idf5.bin。
+**注意：** 对于其他平台，请使用以下 URL：
+- **ESP32-C3**: `https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/esp32c3/1_hello_world.bin`
+- **ESP32-C6**: `https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/esp32c6/1_hello_world.bin`
+- **ESP32-S2**: `https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/esp32s2/1_hello_world.bin`
+- **ESP32-S3**: `https://raw.githubusercontent.com/wiki/espressif/esp-jumpstart/images/esp32s3/1_hello_world.bin`
 
 固件升级成功后，设备将执行 Hello World 固件。
 

@@ -76,18 +76,18 @@ adding the following line into your application’s *CMakeLists.txt* file.
 
 .. code:: cmake
 
-    target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/server.cert" TEXT)
+    target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/device.cert" TEXT)
 
 
 In the above example, the build system will make the file
-*cloud\_cfg/server.cert* be part of the firmware. The contents of this
+*cloud\_cfg/device.cert* be part of the firmware. The contents of this
 file are in the firmware’s address space and can be directly accessed as
 follows:
 
 .. code:: c
 
-    extern const uint8_t certificate_pem_crt_start[] asm("_binary_server_cert_start");
-    extern const uint8_t certificate_pem_crt_end[] asm("_binary_server_cert_end");
+    extern const uint8_t certificate_pem_crt_start[] asm("_binary_device_cert_start");
+    extern const uint8_t certificate_pem_crt_end[] asm("_binary_device_cert_end");
 
 The file can then be accessed using these start and end pointers.
 
@@ -137,8 +137,6 @@ start talking with AWS IoT:
 
 #. A Device ID (a file)
 
-#. A CA Certificate for the AWS-IoT service’s domain name (a file)
-
 #. An endpoint URL (a file)
 
 Before getting into the details of the code, let us actually try to use
@@ -153,8 +151,6 @@ To setup your AWS IoT example,
    (Note that some email clients will rename the files and add a .txt
    extension to them. Please make sure that the downloaded files have
    names as expected below.)
-
-   -  The AWS CA Certificate to **5\_cloud/main/cloud\_cfg/server.cert**
 
    -  The Device Private Key to **5\_cloud/main/cloud\_cfg/device.key**
 
@@ -226,23 +222,23 @@ The Code
 ~~~~~~~~
 
 All the code for the cloud communication has been consolidated in the
-*cloud\_aws.c* file. The structure of this file is similar to what the
-standard AWS IoT SDK expects.
+*app\_cloud.c* file. The implementation uses ESP-IDF's built-in MQTT client
+library (*esp-mqtt*) to communicate with AWS IoT Core.
 
-The file uses our output driver’s APIs, *app\_driver\_get\_state()* and
-*app\_driver\_toggle\_state()*, to fetch and modify the device state
+The file uses our output driver's APIs, *app\_driver\_get\_state()* and
+*app\_driver\_set\_state()*, to fetch and modify the device state
 respectively.
 
-The AWS IoT requires 3 files to be embedded within your firmware:
-
--  The AWS CA Certificate **5\_cloud/main/cloud\_cfg/server.cert**
+The AWS IoT requires 2 files to be embedded within your firmware:
 
 -  The Device Private Key **5\_cloud/main/cloud\_cfg/device.key**
 
 -  The Device Certificate **5\_cloud/main/cloud\_cfg/device.cert**
 
+**Note:** For server certificate validation, this implementation uses ESP-IDF's built-in certificate bundle (`esp_crt_bundle_attach`) instead of embedding individual CA certificates. This provides automatic validation for most common certificate authorities and eliminates the need to manually manage server certificates.
+
 The application uses the mechanism as shown in Section
-:ref:`sec_embedding\_files` for embedding this within the firmware.
+:ref:`sec_embedding\_files` for embedding the device credentials within the firmware.
 
 Progress so far
 ---------------

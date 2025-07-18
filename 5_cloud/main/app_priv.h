@@ -15,3 +15,4 @@ bool app_driver_get_state(void);
 esp_err_t app_wifi_init(void);
 esp_err_t app_wifi_start(void);
 int cloud_start(void);
+void publish_reported_state(bool output);

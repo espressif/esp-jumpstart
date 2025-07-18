@@ -43,16 +43,15 @@ ESP-IDF 提供了一个很好的实现方法，即使用 *CMakeLists.txt* 文件
 
 .. code:: cmake
 
-    target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/server.cert" TEXT)
+    target_add_binary_data(${COMPONENT_TARGET} "cloud_cfg/device.cert" TEXT)
 
 
-
-在上面的示例中，构建系统将 *cloud\_cfg/server.cert* 文件嵌入到固件中，文件内容存放在固件地址空间内，可通过如下方式直接访问：
+在上面的示例中，构建系统将 *cloud\_cfg/device.cert* 文件嵌入到固件中，文件内容存放在固件地址空间内，可通过如下方式直接访问：
 
 .. code:: c
 
-    extern const uint8_t certificate_pem_crt_start[] asm("_binary_server_cert_start");
-    extern const uint8_t certificate_pem_crt_end[] asm("_binary_server_cert_end");
+    extern const uint8_t certificate_pem_crt_start[] asm("_binary_device_cert_start");
+    extern const uint8_t certificate_pem_crt_end[] asm("_binary_device_cert_end");
 
 然后我们可以使用开始和结束指针访问该文件。
 
@@ -89,8 +88,6 @@ ESP-IDF 提供了一个很好的实现方法，即使用 *CMakeLists.txt* 文件
 
 #. 设备 ID（文件）
 
-#. AWS IoT 域名的 CA 证书（文件）
-
 #. 端点 URL（文件）
 
 在详细了解代码之前，让我们先尝试一下设备远程控制。您可以参考 esp-jumpstart 项下 *5\_cloud/* 目录。
@@ -100,8 +97,6 @@ ESP-IDF 提供了一个很好的实现方法，即使用 *CMakeLists.txt* 文件
 #. 进入 *5\_cloud/* 程序
 
 #. 复制如下文件，覆盖以前的所有文件。请注意，有些电子邮件客户端会将这些文件自动重命名，并为其添加 .txt 扩展名。请确保下载文件的名称与下列一致：
-
-   -  复制 AWS CA 到 **5\_cloud/main/cloud\_cfg/server.cert**
 
    -  复制设备私钥到 **5\_cloud/main/cloud\_cfg/device.key**
 
@@ -154,20 +149,20 @@ AWS IoT 为连接到它的所有设备提供了 Web API，用以实现远程控�
 代码
 ~~~~~~~~
 
-所有云通信的代码都已整合到 *cloud\_aws.c* 文件中。此文件的结构与 AWS IoT SDK 所要求的结构标准相似。
+所有云通信的代码都已整合到 *app\_cloud.c* 文件中。该实现使用 ESP-IDF 内置的 MQTT 客户端库（*esp-mqtt*）与 AWS IoT Core 进行通信。
 
 该文件使用我们的驱动程序 API：*app\_driver\_get\_state()* 和
-*app\_driver\_toggle\_state()*，分别用于获取设备状态和反转设备状态。
+*app\_driver\_set\_state()*，分别用于获取设备状态和设置设备状态。
 
-AWS IoT 需要在您的固件中嵌入以下 3 个文件：
-
--  AWS CA 证书文件：**5\_cloud/main/cloud\_cfg/server.cert**
+AWS IoT 需要在您的固件中嵌入以下 2 个文件：
 
 -  设备私钥文件：**5\_cloud/main/cloud\_cfg/device.key**
 
 -  设备证书文件：**5\_cloud/main/cloud\_cfg/device.cert**
 
-应用程序使用 :ref:`sec_embedding\_files` 章节中所描述的机制将以上文件嵌入到固件中。
+**注意：** 对于服务器证书验证，此实现使用 ESP-IDF 内置的证书包（`esp_crt_bundle_attach`）而不是嵌入单个 CA 证书。这为大多数常见证书颁发机构提供自动验证，并消除了手动管理服务器证书的需要。
+
+应用程序使用 :ref:`sec_embedding\_files` 章节中所描述的机制将设备凭据嵌入到固件中。
 
 未完待续
 ---------------

@@ -16,3 +16,4 @@ esp_err_t app_wifi_init(void);
 esp_err_t app_wifi_start(void);
 int cloud_start(void);
 esp_err_t do_firmware_upgrade(const char *url);
+void publish_reported_state(bool output);
