@@ -1,4 +1,5 @@
 stages:
+  - check
   - build
   - deploy
 
@@ -7,6 +8,30 @@ variables:
   MAKEFLAGS: "-j8 --no-keep-going"
   ESP_DOCS_ENV_IMAGE: "$CI_DOCKER_REGISTRY/esp-idf-doc-env-v5.4:1-1"
   ESP_DOCS_PATH: "$CI_PROJECT_DIR"
+
+codespell_check:
+  stage: check
+  image: python:3.8
+  tags:
+    - build
+    - internet 
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  before_script:
+    - pip install codespell
+    - git fetch origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME --depth=1
+    - git fetch origin $CI_COMMIT_REF_NAME --depth=1
+    - export MODIFIED_FILES="$(git diff --name-only origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME..origin/$CI_COMMIT_REF_NAME)"
+  script:
+    - |
+      if [ -n "$MODIFIED_FILES" ]; then
+        echo "Running codespell on changed files:"
+        echo "$MODIFIED_FILES"
+        codespell --config .codespellrc $MODIFIED_FILES
+      else
+        echo "No modified files to check with codespell."
+      fi
+
 
 .build_all_examples: &build_all_examples |
   for EXAMPLE in $EXAMPLES; do
