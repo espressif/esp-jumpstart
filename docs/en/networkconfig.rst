@@ -294,7 +294,7 @@ with a config structure, an example of which is as below:
        };
        network_prov_mgr_init(config);
 
-The paramters are as follows:
+The parameters are as follows:
 
 #. **Scheme:** What is the Provisioning Scheme that we want? SoftAP
    (network\_prov\_scheme\_softap) or BLE (network\_prov\_scheme\_ble)?

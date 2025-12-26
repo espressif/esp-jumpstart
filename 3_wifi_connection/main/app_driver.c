@@ -23,7 +23,7 @@
 #define OUTPUT_GPIO    CONFIG_EXAMPLE_OUTPUT_GPIO
 static bool g_output_state = false;
 
-/* These values correspoind to H,S,V = 120,100,10 */
+/* These values correspond to H,S,V = 120,100,10 */
 #define DEFAULT_RED     0
 #define DEFAULT_GREEN   25
 #define DEFAULT_BLUE    0
