@@ -9,27 +9,30 @@ variables:
   ESP_DOCS_ENV_IMAGE: "$CI_DOCKER_REGISTRY/esp-idf-doc-env-v5.4:1-1"
   ESP_DOCS_PATH: "$CI_PROJECT_DIR"
 
-codespell_check:
+check_pre_commit:
   stage: check
   image: python:3.8
   tags:
     - build
-    - internet 
+    - internet
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  before_script:
-    - pip install codespell
-    - git fetch origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME --depth=1
-    - git fetch origin $CI_COMMIT_REF_NAME --depth=1
-    - export MODIFIED_FILES="$(git diff --name-only origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME..origin/$CI_COMMIT_REF_NAME)"
   script:
+    - pip install pre-commit
+    - git fetch origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME --depth=1  # Fetch target branch latest commit
+    - git fetch origin $CI_COMMIT_REF_NAME --depth=1  # Fetch source branch latest commit
     - |
+      echo "Target branch: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+      echo "Source branch: $CI_COMMIT_REF_NAME"
+
+      MODIFIED_FILES=$(git diff --name-only origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME..origin/$CI_COMMIT_REF_NAME)
+      echo "Modified files to check:"
+      echo "$MODIFIED_FILES"
+
       if [ -n "$MODIFIED_FILES" ]; then
-        echo "Running codespell on changed files:"
-        echo "$MODIFIED_FILES"
-        codespell --config .codespellrc $MODIFIED_FILES
+          CI=true pre-commit run --files $MODIFIED_FILES
       else
-        echo "No modified files to check with codespell."
+          echo "No modified files to check."
       fi
 
 
